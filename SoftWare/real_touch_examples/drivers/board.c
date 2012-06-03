@@ -167,6 +167,28 @@ void fsmc_gpio_init(void)
 	GPIO_Init(GPIOG, &GPIO_InitStructure);
 }
 
+static void mco_config(void)
+{
+    GPIO_InitTypeDef GPIO_InitStructure;
+
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+
+    /* Enable SYSCFG clock */
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+
+    /* MCO configure */
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource8, GPIO_AF_MCO);
+    RCC_MCO1Config(RCC_MCO1Source_HSE, RCC_MCO1Div_1);
+}
+
 /**
  * This function will initial STM32 board.
  */
@@ -184,6 +206,8 @@ void rt_hw_board_init()
 #endif
 
 	fsmc_gpio_init();
+
+	mco_config();
 }
 
 /*@}*/
