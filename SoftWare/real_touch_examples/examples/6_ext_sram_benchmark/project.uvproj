@@ -348,7 +348,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>.;..\..\..\..\..\..\rt-thread-svn\trunk\components\finsh;..\..\..\..\..\..\rt-thread-svn\trunk\include;..\..\..\..\..\..\rt-thread-svn\trunk\libcpu\arm\common;..\..\..\..\..\..\rt-thread-svn\trunk\libcpu\arm\cortex-m4;..\..\STM32F4xx_Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x;..\..\STM32F4xx_Libraries\CMSIS\Include;..\..\STM32F4xx_Libraries\CMSIS\ST\STM32F4xx\Include;..\..\STM32F4xx_Libraries\STM32F4xx_StdPeriph_Driver\inc;..\..\drivers;applications</IncludePath>
+              <IncludePath>.;..\..\..\..\..\..\rt-thread-svn\trunk\components\drivers\include;..\..\..\..\..\..\rt-thread-svn\trunk\components\finsh;..\..\..\..\..\..\rt-thread-svn\trunk\include;..\..\..\..\..\..\rt-thread-svn\trunk\libcpu\arm\common;..\..\..\..\..\..\rt-thread-svn\trunk\libcpu\arm\cortex-m4;..\..\STM32F4xx_Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x;..\..\STM32F4xx_Libraries\CMSIS\Include;..\..\STM32F4xx_Libraries\CMSIS\ST\STM32F4xx\Include;..\..\STM32F4xx_Libraries\STM32F4xx_StdPeriph_Driver\inc;..\..\drivers;applications</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -574,6 +574,11 @@
               <FilePath>..\..\drivers\usart.c</FilePath>
             </File>
             <File>
+              <FileName>ext_sram.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\drivers\ext_sram.c</FilePath>
+            </File>
+            <File>
               <FileName>stm32f4xx_it.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\drivers\stm32f4xx_it.c</FilePath>
@@ -587,6 +592,21 @@
               <FileName>application.c</FileName>
               <FileType>1</FileType>
               <FilePath>applications\application.c</FilePath>
+            </File>
+            <File>
+              <FileName>benchmark.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>applications\benchmark.c</FilePath>
+            </File>
+            <File>
+              <FileName>ext_sram_test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>applications\ext_sram_test.c</FilePath>
+            </File>
+            <File>
+              <FileName>mem_test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>applications\mem_test.c</FilePath>
             </File>
             <File>
               <FileName>startup.c</FileName>
@@ -689,6 +709,9 @@
               <FilePath>..\..\..\..\..\..\rt-thread-svn\trunk\libcpu\arm\common\showmem.c</FilePath>
             </File>
           </Files>
+        </Group>
+        <Group>
+          <GroupName>DeviceDrivers</GroupName>
         </Group>
         <Group>
           <GroupName>finsh</GroupName>
