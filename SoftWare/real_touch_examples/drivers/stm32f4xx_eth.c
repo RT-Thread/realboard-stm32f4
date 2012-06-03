@@ -3855,14 +3855,34 @@ static void GPIO_Configuration(void)
 
 void rt_hw_stm32_eth_init(void)
 {
+    /* PHY RESET: PC0 */
+    {
+        GPIO_InitTypeDef GPIO_InitStructure;
+
+        GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_OUT;
+        GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+        GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+        GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_NOPULL;
+
+        RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
+
+        GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
+        GPIO_Init(GPIOC, &GPIO_InitStructure);
+
+        GPIO_ResetBits(GPIOC, GPIO_Pin_0);
+        rt_thread_delay(2);
+        GPIO_SetBits(GPIOC, GPIO_Pin_0);
+        rt_thread_delay(2);
+    }
+
 	GPIO_Configuration();
 	NVIC_Configuration();
 
-    // OUI 00-80-E1 STMICROELECTRONICS
+    /* OUI 00-80-E1 STMICROELECTRONICS. */
     stm32_eth_device.dev_addr[0] = 0x00;
     stm32_eth_device.dev_addr[1] = 0x80;
     stm32_eth_device.dev_addr[2] = 0xE1;
-    // generate MAC addr from 96bit unique ID (only for test)
+    /* generate MAC addr from 96bit unique ID (only for test). */
     stm32_eth_device.dev_addr[3] = *(rt_uint8_t*)(0x1FFF7A10+7);
     stm32_eth_device.dev_addr[4] = *(rt_uint8_t*)(0x1FFF7A10+8);
     stm32_eth_device.dev_addr[5] = *(rt_uint8_t*)(0x1FFF7A10+9);
