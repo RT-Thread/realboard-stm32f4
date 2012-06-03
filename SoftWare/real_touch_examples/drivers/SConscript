@@ -9,6 +9,7 @@ src	= Split("""
 board.c
 serial.c
 usart.c
+ext_sram.c
 stm32f4xx_it.c
 """)
 
