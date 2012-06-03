@@ -1,0 +1,4 @@
+*.pyc
+*.bak
+.sconsign.dblite
+JLinkLog.txt
