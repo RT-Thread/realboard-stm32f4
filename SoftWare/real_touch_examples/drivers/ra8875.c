@@ -46,16 +46,26 @@ static void LCD_FSMCConfig(void)
 
     FSMC_NORSRAMStructInit(&FSMC_NORSRAMInitStructure);
 
-    /*-- FSMC Configuration -------------------------------------------------*/
-    Timing_read.FSMC_AddressSetupTime = 15;             /* 地址建立时间  */
-    Timing_read.FSMC_DataSetupTime = 15;                /* 数据建立时间  */
-    Timing_read.FSMC_CLKDivision = 15;                /* 数据建立时间  */
-    Timing_read.FSMC_AccessMode = FSMC_AccessMode_A;    /* FSMC 访问模式 */
+    /*--------------------- read timings configuration ---------------------*/
+    Timing_read.FSMC_AddressSetupTime = 2;  /* [3:0] F2/F4 1~15 HCLK */
+    Timing_read.FSMC_AddressHoldTime = 0;   /* [7:4] keep 0x00 in SRAM mode */
+    Timing_read.FSMC_DataSetupTime = 3;     /* [15:8] F2/F4 0~255 HCLK */
+    /* [19:16] Time between NEx high to NEx low (BUSTURN HCLK) */
+    Timing_read.FSMC_BusTurnAroundDuration = 1;
+    Timing_read.FSMC_CLKDivision = 0; /* [24:20] keep 0x00 in SRAM mode  */
+    Timing_read.FSMC_DataLatency = 0; /* [27:25] keep 0x00 in SRAM mode  */
+    Timing_read.FSMC_AccessMode = FSMC_AccessMode_A;
 
-    Timing_write.FSMC_AddressSetupTime = 15;             /* 地址建立时间  */
-    Timing_write.FSMC_DataSetupTime = 15;                /* 数据建立时间  */
-    Timing_write.FSMC_CLKDivision = 15;                /* 数据建立时间  */
+    /*--------------------- write timings configuration ---------------------*/
+    Timing_write.FSMC_AddressSetupTime = 2;  /* [3:0] F2/F4 1~15 HCLK */
+    Timing_write.FSMC_AddressHoldTime = 0;   /* [7:4] keep 0x00 in SRAM mode */
+    Timing_write.FSMC_DataSetupTime = 3;     /* [15:8] F2/F4 0~255 HCLK */
+    /* [19:16] Time between NEx high to NEx low (BUSTURN HCLK) */
+    Timing_write.FSMC_BusTurnAroundDuration = 1;
+    Timing_write.FSMC_CLKDivision = 0; /* [24:20] keep 0x00 in SRAM mode  */
+    Timing_write.FSMC_DataLatency = 0; /* [27:25] keep 0x00 in SRAM mode  */
     Timing_write.FSMC_AccessMode = FSMC_AccessMode_A;   /* FSMC 访问模式 */
+
 
     /* Color LCD configuration ------------------------------------
        LCD configured as follow:
@@ -87,34 +97,6 @@ static void LCD_FSMCConfig(void)
 
 static void RA8875_PLL_ini(void)
 {
-#ifdef P320x240
-    LCD_CmdWrite(0x88);
-    LCD_DataWrite(0x0a);
-    Delay1ms(1);
-    LCD_CmdWrite(0x89);
-    LCD_DataWrite(0x02);
-    Delay1ms(1);
-#endif
-
-
-#ifdef P480x272
-    LCD_CmdWrite(0x88);
-    LCD_DataWrite(0x0a);
-    Delay1ms(1);
-    LCD_CmdWrite(0x89);
-    LCD_DataWrite(0x02);
-    Delay1ms(1);
-#endif
-
-#ifdef P640x480
-    LCD_CmdWrite(0x88);
-    LCD_DataWrite(0x0b);
-    Delay1ms(1);
-    LCD_CmdWrite(0x89);
-    LCD_DataWrite(0x02);
-    Delay1ms(1);
-#endif
-
 #ifdef P800x480
     LCD_CmdWrite(0x88);
     LCD_DataWrite(0x0c);
@@ -132,32 +114,35 @@ static void LCD_Initial(void)
     LCD_DataWrite(0x0f);   /* [3:2]-256/65K [1:0]-8/18bit */
 
 #ifdef P800x480
+//AT070TN92  setting
+//==============	Display Window	800x480 ==================
     LCD_CmdWrite(0x04);  //PCLK inverse
     LCD_DataWrite(0x81);
     Delay1ms(1);
 
-//Horizontal set
+    //Horizontal set
     LCD_CmdWrite(0x14); //HDWR//Horizontal Display Width Setting Bit[6:0]
     LCD_DataWrite(0x63);//Horizontal display width(pixels) = (HDWR + 1)*8
     LCD_CmdWrite(0x15);//Horizontal Non-Display Period Fine Tuning Option Register (HNDFTR)
-    LCD_DataWrite(0x00);//Horizontal Non-Display Period Fine Tuning(HNDFT) [3:0]
+    LCD_DataWrite(0x03);//Horizontal Non-Display Period Fine Tuning(HNDFT) [3:0]
     LCD_CmdWrite(0x16); //HNDR//Horizontal Non-Display Period Bit[4:0]
     LCD_DataWrite(0x03);//Horizontal Non-Display Period (pixels) = (HNDR + 1)*8
     LCD_CmdWrite(0x17); //HSTR//HSYNC Start Position[4:0]
-    LCD_DataWrite(0x03);//HSYNC Start Position(PCLK) = (HSTR + 1)*8
+    LCD_DataWrite(0x02);//HSYNC Start Position(PCLK) = (HSTR + 1)*8
     LCD_CmdWrite(0x18); //HPWR//HSYNC Polarity ,The period width of HSYNC.
-    LCD_DataWrite(0x0B);//HSYNC Width [4:0]   HSYNC Pulse width(PCLK) = (HPWR + 1)*8
-//Vertical set
+    LCD_DataWrite(0x00);//HSYNC Width [4:0]   HSYNC Pulse width(PCLK) = (HPWR + 1)*8
+
+    //Vertical set
     LCD_CmdWrite(0x19); //VDHR0 //Vertical Display Height Bit [7:0]
     LCD_DataWrite(0xdf);//Vertical pixels = VDHR + 1
     LCD_CmdWrite(0x1a); //VDHR1 //Vertical Display Height Bit [8]
     LCD_DataWrite(0x01);//Vertical pixels = VDHR + 1
     LCD_CmdWrite(0x1b); //VNDR0 //Vertical Non-Display Period Bit [7:0]
-    LCD_DataWrite(0x20);//Vertical Non-Display area = (VNDR + 1)
+    LCD_DataWrite(0x14);//Vertical Non-Display area = (VNDR + 1)
     LCD_CmdWrite(0x1c); //VNDR1 //Vertical Non-Display Period Bit [8]
     LCD_DataWrite(0x00);//Vertical Non-Display area = (VNDR + 1)
     LCD_CmdWrite(0x1d); //VSTR0 //VSYNC Start Position[7:0]
-    LCD_DataWrite(0x16);//VSYNC Start Position(PCLK) = (VSTR + 1)
+    LCD_DataWrite(0x06);//VSYNC Start Position(PCLK) = (VSTR + 1)
     LCD_CmdWrite(0x1e); //VSTR1 //VSYNC Start Position[8]
     LCD_DataWrite(0x00);//VSYNC Start Position(PCLK) = (VSTR + 1)
     LCD_CmdWrite(0x1f); //VPWR //VSYNC Polarity ,VSYNC Pulse Width[6:0]
@@ -321,60 +306,60 @@ static struct rt_device_graphic_ops ra8875_ops =
     ra8875_lcd_blit_line
 };
 
-/*RA8875 reset Pin PE2*/	
+/*RA8875 reset Pin PE2*/
 /*RA8875 Busy PE4*/
 /*RA8875 INT PE5*/
 static void _lcd_gpio_init(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
 
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE | RCC_AHB1Periph_GPIOC, ENABLE);
-	/* Enable GPIOs clocks */
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE | RCC_AHB1Periph_GPIOC, ENABLE);
+    /* Enable GPIOs clocks */
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
-	/* Enable SYSCFG clock */
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);  
+    /* Enable SYSCFG clock */
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 
-	  /* Configure MCO (PA8) */
-	  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
-	  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
-	  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-	  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-	  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL ;  
-	  GPIO_Init(GPIOA, &GPIO_InitStructure);
+    /* Configure MCO (PA8) */
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL ;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
 
     /* Output HSE clock (25MHz) on MCO pin (PA8) to clock the PHY */
     RCC_MCO1Config(RCC_MCO1Source_HSE, RCC_MCO1Div_1);
 
-	/*RA8875 reset Pin PC6*/
+    /*RA8875 reset Pin PC6*/
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
-	
-	/*RA8875 Busy PE4*/
+
+    /*RA8875 Busy PE4*/
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_Init(GPIOE, &GPIO_InitStructure);
-	
-	/*RA8875 INT PE5*/
+
+    /*RA8875 INT PE5*/
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_Init(GPIOE, &GPIO_InitStructure);
 }
 
 void ra8875_init(void)
 {
     uint32_t i;
-	
-	_lcd_gpio_init();
+
+    _lcd_gpio_init();
 
     GPIO_ResetBits(GPIOC, GPIO_Pin_6);  /* RESET LCD */
     LCD_FSMCConfig();
@@ -403,25 +388,25 @@ void ra8875_init(void)
 
     LCD_CmdWrite(0x01);//Display on
     LCD_DataWrite(0x80);
-	
-		/*PWM set*/
+
+    /*PWM set*/
     LCD_CmdWrite(0x8B);
     LCD_DataWrite(0xF0);
     LCD_CmdWrite(0x8A);
     LCD_DataWrite(0x48);
     LCD_CmdWrite(0x8B);
     LCD_DataWrite(0xF0);
-	// write_reg(0x8B,0xF0);
-	// write_reg(0x8A,0x48);
-	// write_reg(0x8B,0xF0);
+    // write_reg(0x8B,0xF0);
+    // write_reg(0x8A,0x48);
+    // write_reg(0x8B,0xF0);
 
 
     /*set RA8875 GPOX pin to 1 - disp panel on*/
 //	write_reg(0xC7,0x01);
     LCD_CmdWrite(0xC7);
     LCD_DataWrite(0x01);
-	/*set lift right*/
-	LCD_CmdWrite(0x20);
+    /*set lift right*/
+    LCD_CmdWrite(0x20);
     LCD_DataWrite(0x08);
 
     /* clear */
