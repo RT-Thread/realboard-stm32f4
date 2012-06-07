@@ -41,7 +41,6 @@ void rt_init_thread_entry(void* parameter)
 {
     /* Filesystem Initialization */
 #ifdef RT_USING_DFS
-//    rt_hw_sdcard_init();
 
     {
         /* init the device filesystem */
@@ -49,27 +48,29 @@ void rt_init_thread_entry(void* parameter)
 
 #define DFS_ROMFS_ROOT (&romfs_root)
 
-#if defined(RT_USING_DFS_ROMFS)
-	dfs_romfs_init();
-	if (dfs_mount(RT_NULL, "/", "rom", 0, DFS_ROMFS_ROOT) == 0)
-	{
-		rt_kprintf("ROM File System initialized!\n");
-	}
-	else
-		rt_kprintf("ROM File System initialzation failed!\n");
-#endif
+//#if defined(RT_USING_DFS_ROMFS)
+//	dfs_romfs_init();
+//	if (dfs_mount(RT_NULL, "/", "rom", 0, DFS_ROMFS_ROOT) == 0)
+//	{
+//		rt_kprintf("ROM File System initialized!\n");
+//	}
+//	else
+//		rt_kprintf("ROM File System initialzation failed!\n");
+//#endif
 
 #ifdef RT_USING_DFS_ELMFAT
-        /* init the elm chan FatFs filesystam*/
-//        elm_init();
+        rt_hw_sdcard_init();
 
-//        /* mount sd card fat partition 1 as root directory */
-//        if (dfs_mount("sd0", "/", "elm", 0, 0) == 0)
-//        {
-//            rt_kprintf("File System initialized!\n");
-//        }
-//        else
-//            rt_kprintf("File System initialzation failed!\n");
+        /* init the elm chan FatFs filesystam*/
+        elm_init();
+
+        /* mount sd card fat partition 1 as root directory */
+        if (dfs_mount("sd0", "/", "elm", 0, 0) == 0)
+        {
+            rt_kprintf("File System initialized!\n");
+        }
+        else
+            rt_kprintf("File System initialzation failed!\n");
 #endif
     }
 #endif
