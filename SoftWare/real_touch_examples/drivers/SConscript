@@ -33,6 +33,7 @@ if GetDepend('RT_USING_I2C') == True:
 # add LCD driver.
 if GetDepend('RT_USING_RTGUI') == True:
 	src += ['ra8875.c']
+	src += ['key.c']
 
 CPPPATH = [cwd]
 

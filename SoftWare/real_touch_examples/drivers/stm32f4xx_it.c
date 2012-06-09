@@ -205,6 +205,59 @@ void USART3_IRQHandler(void)
 #endif
 }
 
+/*
+EXTI5: LCD_INTQ  PE5
+EXTI6: KEY_UP    PF6
+EXTI6: KEY_DOWN  PF7
+EXTI6: KEY_LEFT  PF8
+EXTI6: KEY_RIGHT PF9
+*/
+extern void key_handler(void);
+
+__weak void key_handler(void)
+{
+    /* do nothing. */
+}
+
+void EXTI9_5_IRQHandler(void)
+{
+    uint32_t key_flag = 0;
+
+    if(EXTI_GetITStatus(EXTI_Line5) == SET)
+    {
+        EXTI_ClearITPendingBit(EXTI_Line5);
+    }
+
+    if(EXTI_GetITStatus(EXTI_Line6) == SET)
+    {
+        EXTI_ClearITPendingBit(EXTI_Line6);
+        key_flag = 1;
+    }
+
+    if(EXTI_GetITStatus(EXTI_Line7) == SET)
+    {
+        EXTI_ClearITPendingBit(EXTI_Line7);
+        key_flag = 1;
+    }
+
+    if(EXTI_GetITStatus(EXTI_Line8) == SET)
+    {
+        EXTI_ClearITPendingBit(EXTI_Line8);
+        key_flag = 1;
+    }
+
+    if(EXTI_GetITStatus(EXTI_Line9) == SET)
+    {
+        EXTI_ClearITPendingBit(EXTI_Line9);
+        key_flag = 1;
+    }
+
+    if(key_flag)
+    {
+        key_handler();
+    }
+}
+
 /**
   * @}
   */
