@@ -79,8 +79,8 @@ void rt_init_thread_entry(void* parameter)
 	{
 //	    rt_hw_lcd_init();
 		extern void gui_init(void);
-		gui_init();
-		rt_hw_key_init();
+		//gui_init();
+		//rt_hw_key_init();
 	}
 #endif
 
