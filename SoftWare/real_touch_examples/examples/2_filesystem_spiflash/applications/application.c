@@ -25,9 +25,10 @@
 
 void rt_init_thread_entry(void* parameter)
 {
+    platform_init();
+
 #ifdef RT_USING_SPI
 	{
-		rt_hw_spi2_init();
 		w25qxx_init("flash0", "spi20");
 	}
 #endif
