@@ -175,4 +175,6 @@
 /* default font size in RTGUI */
 #define RTGUI_DEFAULT_FONT_SIZE	16
 
+#define RT_USING_COMPONENTS_INIT
+
 #endif

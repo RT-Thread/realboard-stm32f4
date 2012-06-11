@@ -1,30 +1,19 @@
 #include <rtgui/rtgui.h>
 #include <rtgui/image.h>
 #include <rtgui/rtgui_system.h>
+#include <rtgui/widgets/window.h>
+#include <rtgui/rtgui_application.h>
 
-#include <rtgui/widgets/view.h>
-#include <rtgui/widgets/workbench.h>
 #include <dfs_posix.h>
 #include <string.h>
 
 #define PICTURE_DIR "/"
 
-enum picture_view_mode
-{
-	VIEW_SINGLE_MODE,
-	VIEW_DIR_MODE,
-	VIEW_FN_LIST_MODE
-};
-
-static rtgui_view_t* picture_view = RT_NULL;
-static enum picture_view_mode view_mode = VIEW_SINGLE_MODE;
-
 /* current picture file name */
 static char current_fn[32] = {0};
-static const char** picture_fn_list;
-static rt_uint8_t picture_fn_list_size, picture_fn_list_current;
+static struct rtgui_container *container;
 
-static void picture_show_prev()
+static void picture_show_prev(void)
 {
 	DIR* dir;
 	struct dirent* entry;
@@ -64,7 +53,7 @@ static void picture_show_prev()
 					{
 						/* display image */
 						strcpy(current_fn, fn);
-						rtgui_widget_update(RTGUI_WIDGET(picture_view));
+						rtgui_widget_update(RTGUI_WIDGET(container));
 						closedir(dir);
 						return;
 					}
@@ -80,11 +69,11 @@ static void picture_show_prev()
 	if ((is_last == RT_TRUE) && fn[0] != '\0')
 	{
 		strcpy(current_fn, fn);
-		rtgui_widget_update(RTGUI_WIDGET(picture_view));
+		rtgui_widget_update(RTGUI_WIDGET(container));
 	}
 }
 
-static void picture_show_next()
+static void picture_show_next(void)
 {
 	DIR* dir;
 	struct dirent* entry;
@@ -116,7 +105,7 @@ __restart:
 				if (found == RT_TRUE || current_fn[0] == '\0')
 				{
 					strcpy(current_fn, entry->d_name);
-					rtgui_widget_update(RTGUI_WIDGET(picture_view));
+					rtgui_widget_update(RTGUI_WIDGET(container));
 
 					closedir(dir);
 					return;
@@ -137,7 +126,27 @@ __restart:
 	goto __restart;
 }
 
-static rt_bool_t picture_view_event_handler(struct rtgui_widget* widget, struct rtgui_event* event)
+static rt_bool_t onkey_handle(struct rtgui_object* object, struct rtgui_event* event)
+{
+	struct rtgui_event_kbd* ekbd = (struct rtgui_event_kbd*)event;
+
+	if (ekbd->type == RTGUI_KEYDOWN)
+	{
+		if (ekbd->key == RTGUIK_RIGHT)
+		{
+			picture_show_next();
+			return RT_TRUE;
+		}
+		else if (ekbd->key == RTGUIK_LEFT)
+		{
+			picture_show_prev();
+			return RT_TRUE;
+		}
+	}
+	return RT_TRUE;
+}
+
+static rt_bool_t picture_view_event_handler(rtgui_object_t *object, rtgui_event_t *event)
 {
 	if (event->type == RTGUI_EVENT_PAINT)
 	{
@@ -146,9 +155,9 @@ static rt_bool_t picture_view_event_handler(struct rtgui_widget* widget, struct 
 		struct rtgui_image* image = RT_NULL;
 		char fn[32];
 
-		dc = rtgui_dc_begin_drawing(widget);
+		dc = rtgui_dc_begin_drawing(RTGUI_WIDGET(object));
 		if (dc == RT_NULL) return RT_FALSE;
-		rtgui_widget_get_rect(widget, &rect);
+		rtgui_widget_get_rect(RTGUI_WIDGET(object), &rect);
 
 		/* open image */
 		rt_snprintf(fn, sizeof(fn), "%s/%s", PICTURE_DIR, current_fn);
@@ -182,118 +191,56 @@ static rt_bool_t picture_view_event_handler(struct rtgui_widget* widget, struct 
 
 		return RT_FALSE;
 	}
-	else if (event->type == RTGUI_EVENT_KBD)
+
+	return rtgui_container_event_handler(object, event);
+}
+
+void picture_show(void)
+{
+	/* create application */
+	struct rtgui_application *app;
+	struct rtgui_rect rect1;
+	struct rtgui_win *win_main;
+	
+	app = rtgui_application_create(rt_thread_self(), "gui_app");
+	if (app == RT_NULL)
+    {
+        rt_kprintf("Create application \"gui_app\" failed!\n");
+        return;
+    }
+
+	rtgui_graphic_driver_get_rect(rtgui_graphic_driver_get_default(), &rect1);
+
+    /* create main window */
+	win_main = rtgui_win_create(RT_NULL, "main",
+                    &rect1,
+                    RTGUI_WIN_STYLE_NO_BORDER | RTGUI_WIN_STYLE_NO_TITLE);
+	if (win_main == RT_NULL)
 	{
-		struct rtgui_event_kbd* ekbd = (struct rtgui_event_kbd*)event;
-		if (ekbd->type == RTGUI_KEYDOWN)
-		{
-			switch (ekbd->key)
-			{
-			case RTGUIK_RIGHT:
-				if (view_mode == VIEW_DIR_MODE) picture_show_next();
-				else if (view_mode == VIEW_FN_LIST_MODE)
-				{
-					picture_fn_list_current ++;
-					if (picture_fn_list_current == picture_fn_list_size)
-					{
-						picture_fn_list_current = 0;
-					}
-					strcpy(current_fn, picture_fn_list[picture_fn_list_current]);
-					rtgui_widget_update(RTGUI_WIDGET(picture_view));
-				}
-				break;
-			case RTGUIK_LEFT:
-				if (view_mode == VIEW_DIR_MODE) picture_show_prev();
-				else if (view_mode == VIEW_FN_LIST_MODE)
-				{
-					if (picture_fn_list_current == 0)
-					{
-						picture_fn_list_current = picture_fn_list_size - 1;
-					}
-					else picture_fn_list_current --;
-
-					strcpy(current_fn, picture_fn_list[picture_fn_list_current]);
-					rtgui_widget_update(RTGUI_WIDGET(picture_view));
-				}
-				break;
-			case RTGUIK_RETURN:
-			{
-				rtgui_view_t* view;
-
-				view = RTGUI_VIEW(widget);
-
-				/* close this view */
-				current_fn[0] = '\0';
-
-				/* end of modal */
-			    rtgui_view_end_modal(view, RTGUI_MODAL_OK);
-			    picture_view = RT_NULL;
-			}
-				break;
-			}
-		}
-		return RT_FALSE;
+	    rt_kprintf("Create window \"main\" failed!\n");
+				rtgui_application_destroy(app);
+	    return;
 	}
 
-	return rtgui_view_event_handler(widget, event);
-}
+    /* create container in main window */
+	container = rtgui_container_create();
+	if (container == RT_NULL)
+	{
+        rt_kprintf("Create container failed!\n");
+		return;
+	}
 
-rtgui_view_t *picture_view_create(struct rtgui_workbench* workbench)
-{
-    /* create picture view */
-    picture_view = rtgui_view_create("Picture Presentation");
-	rtgui_widget_set_event_handler(RTGUI_WIDGET(picture_view),
-        picture_view_event_handler);
+	rtgui_widget_set_rect(RTGUI_WIDGET(container), &rect1);
+    rtgui_object_set_event_handler(RTGUI_OBJECT(container), picture_view_event_handler);
+    rtgui_container_add_child(RTGUI_CONTAINER(win_main), RTGUI_WIDGET(container));
 
-	rtgui_workbench_add_view(workbench, picture_view);
-	/* this view can be focused */
-	RTGUI_WIDGET(picture_view)->flag |= RTGUI_WIDGET_FLAG_FOCUSABLE;
-	
+	rtgui_win_set_onkey(win_main, onkey_handle);
+    rtgui_win_show(win_main, RT_FALSE);
+
 	/* show next picture */
 	picture_show_next();
-	
-	view_mode = VIEW_DIR_MODE;
 
-	return picture_view;
+    rtgui_application_run(app);
+    rtgui_application_destroy(app);
 }
 
-rtgui_view_t *picture_view_create_view_file(struct rtgui_workbench* workbench,
-	const char* filename)
-{
-	strcpy(current_fn, filename);
-
-    /* create picture view */
-    picture_view = rtgui_view_create("Picture Presentation");
-	rtgui_widget_set_event_handler(RTGUI_WIDGET(picture_view),
-        picture_view_event_handler);
-
-	rtgui_workbench_add_view(workbench, picture_view);
-	/* this view can be focused */
-	RTGUI_WIDGET(picture_view)->flag |= RTGUI_WIDGET_FLAG_FOCUSABLE;
-
-	view_mode = VIEW_SINGLE_MODE;
-
-	return picture_view;
-}
-
-rtgui_view_t *picture_view_create_view_list(struct rtgui_workbench* workbench,
-	const char* list[], rt_uint8_t size)
-{
-	picture_fn_list = list;
-	picture_fn_list_size = size;
-	picture_fn_list_current = 0;
-	strcpy(current_fn, picture_fn_list[picture_fn_list_current]);
-
-    /* create picture view */
-    picture_view = rtgui_view_create("Picture Presentation");
-	rtgui_widget_set_event_handler(RTGUI_WIDGET(picture_view),
-        picture_view_event_handler);
-
-	rtgui_workbench_add_view(workbench, picture_view);
-	/* this view can be focused */
-	RTGUI_WIDGET(picture_view)->flag |= RTGUI_WIDGET_FLAG_FOCUSABLE;
-
-	view_mode = VIEW_FN_LIST_MODE;
-
-	return picture_view;
-}

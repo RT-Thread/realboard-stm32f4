@@ -134,6 +134,7 @@ static void key_thread_entry(void *parameter)
 
     /* init keyboard event */
     RTGUI_EVENT_KBD_INIT(&kbd_event);
+	kbd_event.wid = RT_NULL;
     kbd_event.mod  = RTGUI_KMOD_NONE;
     kbd_event.unicode = 0;
 
@@ -221,7 +222,3 @@ void rt_hw_key_init(void)
     if (key_tid != RT_NULL) rt_thread_startup(key_tid);
 }
 
-void key_handler(void)
-{
-
-}

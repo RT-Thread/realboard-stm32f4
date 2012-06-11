@@ -23,71 +23,36 @@
 #include <board.h>
 #include <rtthread.h>
 
-#ifdef RT_USING_DFS
-/* dfs init */
-#include <dfs_init.h>
-/* dfs filesystem:ELM filesystem init */
-#include <dfs_elm.h>
-/* dfs Filesystem APIs */
-#include <dfs_fs.h>
 
-#ifdef RT_USING_DFS_ROMFS
-#include <dfs_romfs.h>
-#endif
-
-#endif
-
-void rt_init_thread_entry(void* parameter)
+void rt_init_thread_entry(void *parameter)
 {
-    /* Filesystem Initialization */
+#ifdef RT_USING_COMPONENTS_INIT
+	/* initialization RT-Thread Components */
+	rt_components_init();
+#endif
+
+	rt_hw_sdcard_init();
+
+	/* Filesystem Initialization */
 #ifdef RT_USING_DFS
-
-    {
-        /* init the device filesystem */
-        dfs_init();
-
-#define DFS_ROMFS_ROOT (&romfs_root)
-
-//#if defined(RT_USING_DFS_ROMFS)
-//	dfs_romfs_init();
-//	if (dfs_mount(RT_NULL, "/", "rom", 0, DFS_ROMFS_ROOT) == 0)
-//	{
-//		rt_kprintf("ROM File System initialized!\n");
-//	}
-//	else
-//		rt_kprintf("ROM File System initialzation failed!\n");
-//#endif
-
-#ifdef RT_USING_DFS_ELMFAT
-        rt_hw_sdcard_init();
-
-        /* init the elm chan FatFs filesystam*/
-        elm_init();
-
-        /* mount sd card fat partition 1 as root directory */
-        if (dfs_mount("sd0", "/", "elm", 0, 0) == 0)
-        {
-            rt_kprintf("File System initialized!\n");
-        }
-        else
-            rt_kprintf("File System initialzation failed!\n");
-#endif
-    }
-#endif
-
-#ifdef RT_USING_RTGUI
+	/* mount sd card fat partition 1 as root directory */
+	if (dfs_mount("sd0", "/", "elm", 0, 0) == 0)
 	{
-//	    rt_hw_lcd_init();
-		extern void gui_init(void);
-		gui_init();
-		rt_hw_key_init();
+		rt_kprintf("File System initialized!\n");
 	}
+	else rt_kprintf("File System initialzation failed!\n");
 #endif
 
-    /* do some thing here. */
+	ra8875_init();
+
+	rt_hw_key_init();
+
+	gui_init();
+
+	picture_show();
 }
 
-int rt_application_init()
+int rt_application_init(void)
 {
     rt_thread_t init_thread;
 
