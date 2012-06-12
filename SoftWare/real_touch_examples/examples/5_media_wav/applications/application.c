@@ -32,12 +32,13 @@
 #include <dfs_fs.h>
 #endif
 
-#include <drivers/i2c.h>
-extern struct rt_i2c_bus_device stm32_i2c1;
+// #include <drivers/i2c.h>
+// extern struct rt_i2c_bus_device stm32_i2c1;
 
 void rt_init_thread_entry(void* parameter)
 {
 #ifdef RT_USING_I2C
+    rt_i2c_core_init();
     rt_hw_i2c_init();
 #endif
 
