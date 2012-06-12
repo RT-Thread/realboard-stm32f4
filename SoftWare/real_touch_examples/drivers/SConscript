@@ -7,6 +7,7 @@ cwd     = GetCurrentDir()
 
 src	= Split("""
 board.c
+platform.c
 serial.c
 usart.c
 ext_sram.c
@@ -23,7 +24,7 @@ if GetDepend('RT_USING_LWIP') == True:
 
 # add spi driver.
 if GetDepend('RT_USING_SPI') == True:
-	src += ['stm32f20x_40x_spi.c', 'realtouch_spi_bsp.c']
+	src += ['stm32f20x_40x_spi.c']
 
 # add spi driver.
 if GetDepend('RT_USING_I2C') == True:
