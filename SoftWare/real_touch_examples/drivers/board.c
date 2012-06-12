@@ -202,7 +202,7 @@ void rt_hw_board_init()
 
 	rt_hw_usart_init();
 #ifdef RT_USING_CONSOLE
-	rt_console_set_device(CONSOLE_DEVICE);
+	rt_console_set_device(RT_CONSOLE_DEVICE_NAME);
 #endif
 
 	fsmc_gpio_init();

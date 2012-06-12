@@ -67,6 +67,8 @@
 #define RT_USING_CONSOLE
 /* the buffer size of console*/
 #define RT_CONSOLEBUF_SIZE	128
+/* console name */
+#define RT_CONSOLE_DEVICE_NAME	"uart3"
 
 /* SECTION: finsh, a C-Express shell */
 #define RT_USING_FINSH
