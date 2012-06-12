@@ -2,7 +2,7 @@
 #include <rtthread.h>
 #include <rtdevice.h>
 
-#include <drivers/i2c.h>
+#include <i2c.h>
 
 #include "board.h"
 #include "codec_wm8978_i2c.h"
@@ -159,17 +159,20 @@ static void I2S_Configuration(uint32_t I2S_AudioFreq)
 
 static void codec_send(rt_uint16_t s_data)
 {
-    struct rt_i2c_message message;
-    rt_uint8_t dummy_offset, dummy_data;
+    struct rt_i2c_msg msg;
+    rt_uint8_t send_buffer[2];
 
-    dummy_offset = s_data>>8;
-    dummy_data = s_data;
+    RT_ASSERT(codec.i2c_device != RT_NULL);
 
-    message.device_addr = 0x1A<<1;
-    message.device_offset = &dummy_offset;
-    message.device_offset_len = 1;
+    send_buffer[0] = (rt_uint8_t)(s_data>>8);
+    send_buffer[1] = (rt_uint8_t)(s_data);
 
-    rt_i2c_write(codec.i2c_device, &message, &dummy_data, 1);
+    msg.addr = 0x1A;
+    msg.flags = RT_I2C_WR;
+    msg.len = 2;
+    msg.buf = send_buffer;
+
+    rt_i2c_transfer(codec.i2c_device, &msg, 1);
 }
 
 static rt_err_t codec_init(rt_device_t dev)
@@ -549,7 +552,7 @@ rt_err_t codec_hw_init(const char * i2c_bus_device_name)
 {
     struct rt_i2c_bus_device * i2c_device;
 
-    i2c_device = (struct rt_i2c_bus_device *)rt_device_find(i2c_bus_device_name);
+    i2c_device = rt_i2c_bus_device_find(i2c_bus_device_name);
     if(i2c_device == RT_NULL)
     {
         rt_kprintf("i2c bus device %s not found!\r\n", i2c_bus_device_name);
