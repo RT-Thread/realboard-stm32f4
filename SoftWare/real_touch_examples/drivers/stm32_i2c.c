@@ -1,10 +1,8 @@
 #include <rtthread.h>
 #include <board.h>
+#include <rtdevice.h>
 
 #ifdef RT_USING_I2C_BITOPS
-
-#include <i2c.h>
-#include <i2c-bit-ops.h>
 
 /* GPIO define */
 #define GPIO_PORT_I2C	GPIOB
@@ -53,11 +51,8 @@ static void gpio_udelay(rt_uint32_t us)
 	volatile rt_int32_t i;
 	for (; us > 0; us--)
 	{
-		i = 50000;
-		while(i > 0)
-		{
-			i--;
-		}
+		i = 50;
+		while(i--);
 	}
 }
 
