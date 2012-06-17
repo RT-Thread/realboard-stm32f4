@@ -16,6 +16,7 @@
 #ifndef __BOARD_H__
 #define __BOARD_H__
 
+#include <rtthread.h>
 #include <stm32f4xx.h>
 
 /* board configuration */
@@ -49,6 +50,8 @@
 #define STM32_CONSOLE_USART		3
 
 void rt_hw_board_init(void);
+rt_uint32_t rt_hw_tick_get_millisecond(void);
+rt_uint32_t rt_hw_tick_get_microsecond(void);
 
 void rt_hw_usart_init(void);
 
