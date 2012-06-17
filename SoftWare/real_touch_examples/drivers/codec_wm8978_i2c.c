@@ -2,8 +2,6 @@
 #include <rtthread.h>
 #include <rtdevice.h>
 
-#include <i2c.h>
-
 #include "board.h"
 #include "codec_wm8978_i2c.h"
 
