@@ -89,8 +89,6 @@
 /* Maximum sector size to be handled. */
 #define RT_DFS_ELM_MAX_SECTOR_SIZE  512
 
-#define RT_USING_DFS_ROMFS
-
 /* the max number of mounted filesystem */
 #define DFS_FILESYSTEMS_MAX			2
 /* the max number of opened files 		*/
