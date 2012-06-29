@@ -35,6 +35,7 @@ if GetDepend('RT_USING_I2C') == True:
 if GetDepend('RT_USING_RTGUI') == True:
 	src += ['ra8875.c']
 	src += ['key.c']
+	src += ['touch.c']
 
 CPPPATH = [cwd]
 
