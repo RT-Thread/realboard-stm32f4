@@ -187,6 +187,32 @@ static void XY_Coordinate(uint32_t X,uint32_t Y)
     LCD_DataWrite(Y);
 }
 
+/** \brief LCD brightness PWM setting.
+ *
+ * \param pwm_duty_cycle int LED pwm duty cycle, 0~100.
+ * \return void
+ *
+ */
+static void pwm_setting(int pwm_duty_cycle)
+{
+    uint32_t value;
+
+    value  = (1 << 7); /* enable PWM. */
+    value |= (0 << 6); /* ouput LOW when PWM STOP. */
+    value |= (0 << 4); /* selet PWM1 function. */
+    value |= 8;        /* 8: PWM clk = SYS_CLK/256. */
+    LCD_CmdWrite(0x8A);
+    LCD_DataWrite(value);
+
+
+    value = (pwm_duty_cycle * 256) / 100;
+    if(value > 0xFF)
+    {
+        value = 0xFF;
+    }
+    LCD_CmdWrite(0x8B);
+    LCD_DataWrite(value);
+}
 
 static rt_err_t lcd_init(rt_device_t dev)
 {
@@ -390,16 +416,7 @@ void ra8875_init(void)
     LCD_DataWrite(0x80);
 
     /*PWM set*/
-    LCD_CmdWrite(0x8B);
-    LCD_DataWrite(0xF0);
-    LCD_CmdWrite(0x8A);
-    LCD_DataWrite(0x48);
-    LCD_CmdWrite(0x8B);
-    LCD_DataWrite(0xF0);
-    // write_reg(0x8B,0xF0);
-    // write_reg(0x8A,0x48);
-    // write_reg(0x8B,0xF0);
-
+    pwm_setting(60);
 
     /*set RA8875 GPOX pin to 1 - disp panel on*/
 //	write_reg(0xC7,0x01);
