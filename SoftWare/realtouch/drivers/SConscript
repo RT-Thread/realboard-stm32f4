@@ -1,0 +1,44 @@
+Import('RTT_ROOT')
+Import('rtconfig')
+from building import *
+
+# get current directory
+cwd     = GetCurrentDir()
+
+src	= Split("""
+board.c
+platform.c
+serial.c
+usart.c
+ext_sram.c
+stm32f4xx_it.c
+""")
+
+# add SD driver.
+if GetDepend('RT_USING_DFS') == True:
+	src += ['sdio_sd.c']
+
+# add ethernet driver.
+if GetDepend('RT_USING_LWIP') == True:
+	src += ['stm32f4xx_eth.c']
+
+# add spi driver.
+if GetDepend('RT_USING_SPI') == True:
+	src += ['stm32f20x_40x_spi.c']
+
+# add spi driver.
+if GetDepend('RT_USING_I2C') == True:
+	src += ['stm32_i2c.c']
+	src += ['codec_wm8978_i2c.c']
+
+# add LCD driver.
+if GetDepend('RT_USING_RTGUI') == True:
+	src += ['ra8875.c']
+	src += ['key.c']
+	src += ['touch.c']
+
+CPPPATH = [cwd]
+
+group = DefineGroup('Drivers', src, depend = [''], CPPPATH = CPPPATH)
+
+Return('group')
