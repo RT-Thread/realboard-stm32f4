@@ -54,6 +54,7 @@ rt_uint32_t rt_hw_tick_get_millisecond(void);
 rt_uint32_t rt_hw_tick_get_microsecond(void);
 
 void rt_hw_usart_init(void);
+void rt_hw_susb_init(void);
 
 #endif
 

@@ -732,13 +732,12 @@ static rt_err_t susb_init(rt_device_t dev)
  * 
  * @return the error code, RT_EOK on successfully.
  */
-rt_device_t rt_usb_hcd_susb(void)
-{	
+void rt_hw_susb_init(void)
+{
 	susb_hcd.parent.type = RT_Device_Class_USBHost;
 	susb_hcd.parent.init = susb_init;
 	
 	susb_hcd.ops = &susb_ops;
 	
-	return &susb_hcd.parent;
+	rt_device_register(&susb_hcd.parent, "susb", 0);	
 }
-

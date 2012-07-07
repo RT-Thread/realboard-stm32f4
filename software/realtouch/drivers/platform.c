@@ -115,6 +115,8 @@ static void rt_hw_spi2_init(void)
 
 void rt_platform_init(void)
 {
+	rt_device_t dev;
+
 #ifdef RT_USING_SPI
     rt_hw_spi2_init();
 
@@ -127,6 +129,11 @@ void rt_platform_init(void)
 	rtgui_touch_hw_init("spi21");
 #endif /* RT_USING_RTGUI */
 #endif /* RT_USING_SPI */
+
+#ifdef RT_USING_USB_HOST
+	/* register stm32 usb host controller driver */
+	rt_hw_susb_init();	
+#endif
 
 	/* initilize ra8875 lcd controller */
 	ra8875_init();

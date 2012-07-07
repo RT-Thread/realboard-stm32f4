@@ -72,9 +72,7 @@
 // <bool name="RT_USB_CLASS_ADK" description="Using ADK class" default="true" />
 #define RT_USB_CLASS_ADK
 // <string name="UDISK_MOUNTPOINT" description="udisk mount point" default="/" />
-#define UDISK_MOUNTPOINT	"/sd"
-// <bool name="RT_USB_HCD_STM32" description="Using STM32 usb host controller driver" default="true" />
-#define RT_USB_HCD_STM32
+//#define UDISK_MOUNTPOINT	"/sd"
 // </section>
 
 // <section name="RT_USING_CONSOLE" description="Using console" default="true" >
@@ -83,6 +81,10 @@
 #define RT_CONSOLEBUF_SIZE	128
 // <string name="RT_CONSOLE_DEVICE_NAME" description="console device name" default="uart3" />
 #define RT_CONSOLE_DEVICE_NAME	"uart3"
+// </section>
+
+// <section name="RT_USING_COMPONENTS_INIT" description="Using components init" default="true" >
+#define RT_USING_COMPONENTS_INIT
 // </section>
 
 // <section name="RT_USING_FINSH" description="Using finsh as shell, which is a C-Express shell" default="true" >
@@ -125,8 +127,8 @@
 // #define RT_USING_DFS_UFFS
 // <bool name="RT_USING_DFS_DEVFS" description="Using devfs for device objects" default="true" />
 #define RT_USING_DFS_DEVFS
-// <bool name="RT_USING_DFS_ROMFS" description="Using ROMFS" default="true" />
-#define RT_USING_DFS_ROMFS
+// <bool name="RT_USING_DFS_ROMFS" description="Using ROMFS" default="false" />
+//#define RT_USING_DFS_ROMFS
 // </section>
 
 // <section name="RT_USING_RTGUI" description="RTGUI, a graphic user interface" default="true" >
@@ -135,16 +137,16 @@
 #define RTGUI_NAME_MAX	16
 // <bool name="RTGUI_USING_FONT16" description="Support 16 weight font" default="true" />
 #define RTGUI_USING_FONT16
-// <bool name="RTGUI_USING_FONT12" description="Support 12 weight font" default="true" />
-#define RTGUI_USING_FONT12
-// <bool name="RTGUI_USING_FONTHZ" description="Support Chinese font" default="true" />
-#define RTGUI_USING_FONTHZ
+// <bool name="RTGUI_USING_FONT12" description="Support 12 weight font" default="false" />
+//#define RTGUI_USING_FONT12
+// <bool name="RTGUI_USING_FONTHZ" description="Support Chinese font" default="false" />
+//#define RTGUI_USING_FONTHZ
 // <bool name="RTGUI_USING_DFS_FILERW" description="Using DFS as file interface " default="true" />
 #define RTGUI_USING_DFS_FILERW
 // <bool name="RTGUI_USING_HZ_FILE" description="Using font file as Chinese font" default="false" />
-// #define RTGUI_USING_HZ_FILE
-// <bool name="RTGUI_USING_HZ_BMP" description="Using Chinese bitmap font" default="true" />
-#define RTGUI_USING_HZ_BMP
+#define RTGUI_USING_HZ_FILE
+// <bool name="RTGUI_USING_HZ_BMP" description="Using Chinese bitmap font" default="false" />
+//#define RTGUI_USING_HZ_BMP
 // <bool name="RTGUI_USING_SMALL_SIZE" description="Using small size in RTGUI" default="false" />
 // #define RTGUI_USING_SMALL_SIZE
 // <bool name="RTGUI_USING_MOUSE_CURSOR" description="Using mouse cursor in RTGUI" default="false" />
@@ -153,11 +155,12 @@
 #define RTGUI_IMAGE_XPM
 // <bool name="RTGUI_IMAGE_JPEG" description="Using jpeg image in RTGUI" default="true" />
 #define RTGUI_IMAGE_JPEG
-// <bool name="RTGUI_IMAGE_PNG" description="Using png image in RTGUI" default="true" />
-#define RTGUI_IMAGE_PNG
+// <bool name="RTGUI_IMAGE_PNG" description="Using png image in RTGUI" default="false" />
+//#define RTGUI_IMAGE_PNG
 // <bool name="RTGUI_IMAGE_BMP" description="Using bmp image in RTGUI" default="true" />
 #define RTGUI_IMAGE_BMP
 // </section>
+
 
 // </RDTConfigurator>
 
