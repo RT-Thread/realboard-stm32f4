@@ -20,7 +20,7 @@ static void rt_hw_spi2_init(void)
         static struct stm32_spi_bus stm32_spi;
         GPIO_InitTypeDef GPIO_InitStructure;
 
-		RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
+        RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
 
         GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_AF;
         GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
@@ -111,12 +111,10 @@ static void rt_hw_spi2_init(void)
         rt_spi_bus_attach_device(&spi_device, "spi22", "spi2", (void*)&spi_cs);
     }
 }
-#endif
+#endif /* RT_USING_SPI */
 
 void rt_platform_init(void)
 {
-	rt_device_t dev;
-
 #ifdef RT_USING_SPI
     rt_hw_spi2_init();
 
@@ -125,26 +123,30 @@ void rt_platform_init(void)
 #endif /* RT_USING_DFS */
 
 #ifdef RT_USING_RTGUI
-	/* initilize touch panel */
-	rtgui_touch_hw_init("spi21");
+    /* initilize touch panel */
+    rtgui_touch_hw_init("spi21");
 #endif /* RT_USING_RTGUI */
 #endif /* RT_USING_SPI */
 
 #ifdef RT_USING_USB_HOST
-	/* register stm32 usb host controller driver */
-	rt_hw_susb_init();	
+    /* register stm32 usb host controller driver */
+    rt_hw_susb_init();
 #endif
 
-	/* initilize ra8875 lcd controller */
-	ra8875_init();
+#ifdef RT_USING_DFS
+    /* initilize sd card */
+    rt_hw_sdcard_init();
+#endif /* RT_USING_DFS */
 
-	/* initilize sd card */
-	rt_hw_sdcard_init();
+#ifdef RT_USING_RTGUI
+    /* initilize ra8875 lcd controller */
+    ra8875_init();
 
-	/* initilize key module */
-	rt_hw_key_init();
+    /* initilize key module */
+    rt_hw_key_init();
+#endif /* RT_USING_RTGUI */
 
-	rt_thread_delay(50);
-	rt_device_init_all();
+    rt_thread_delay(50);
+    rt_device_init_all();
 }
 
