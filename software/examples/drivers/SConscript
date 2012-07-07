@@ -8,7 +8,6 @@ cwd     = GetCurrentDir()
 src	= Split("""
 board.c
 platform.c
-serial.c
 usart.c
 ext_sram.c
 stm32f4xx_it.c
@@ -25,6 +24,7 @@ if GetDepend('RT_USING_LWIP') == True:
 # add spi driver.
 if GetDepend('RT_USING_SPI') == True:
 	src += ['stm32f20x_40x_spi.c']
+	src += ['spi_flash_w25qxx.c']
 
 # add spi driver.
 if GetDepend('RT_USING_I2C') == True:
@@ -36,6 +36,10 @@ if GetDepend('RT_USING_RTGUI') == True:
 	src += ['ra8875.c']
 	src += ['key.c']
 	src += ['touch.c']
+
+if GetDepend('RT_USING_USB_HOST') == True:
+	src+= ['stm32f4xx_hcd.c']
+	src+= ['usb_bsp.c']
 
 CPPPATH = [cwd]
 
