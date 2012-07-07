@@ -500,7 +500,7 @@ static uint8_t SDSTATUS_Tab[16];
 __IO uint32_t StopCondition = 0;
 __IO SD_Error TransferError = SD_OK;
 __IO uint32_t TransferEnd = 0, DMAEndOfTransfer = 0;
-SD_CardInfo SDCardInfo;
+static SD_CardInfo SDCardInfo;
 
 SDIO_InitTypeDef SDIO_InitStructure;
 SDIO_CmdInitTypeDef SDIO_CmdInitStructure;
@@ -2917,7 +2917,6 @@ uint8_t convert_from_bytes_to_power_of_two(uint16_t NumberOfBytes)
 #define SECTOR_SIZE		512
 
 static struct rt_device sdcard_device;
-static SD_CardInfo SDCardInfo;
 static struct dfs_partition part;
 static struct rt_semaphore sd_lock;
 static rt_uint8_t _sdcard_buffer[SECTOR_SIZE];
@@ -3099,7 +3098,7 @@ static rt_err_t rt_sdcard_control(rt_device_t dev, rt_uint8_t cmd, void *args)
 	return RT_EOK;
 }
 
-void rt_hw_sdcard_init()
+void rt_hw_sdcard_init(void)
 {
     NVIC_InitTypeDef NVIC_InitStructure;
 
