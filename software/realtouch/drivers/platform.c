@@ -113,10 +113,25 @@ static void rt_hw_spi2_init(void)
 }
 #endif
 
-
-void platform_init(void)
+void rt_platform_init(void)
 {
 #ifdef RT_USING_SPI
     rt_hw_spi2_init();
+
+	/* initilize touch panel */
+	rtgui_touch_hw_init("spi21");
 #endif
+
+	/* initilize ra8875 lcd controller */
+	ra8875_init();
+
+	/* initilize sd card */
+	rt_hw_sdcard_init();
+
+	/* initilize key module */
+	rt_hw_key_init();
+
+	rt_thread_delay(50);
+	rt_device_init_all();
 }
+

@@ -227,15 +227,6 @@ static rt_err_t rtgui_touch_control (rt_device_t dev, rt_uint8_t cmd, void *args
         touch->max_x = data->max_x;
         touch->min_y = data->min_y;
         touch->max_y = data->max_y;
-
-#ifdef SAVE_CALIBRATION
-        //save setup
-        radio_setup.touch_min_x = touch->min_x;
-        radio_setup.touch_max_x = touch->max_x;
-        radio_setup.touch_min_y = touch->min_y;
-        radio_setup.touch_max_y = touch->max_y;
-        save_setup();
-#endif
     }
     break;
     }
@@ -254,6 +245,9 @@ static void touch_thread_entry(void *parameter)
         rt_uint32_t y;
     } touch_previous;
 
+	RTGUI_EVENT_MOUSE_BUTTON_INIT(&emouse);
+	emouse.wid = RT_NULL;
+
     while(1)
     {
         if(rt_event_recv(&touch->event, 1 ,RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR, RT_WAITING_FOREVER, &event_value) == RT_EOK)
@@ -261,24 +255,27 @@ static void touch_thread_entry(void *parameter)
             while(1)
             {
                 if (IS_TOUCH_UP())
-                {
-                    /* touch up */
-                    emouse.parent.type = RTGUI_EVENT_MOUSE_BUTTON;
+                {            
+					/* touch up */
                     emouse.button = (RTGUI_MOUSE_BUTTON_LEFT |RTGUI_MOUSE_BUTTON_UP);
 
                     /* use old value */
                     emouse.x = touch->x;
                     emouse.y = touch->y;
 
-                    if ((touch->calibrating == RT_TRUE) && (touch->calibration_func != RT_NULL))
-                    {
-                        /* callback function */
-                        touch->calibration_func(emouse.x, emouse.y);
-                    }
-                    else
-                    {
-                        rtgui_server_post_event(&emouse.parent, sizeof(struct rtgui_event_mouse));
-                    }
+					if(touch_down == RT_TRUE)
+					{
+	                    if ((touch->calibrating == RT_TRUE) && (touch->calibration_func != RT_NULL))
+	                    {
+	                        /* callback function */
+	                        touch->calibration_func(emouse.x, emouse.y);
+	                    }
+	                    else
+	                    {
+	                        rtgui_server_post_event(&emouse.parent, sizeof(struct rtgui_event_mouse));
+	                    }
+					}
+					rt_kprintf("touch up: (%d, %d)\n", emouse.x, emouse.y);
 
                     /* clean */
                     touch_previous.x = touch_previous.y = 0;
@@ -289,6 +286,11 @@ static void touch_thread_entry(void *parameter)
                 } /* touch up */
                 else /* touch down or move */
                 {
+					if(touch_down == RT_FALSE)
+					{
+						rt_thread_delay(RT_TICK_PER_SECOND / 10);
+					}
+					
                     /* calculation */
                     rtgui_touch_calculate();
 
@@ -307,11 +309,10 @@ static void touch_thread_entry(void *parameter)
                     {
 #define previous_keep      8
                         /* filter. */
-                        if(
-                            (touch_previous.x > touch->x + previous_keep)
+                        if((touch_previous.x > touch->x + previous_keep)
                             || (touch_previous.x < touch->x - previous_keep)
                             || (touch_previous.y > touch->y + previous_keep)
-                            || (touch_previous.y < touch->y - previous_keep)  )
+                            || (touch_previous.y < touch->y - previous_keep))
                         {
                             touch_previous.x = touch->x;
                             touch_previous.y = touch->y;
@@ -319,14 +320,18 @@ static void touch_thread_entry(void *parameter)
                             if(touch_down == RT_FALSE)
                             {
                                 touch_down = RT_TRUE;
-//                                rt_kprintf("touch down: (%d, %d)\n", emouse.x, emouse.y);
+                                rt_kprintf("touch down: (%d, %d)\n", emouse.x, emouse.y);
                             }
                             else
                             {
-//                                rt_kprintf("touch motion: (%d, %d)\n", emouse.x, emouse.y);
+                                rt_kprintf("touch motion: (%d, %d)\n", emouse.x, emouse.y);
                             }
                         }
                     }
+					else 
+					{
+						touch_down = RT_TRUE;
+					}
                 } /* touch down or move */
 
                 rt_thread_delay(RT_TICK_PER_SECOND / 10);

@@ -189,22 +189,6 @@ void USART2_IRQHandler(void)
 #endif
 }
 
-void USART3_IRQHandler(void)
-{
-#ifdef RT_USING_UART3
-    extern struct rt_device uart3_device;
-	extern void rt_hw_serial_isr(struct rt_device *device);
-
-    /* enter interrupt */
-    rt_interrupt_enter();
-
-    rt_hw_serial_isr(&uart3_device);
-
-    /* leave interrupt */
-    rt_interrupt_leave();
-#endif
-}
-
 /*
 EXTI5: LCD_INTQ  PE5
 EXTI6: KEY_UP    PF6
@@ -214,7 +198,7 @@ EXTI6: KEY_RIGHT PF9
 */
 extern void key_handler(void);
 
-__weak void key_handler(void)
+void key_handler(void)
 {
     /* do nothing. */
 }

@@ -8,7 +8,6 @@ cwd     = GetCurrentDir()
 src	= Split("""
 board.c
 platform.c
-serial.c
 usart.c
 ext_sram.c
 stm32f4xx_it.c
@@ -36,6 +35,10 @@ if GetDepend('RT_USING_RTGUI') == True:
 	src += ['ra8875.c']
 	src += ['key.c']
 	src += ['touch.c']
+
+if GetDepend('RT_USING_USB_HOST') == True:
+	src+= ['stm32f4xx_hcd.c']
+	src+= ['usb_bsp.c']
 
 CPPPATH = [cwd]
 
