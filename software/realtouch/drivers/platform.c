@@ -118,9 +118,15 @@ void rt_platform_init(void)
 #ifdef RT_USING_SPI
     rt_hw_spi2_init();
 
+#ifdef RT_USING_DFS
+    w25qxx_init("flash0", "spi20");
+#endif /* RT_USING_DFS */
+
+#ifdef RT_USING_RTGUI
 	/* initilize touch panel */
 	rtgui_touch_hw_init("spi21");
-#endif
+#endif /* RT_USING_RTGUI */
+#endif /* RT_USING_SPI */
 
 	/* initilize ra8875 lcd controller */
 	ra8875_init();

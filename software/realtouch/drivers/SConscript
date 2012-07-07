@@ -24,6 +24,7 @@ if GetDepend('RT_USING_LWIP') == True:
 # add spi driver.
 if GetDepend('RT_USING_SPI') == True:
 	src += ['stm32f20x_40x_spi.c']
+	src += ['spi_flash_w25qxx.c']
 
 # add spi driver.
 if GetDepend('RT_USING_I2C') == True:
