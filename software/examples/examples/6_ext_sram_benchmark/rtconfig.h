@@ -62,11 +62,14 @@
 /* SECTION: Device System */
 /* Using Device System */
 #define RT_USING_DEVICE
+#define RT_USING_SERIAL
 
 /* SECTION: Console options */
 #define RT_USING_CONSOLE
 /* the buffer size of console*/
 #define RT_CONSOLEBUF_SIZE	128
+/* console name */
+#define RT_CONSOLE_DEVICE_NAME	"uart3"
 
 /* SECTION: finsh, a C-Express shell */
 #define RT_USING_FINSH
@@ -86,8 +89,6 @@
 #define RT_DFS_ELM_MAX_LFN			255
 /* Maximum sector size to be handled. */
 #define RT_DFS_ELM_MAX_SECTOR_SIZE  512
-
-#define RT_USING_DFS_ROMFS
 
 /* the max number of mounted filesystem */
 #define DFS_FILESYSTEMS_MAX			2

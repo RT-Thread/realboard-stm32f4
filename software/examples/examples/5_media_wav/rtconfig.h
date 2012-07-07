@@ -62,6 +62,7 @@
 /* SECTION: Device System */
 /* Using Device System */
 #define RT_USING_DEVICE
+#define RT_USING_SERIAL
 #define RT_USING_I2C
 #define RT_USING_I2C_BITOPS
 
@@ -79,7 +80,7 @@
 #define FINSH_USING_DESCRIPTION
 
 /* SECTION: device filesystem */
- #define RT_USING_DFS
+#define RT_USING_DFS
 #define RT_USING_DFS_ELMFAT
 #define RT_DFS_ELM_WORD_ACCESS
 /* Reentrancy (thread safe) of the FatFs module.  */
