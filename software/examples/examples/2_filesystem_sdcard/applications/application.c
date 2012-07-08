@@ -18,8 +18,6 @@
 /*@{*/
 
 #include <stdio.h>
-
-#include "stm32f4xx.h"
 #include <board.h>
 #include <rtthread.h>
 
@@ -34,18 +32,17 @@
 
 void rt_init_thread_entry(void* parameter)
 {
+#ifdef RT_USING_COMPONENTS_INIT
+    /* initialization RT-Thread Components */
+    rt_components_init();
+#endif
+
+    rt_platform_init();
+
     /* Filesystem Initialization */
 #ifdef RT_USING_DFS
-    rt_hw_sdcard_init();
-
     {
-        /* init the device filesystem */
-        dfs_init();
-
 #ifdef RT_USING_DFS_ELMFAT
-        /* init the elm chan FatFs filesystam*/
-        elm_init();
-
         /* mount sd card fat partition 1 as root directory */
         if (dfs_mount("sd0", "/", "elm", 0, 0) == 0)
         {

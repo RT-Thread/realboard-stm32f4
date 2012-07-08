@@ -72,6 +72,8 @@
 /* console name */
 #define RT_CONSOLE_DEVICE_NAME	"uart3"
 
+#define RT_USING_COMPONENTS_INIT
+
 /* SECTION: finsh, a C-Express shell */
 #define RT_USING_FINSH
 /* Using symbol table */

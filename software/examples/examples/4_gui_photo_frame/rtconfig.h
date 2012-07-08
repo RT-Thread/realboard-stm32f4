@@ -72,6 +72,8 @@
 /* console name */
 #define RT_CONSOLE_DEVICE_NAME	"uart3"
 
+#define RT_USING_COMPONENTS_INIT
+
 /* SECTION: finsh, a C-Express shell */
 #define RT_USING_FINSH
 /* Using symbol table */
@@ -176,7 +178,5 @@
 /* #define RTGUI_USING_MOUSE_CURSOR */
 /* default font size in RTGUI */
 #define RTGUI_DEFAULT_FONT_SIZE	16
-
-#define RT_USING_COMPONENTS_INIT
 
 #endif

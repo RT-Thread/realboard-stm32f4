@@ -18,20 +18,28 @@
 /*@{*/
 
 #include <stdio.h>
-
-#include "stm32f4xx.h"
 #include <board.h>
 #include <rtthread.h>
 
 void rt_init_thread_entry(void* parameter)
 {
-    platform_init();
-
-#ifdef RT_USING_SPI
-	{
-		w25qxx_init("flash0", "spi20");
-	}
+#ifdef RT_USING_COMPONENTS_INIT
+    /* initialization RT-Thread Components */
+    rt_components_init();
 #endif
+
+    rt_platform_init();
+
+    /* mount SPI flash as root directory */
+    if (dfs_mount("flash0", "/", "elm", 0, 0) == 0)
+    {
+        rt_kprintf("flash0 mount to /.\n");
+    }
+    else
+    {
+        rt_kprintf("flash0 mount to / failed.\n");
+    }
+
     /* do some thing here. */
 }
 

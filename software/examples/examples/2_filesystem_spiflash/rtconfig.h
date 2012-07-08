@@ -72,6 +72,8 @@
 /* console name */
 #define RT_CONSOLE_DEVICE_NAME	"uart3"
 
+#define RT_USING_COMPONENTS_INIT
+
 /* SECTION: finsh, a C-Express shell */
 #define RT_USING_FINSH
 /* Using symbol table */
@@ -116,7 +118,7 @@
 #define RT_LWIP_IPADDR0	192
 #define RT_LWIP_IPADDR1	168
 #define RT_LWIP_IPADDR2	1
-#define RT_LWIP_IPADDR3	201
+#define RT_LWIP_IPADDR3	30
 
 /* gateway address of target*/
 #define RT_LWIP_GWADDR0	192

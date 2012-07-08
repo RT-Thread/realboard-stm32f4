@@ -18,8 +18,6 @@
 /*@{*/
 
 #include <stdio.h>
-
-#include "stm32f4xx.h"
 #include <board.h>
 #include <rtthread.h>
 
@@ -31,7 +29,7 @@ void rt_init_thread_entry(void *parameter)
 	rt_components_init();
 #endif
 
-	rt_hw_sdcard_init();
+	rt_platform_init();
 
 	/* Filesystem Initialization */
 #ifdef RT_USING_DFS
@@ -42,10 +40,6 @@ void rt_init_thread_entry(void *parameter)
 	}
 	else rt_kprintf("File System initialzation failed!\n");
 #endif
-
-	ra8875_init();
-
-	rt_hw_key_init();
 
 	gui_init();
 
