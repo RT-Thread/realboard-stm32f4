@@ -23,6 +23,7 @@
 
 static struct uhcd susb_hcd;
 static struct uhubinst root_hub;
+static rt_bool_t ignore_disconnect = RT_FALSE;
 
 static struct rt_semaphore sem_lock;
 
@@ -31,7 +32,7 @@ ALIGN(4) static USBH_HOST USB_Host;
 
 void OTG_FS_IRQHandler(void)
 {
-	USBH_OTG_ISR_Handler(&USB_OTG_Core);
+    USBH_OTG_ISR_Handler(&USB_OTG_Core);
 }
 
 /**
@@ -54,8 +55,8 @@ USBH_Status USBH_HandleControl (USB_OTG_CORE_HANDLE *pdev, USBH_HOST *phost)
   case CTRL_SETUP:
     /* send a SETUP packet */
     USBH_CtlSendSetup     (pdev, 
-	                   phost->Control.setup.d8 , 
-	                   phost->Control.hc_num_out);  
+                       phost->Control.setup.d8 , 
+                       phost->Control.hc_num_out);  
     phost->Control.state = CTRL_SETUP_WAIT;  
     break; 
     
@@ -322,20 +323,21 @@ USBH_Status USBH_DeInit(USB_OTG_CORE_HANDLE *pdev, USBH_HOST *phost)
   */
 rt_uint8_t susb_connect (USB_OTG_CORE_HANDLE *pdev)
 {
-	struct umsg msg;
+    struct umsg msg;
 
-	pdev->host.ConnSts = 1;
+    pdev->host.ConnSts = 1;
 
-	rt_kprintf("susb_connect\n");
-	
-	if(root_hub.port_status[0] & PORT_CCS) return 0;
-	
-	root_hub.port_status[0] |= (PORT_CCS | PORT_CCSC);
-	msg.type = USB_MSG_CONNECT_CHANGE;
-	msg.content.uhub = &root_hub;
-	rt_usb_post_event(&msg, sizeof(struct umsg));	
+    rt_kprintf("susb_connect\n");
+    
+    if(root_hub.port_status[0] & PORT_CCS) return 0;
+    if(ignore_disconnect == RT_FALSE) return 0;
+        
+    root_hub.port_status[0] |= (PORT_CCS | PORT_CCSC);
+    msg.type = USB_MSG_CONNECT_CHANGE;
+    msg.content.uhub = &root_hub;
+    rt_usb_post_event(&msg, sizeof(struct umsg));    
 
-	return 0;
+    return 0;
 }
 
 /**
@@ -346,19 +348,19 @@ rt_uint8_t susb_connect (USB_OTG_CORE_HANDLE *pdev)
   */
 rt_uint8_t susb_disconnect (USB_OTG_CORE_HANDLE *pdev)
 {    
-	struct umsg msg;
+    struct umsg msg;
 
-	pdev->host.ConnSts = 0;
+    pdev->host.ConnSts = 0;
 
-	rt_kprintf("susb_disconnect\n");
+    rt_kprintf("susb_disconnect\n");
 
-	root_hub.port_status[0] |= PORT_CCSC;
-	root_hub.port_status[0] &= ~PORT_CCS;
-	msg.type = USB_MSG_CONNECT_CHANGE;
-	msg.content.uhub = &root_hub;
-	rt_usb_post_event(&msg, sizeof(struct umsg));	
+    root_hub.port_status[0] |= PORT_CCSC;
+    root_hub.port_status[0] &= ~PORT_CCS;
+    msg.type = USB_MSG_CONNECT_CHANGE;
+    msg.content.uhub = &root_hub;
+    rt_usb_post_event(&msg, sizeof(struct umsg));    
 
-	return 0;
+    return 0;
 }
 
 rt_uint8_t susb_sof (USB_OTG_CORE_HANDLE *pdev)
@@ -369,9 +371,9 @@ rt_uint8_t susb_sof (USB_OTG_CORE_HANDLE *pdev)
 
 static USBH_HCD_INT_cb_TypeDef USBH_HCD_INT_cb = 
 {
-	susb_sof,
-	susb_connect, 
-	susb_disconnect,    
+    susb_sof,
+    susb_connect, 
+    susb_disconnect,    
 };
 USBH_HCD_INT_cb_TypeDef  *USBH_HCD_INT_fops = &USBH_HCD_INT_cb;
 
@@ -386,44 +388,44 @@ USBH_HCD_INT_cb_TypeDef  *USBH_HCD_INT_fops = &USBH_HCD_INT_cb;
  * @return the error code, RT_EOK on successfully.
  */
 static int susb_control_xfer(uinst_t uinst, ureq_t setup, void* buffer, 
-	int nbytes, int timeout)
+    int nbytes, int timeout)
 {
-	rt_uint32_t speed;
+    rt_uint32_t speed;
 
-	RT_ASSERT(uinst != RT_NULL);
-	RT_ASSERT(setup != RT_NULL);
+    RT_ASSERT(uinst != RT_NULL);
+    RT_ASSERT(setup != RT_NULL);
 
-	if(!(root_hub.port_status[0] & PORT_CCS) || 
-		(root_hub.port_status[0] & PORT_CCSC)) return -1;
+    if(!(root_hub.port_status[0] & PORT_CCS) || 
+        (root_hub.port_status[0] & PORT_CCSC)) return -1;
 
-	rt_sem_take(&sem_lock, RT_WAITING_FOREVER);
+    rt_sem_take(&sem_lock, RT_WAITING_FOREVER);
 
-	/* Save Global State */
-	USB_Host.gStateBkp = USB_Host.gState; 
-	
-	/* Prepare the Transactions */
-	USB_Host.gState = HOST_CTRL_XFER;
-	USB_Host.Control.buff = (rt_uint8_t*)buffer; 
-	USB_Host.Control.length = nbytes;
-	USB_Host.Control.state = CTRL_SETUP;	
-	speed = HCD_GetCurrentSpeed(&USB_OTG_Core);
+    /* Save Global State */
+    USB_Host.gStateBkp = USB_Host.gState; 
+    
+    /* Prepare the Transactions */
+    USB_Host.gState = HOST_CTRL_XFER;
+    USB_Host.Control.buff = (rt_uint8_t*)buffer; 
+    USB_Host.Control.length = nbytes;
+    USB_Host.Control.state = CTRL_SETUP;    
+    speed = HCD_GetCurrentSpeed(&USB_OTG_Core);
 
-	rt_memcpy((void*)USB_Host.Control.setup.d8, (void*)setup, 8);
-	
-	USBH_Modify_Channel (&USB_OTG_Core, USB_Host.Control.hc_num_out,
-		uinst->address, 0, speed, uinst->max_packet_size);
-	USBH_Modify_Channel (&USB_OTG_Core, USB_Host.Control.hc_num_in,
-		uinst->address, 0, speed, uinst->max_packet_size);  
+    rt_memcpy((void*)USB_Host.Control.setup.d8, (void*)setup, 8);
+    
+    USBH_Modify_Channel (&USB_OTG_Core, USB_Host.Control.hc_num_out,
+        uinst->address, 0, speed, uinst->max_packet_size);
+    USBH_Modify_Channel (&USB_OTG_Core, USB_Host.Control.hc_num_in,
+        uinst->address, 0, speed, uinst->max_packet_size);  
 
-	while(1)
-	{
-    	USBH_HandleControl(&USB_OTG_Core, &USB_Host);    
-		if(USB_Host.Control.state == CTRL_COMPLETE) break;
-	}
-	
-	rt_sem_release(&sem_lock);		
+    while(1)
+    {
+        USBH_HandleControl(&USB_OTG_Core, &USB_Host);    
+        if(USB_Host.Control.state == CTRL_COMPLETE) break;
+    }
+    
+    rt_sem_release(&sem_lock);        
 
-	return nbytes;
+    return nbytes;
 }
 
 /**
@@ -438,19 +440,21 @@ static int susb_control_xfer(uinst_t uinst, ureq_t setup, void* buffer,
  */
 static int susb_int_xfer(upipe_t pipe, void* buffer, int nbytes, int timeout)
 {
-	int size;
-	
-	RT_ASSERT(pipe != RT_NULL);
-	RT_ASSERT(buffer != RT_NULL);
+    int size;
+    
+    RT_ASSERT(pipe != RT_NULL);
+    RT_ASSERT(buffer != RT_NULL);
 
-	if(!(root_hub.port_status[0] & PORT_CCS) || 
-		(root_hub.port_status[0] & PORT_CCSC)) return -1;
+    if(!(root_hub.port_status[0] & PORT_CCS) || 
+        (root_hub.port_status[0] & PORT_CCSC)) return -1;
 
-	rt_sem_take(&sem_lock, RT_WAITING_FOREVER);
+    rt_sem_take(&sem_lock, RT_WAITING_FOREVER);
 
-	rt_sem_release(&sem_lock);		
+    rt_kprintf("susb_int_xfer\n");
+    
+    rt_sem_release(&sem_lock);        
 
-	return size;
+    return size;
 }
 
 /**
@@ -463,68 +467,68 @@ static int susb_int_xfer(upipe_t pipe, void* buffer, int nbytes, int timeout)
  * @return the error code, RT_EOK on successfully.
  */
 static int susb_bulk_xfer(upipe_t pipe, void* buffer, int nbytes, int timeout)
-{	
-	rt_uint8_t channel;
-	int left = nbytes;
-	rt_uint8_t *ptr;
-	URB_STATE state;
+{    
+    rt_uint8_t channel;
+    int left = nbytes;
+    rt_uint8_t *ptr;
+    URB_STATE state;
 
-	RT_ASSERT(pipe != RT_NULL);
-	RT_ASSERT(buffer != RT_NULL);
+    RT_ASSERT(pipe != RT_NULL);
+    RT_ASSERT(buffer != RT_NULL);
 
-	if(!(root_hub.port_status[0] & PORT_CCS) || 
-		(root_hub.port_status[0] & PORT_CCSC)) return -1;
+    if(!(root_hub.port_status[0] & PORT_CCS) || 
+        (root_hub.port_status[0] & PORT_CCSC)) return -1;
 
-	ptr = (rt_uint8_t*)buffer;
-	channel = (rt_uint32_t)pipe->user_data & 0xFF;
-	
-	rt_sem_take(&sem_lock, RT_WAITING_FOREVER);
-	
-	if(pipe->ep.bEndpointAddress & USB_DIR_IN)
-	{	
-		while(left > pipe->ep.wMaxPacketSize)
-		{
-			USBH_BulkReceiveData(&USB_OTG_Core, ptr, pipe->ep.wMaxPacketSize, 
-				channel);
-			while(HCD_GetURB_State(&USB_OTG_Core , channel) != URB_DONE);
+    ptr = (rt_uint8_t*)buffer;
+    channel = (rt_uint32_t)pipe->user_data & 0xFF;
+    
+    rt_sem_take(&sem_lock, RT_WAITING_FOREVER);
+    
+    if(pipe->ep.bEndpointAddress & USB_DIR_IN)
+    {    
+        while(left > pipe->ep.wMaxPacketSize)
+        {
+            USBH_BulkReceiveData(&USB_OTG_Core, ptr, pipe->ep.wMaxPacketSize, 
+                channel);
+            while(HCD_GetURB_State(&USB_OTG_Core , channel) != URB_DONE);
 
-			ptr += pipe->ep.wMaxPacketSize;
-			left -= pipe->ep.wMaxPacketSize;
-		}
+            ptr += pipe->ep.wMaxPacketSize;
+            left -= pipe->ep.wMaxPacketSize;
+        }
 
-		USBH_BulkReceiveData(&USB_OTG_Core, ptr, left, channel);
-		while(HCD_GetURB_State(&USB_OTG_Core , channel) != URB_DONE);
-	}	
-	else
-	{	
+        USBH_BulkReceiveData(&USB_OTG_Core, ptr, left, channel);
+        while(HCD_GetURB_State(&USB_OTG_Core , channel) != URB_DONE);
+    }    
+    else
+    {    
 send_data:
-		while(left > pipe->ep.wMaxPacketSize)
-		{
-			USBH_BulkSendData(&USB_OTG_Core, ptr, pipe->ep.wMaxPacketSize, 
-				channel);
+        while(left > pipe->ep.wMaxPacketSize)
+        {
+            USBH_BulkSendData(&USB_OTG_Core, ptr, pipe->ep.wMaxPacketSize, 
+                channel);
 
-			while(1)
-			{
-				state = HCD_GetURB_State(&USB_OTG_Core, channel);
-				if(state == URB_DONE) break;
-				if(state == URB_NOTREADY) goto send_data;
-			}
+            while(1)
+            {
+                state = HCD_GetURB_State(&USB_OTG_Core, channel);
+                if(state == URB_DONE) break;
+                if(state == URB_NOTREADY) goto send_data;
+            }
 
-			ptr += pipe->ep.wMaxPacketSize;
-			left -= pipe->ep.wMaxPacketSize;		
-		}		
+            ptr += pipe->ep.wMaxPacketSize;
+            left -= pipe->ep.wMaxPacketSize;        
+        }        
 
-		USBH_BulkSendData(&USB_OTG_Core, ptr, left, channel);	
-		while(1)
-		{
-			state = HCD_GetURB_State(&USB_OTG_Core , channel);
-			if(state == URB_DONE) break;
-			if(state == URB_NOTREADY) goto send_data;
-		}		
-	}
+        USBH_BulkSendData(&USB_OTG_Core, ptr, left, channel);    
+        while(1)
+        {
+            state = HCD_GetURB_State(&USB_OTG_Core , channel);
+            if(state == URB_DONE) break;
+            if(state == URB_NOTREADY) goto send_data;
+        }        
+    }
 
-	rt_sem_release(&sem_lock);
-	return nbytes;
+    rt_sem_release(&sem_lock);
+    return nbytes;
 }
 
 /**
@@ -540,10 +544,10 @@ send_data:
  */
 static int susb_iso_xfer(upipe_t pipe, void* buffer, int nbytes, int timeout)
 {
-	/* no implement */
-	RT_ASSERT(0);
-	
-	return 0;
+    /* no implement */
+    RT_ASSERT(0);
+    
+    return 0;
 }
 
 /**
@@ -557,33 +561,40 @@ static int susb_iso_xfer(upipe_t pipe, void* buffer, int nbytes, int timeout)
  * @return the error code, RT_EOK on successfully.
  */
 static rt_err_t susb_alloc_pipe(upipe_t* pipe, uifinst_t ifinst, uep_desc_t ep, 
-	func_callback callback)
+    func_callback callback)
 {
-	rt_uint32_t channel, speed;
-	upipe_t p;
+    rt_uint32_t channel, speed;
+    rt_uint8_t ep_type;
+    upipe_t p;
 
-	RT_ASSERT(ep != RT_NULL);
+    RT_ASSERT(ep != RT_NULL);
 
-	p = (upipe_t)rt_malloc(sizeof(struct upipe));
-	p->ifinst = ifinst;
-	p->callback = callback;
-	p->status = UPIPE_STATUS_OK;
-	rt_memcpy(&p->ep, ep, ep->bLength);
+    p = (upipe_t)rt_malloc(sizeof(struct upipe));
+    p->ifinst = ifinst;
+    p->callback = callback;
+    p->status = UPIPE_STATUS_OK;
+    rt_memcpy(&p->ep, ep, ep->bLength);
 
-	speed = HCD_GetCurrentSpeed(&USB_OTG_Core);
+    speed = HCD_GetCurrentSpeed(&USB_OTG_Core);
     channel = USBH_Alloc_Channel(&USB_OTG_Core, p->ep.bEndpointAddress);
-    
+
+    if(ep->bmAttributes & USB_EP_ATTR_TYPE_MASK == USB_EP_ATTR_BULK)
+    ep_type = EP_TYPE_BULK;
+    else if(ep->bmAttributes & USB_EP_ATTR_TYPE_MASK == USB_EP_ATTR_INT)
+    ep_type = EP_TYPE_INTR;
+    else rt_kprintf("unsupported endpoint type\n");
+        
     /* Open the new channels */
     USBH_Open_Channel(&USB_OTG_Core, channel, ifinst->uinst->address, 
-    	speed, EP_TYPE_BULK, p->ep.wMaxPacketSize);
+        speed, ep_type, p->ep.wMaxPacketSize);
 
-	RT_DEBUG_LOG(1, ("susb_alloc_pipe : %d, chanel %d, max packet size %d\n", 
-		p->ep.bEndpointAddress, channel, p->ep.wMaxPacketSize));
-	
-	p->user_data = (void*)channel;
-	*pipe = p;
-	
- 	return RT_EOK;
+    RT_DEBUG_LOG(1, ("susb_alloc_pipe : %d, chanel %d, max packet size %d\n", 
+        p->ep.bEndpointAddress, channel, p->ep.wMaxPacketSize));
+    
+    p->user_data = (void*)channel;
+    *pipe = p;
+    
+     return RT_EOK;
 }
 
 /**
@@ -595,19 +606,19 @@ static rt_err_t susb_alloc_pipe(upipe_t* pipe, uifinst_t ifinst, uep_desc_t ep,
  */
 static rt_err_t susb_free_pipe(upipe_t pipe)
 {
-	rt_uint8_t channel;
+    rt_uint8_t channel;
 
-	RT_ASSERT(pipe != RT_NULL);
-	
-	RT_DEBUG_LOG(RT_DEBUG_USB, ("susb_free_pipe:%d\n", 
-		pipe->ep.bEndpointAddress));
+    RT_ASSERT(pipe != RT_NULL);
+    
+    RT_DEBUG_LOG(RT_DEBUG_USB, ("susb_free_pipe:%d\n", 
+        pipe->ep.bEndpointAddress));
 
-	channel = (rt_uint32_t)pipe->user_data & 0xFF;	
+    channel = (rt_uint32_t)pipe->user_data & 0xFF;    
     USBH_Free_Channel(&USB_OTG_Core, channel);
 
-	rt_free(pipe);
+    rt_free(pipe);
 
-	return RT_EOK;
+    return RT_EOK;
 }
 
 /**
@@ -619,63 +630,65 @@ static rt_err_t susb_free_pipe(upipe_t pipe)
  */
 static rt_err_t susb_hub_control(rt_uint16_t port, rt_uint8_t cmd, void* args)
 {
-	RT_ASSERT(port == 1);
-	
-	switch(cmd)
-	{
-	case RH_GET_PORT_STATUS:
-		*(rt_uint32_t*)args = root_hub.port_status[port - 1];
-		break;
-	case RH_SET_PORT_STATUS:
-		break;
-	case RH_CLEAR_PORT_FEATURE:
-		switch((rt_uint32_t)args & 0xFF)
-		{
-		case PORT_FEAT_C_RESET:
-			root_hub.port_status[port - 1] &= ~PORT_PRSC;			
-			break;
-		case PORT_FEAT_C_CONNECTION:
-			root_hub.port_status[port - 1] &= ~PORT_CCSC;			
-			break;
-		case PORT_FEAT_C_ENABLE:
-			root_hub.port_status[port - 1] &= ~PORT_PESC;			
-			break;
-		default:
-			break;
-		}
-		break;
-	case RH_SET_PORT_FEATURE:
-		switch((rt_uint32_t)args & 0xFF)
-		{		
-		case PORT_FEAT_POWER:
-			root_hub.port_status[port - 1] |= PORT_PPS;
-			break;
-		case PORT_FEAT_RESET:			
-			root_hub.port_status[port - 1] |= PORT_PRS;	
-			USB_OTG_ResetPort(&USB_OTG_Core); 			
-			root_hub.port_status[port - 1] &= ~PORT_PRS;				
-			break;
-		case PORT_FEAT_ENABLE:
-			root_hub.port_status[port - 1] |= PORT_PES;			
-			break;
-		}	
-		break;
-	default:
-		break;
-	}	
+    RT_ASSERT(port == 1);
+    
+    switch(cmd)
+    {
+    case RH_GET_PORT_STATUS:
+        *(rt_uint32_t*)args = root_hub.port_status[port - 1];
+        break;
+    case RH_SET_PORT_STATUS:
+        break;
+    case RH_CLEAR_PORT_FEATURE:
+        switch((rt_uint32_t)args & 0xFF)
+        {
+        case PORT_FEAT_C_RESET:
+            root_hub.port_status[port - 1] &= ~PORT_PRSC;    
+            ignore_disconnect = RT_FALSE;            
+            break;
+        case PORT_FEAT_C_CONNECTION:
+            root_hub.port_status[port - 1] &= ~PORT_CCSC;            
+            break;
+        case PORT_FEAT_C_ENABLE:
+            root_hub.port_status[port - 1] &= ~PORT_PESC;            
+            break;
+        default:
+            break;
+        }
+        break;
+    case RH_SET_PORT_FEATURE:
+        switch((rt_uint32_t)args & 0xFF)
+        {        
+        case PORT_FEAT_POWER:
+            root_hub.port_status[port - 1] |= PORT_PPS;
+            break;
+        case PORT_FEAT_RESET:            
+            root_hub.port_status[port - 1] |= PORT_PRS;    
+            USB_OTG_ResetPort(&USB_OTG_Core);             
+            root_hub.port_status[port - 1] &= ~PORT_PRS;  
+            ignore_disconnect = RT_TRUE;          
+            break;
+        case PORT_FEAT_ENABLE:
+            root_hub.port_status[port - 1] |= PORT_PES;            
+            break;
+        }    
+        break;
+    default:
+        break;
+    }    
 
-	return RT_EOK;
+    return RT_EOK;
 }
 
 static struct uhcd_ops susb_ops = 
 {
-	susb_control_xfer,
-	susb_bulk_xfer,
-	susb_int_xfer,
-	susb_iso_xfer,
-	susb_alloc_pipe,
-	susb_free_pipe,
-	susb_hub_control,	
+    susb_control_xfer,
+    susb_bulk_xfer,
+    susb_int_xfer,
+    susb_iso_xfer,
+    susb_alloc_pipe,
+    susb_free_pipe,
+    susb_hub_control,    
 };
 
 /**
@@ -686,44 +699,44 @@ static struct uhcd_ops susb_ops =
  * @return the error code, RT_EOK on successfully.
  */
 static rt_err_t susb_init(rt_device_t dev)
-{	
-	rt_sem_init(&sem_lock, "s_lock", 1, RT_IPC_FLAG_FIFO);	
+{    
+    rt_sem_init(&sem_lock, "s_lock", 1, RT_IPC_FLAG_FIFO);    
 
-	/* roothub initilizition */
-	root_hub.num_ports = 1;
-	root_hub.is_roothub = RT_TRUE;
-	root_hub.self = RT_NULL;
-	root_hub.hcd = &susb_hcd;
+    /* roothub initilizition */
+    root_hub.num_ports = 1;
+    root_hub.is_roothub = RT_TRUE;
+    root_hub.self = RT_NULL;
+    root_hub.hcd = &susb_hcd;
 
-	/* Hardware Init */
-	USB_OTG_BSP_Init(&USB_OTG_Core);  
-	
-	/* configure GPIO pin used for switching VBUS power */
-	USB_OTG_BSP_ConfigVBUS(0);	
-	
-	/* Host de-initializations */
-	USBH_DeInit(&USB_OTG_Core, &USB_Host);
+    /* Hardware Init */
+    USB_OTG_BSP_Init(&USB_OTG_Core);  
+    
+    /* configure GPIO pin used for switching VBUS power */
+    USB_OTG_BSP_ConfigVBUS(0);    
+    
+    /* Host de-initializations */
+    USBH_DeInit(&USB_OTG_Core, &USB_Host);
 
     USB_Host.Control.hc_num_out = USBH_Alloc_Channel(&USB_OTG_Core, 0x00);
     USB_Host.Control.hc_num_in = USBH_Alloc_Channel(&USB_OTG_Core, 0x80);  
-	
-	/* Start the USB OTG core */	 
-	HCD_Init(&USB_OTG_Core , USB_OTG_FS_CORE_ID);
+    
+    /* Start the USB OTG core */     
+    HCD_Init(&USB_OTG_Core , USB_OTG_FS_CORE_ID);
 
-	/* Open Control pipes */
-	USBH_Open_Channel(&USB_OTG_Core, USB_Host.Control.hc_num_in,
-		USB_Host.device_prop.address,USB_Host.device_prop.speed, EP_TYPE_CTRL,
-		USB_Host.Control.ep0size); 
+    /* Open Control pipes */
+    USBH_Open_Channel(&USB_OTG_Core, USB_Host.Control.hc_num_in,
+        USB_Host.device_prop.address,USB_Host.device_prop.speed, EP_TYPE_CTRL,
+        USB_Host.Control.ep0size); 
 
-	/* Open Control pipes */
-	USBH_Open_Channel(&USB_OTG_Core, USB_Host.Control.hc_num_out,
-		USB_Host.device_prop.address, USB_Host.device_prop.speed,
-		EP_TYPE_CTRL, USB_Host.Control.ep0size);   
-	  	
-	/* Enable Interrupts */
-	USB_OTG_BSP_EnableInterrupt(&USB_OTG_Core);	
+    /* Open Control pipes */
+    USBH_Open_Channel(&USB_OTG_Core, USB_Host.Control.hc_num_out,
+        USB_Host.device_prop.address, USB_Host.device_prop.speed,
+        EP_TYPE_CTRL, USB_Host.Control.ep0size);   
+          
+    /* Enable Interrupts */
+    USB_OTG_BSP_EnableInterrupt(&USB_OTG_Core);    
 
-	return RT_EOK;
+    return RT_EOK;
 }
 
 /**
@@ -734,10 +747,10 @@ static rt_err_t susb_init(rt_device_t dev)
  */
 void rt_hw_susb_init(void)
 {
-	susb_hcd.parent.type = RT_Device_Class_USBHost;
-	susb_hcd.parent.init = susb_init;
-	
-	susb_hcd.ops = &susb_ops;
-	
-	rt_device_register(&susb_hcd.parent, "susb", 0);	
+    susb_hcd.parent.type = RT_Device_Class_USBHost;
+    susb_hcd.parent.init = susb_init;
+    
+    susb_hcd.ops = &susb_ops;
+    
+    rt_device_register(&susb_hcd.parent, "susb", 0);    
 }

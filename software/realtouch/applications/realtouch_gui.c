@@ -54,6 +54,7 @@ static int xml_event_handler(rt_uint8_t event, const char* text, rt_size_t len, 
         {
         case READ_NAME:    
             items[++index].name = rt_strdup(text);
+            items[index].parameter = items[index].name;
             break;
         case READ_ICON:
             rt_snprintf(fn, sizeof(fn), "%s/%s", APP_PATH, text);
@@ -94,8 +95,11 @@ static int xml_load_items(const char* filename)
     }
     
     xml = rtgui_xml_create(512, xml_event_handler, RT_NULL);
-    if (xml != RT_NULL)    {        rtgui_xml_parse(xml, buffer, length);
-        rtgui_xml_destroy(xml);    }
+    if (xml != RT_NULL)    
+    {        
+        rtgui_xml_parse(xml, buffer, length);
+        rtgui_xml_destroy(xml);    
+    }
 
     rtgui_filerw_close(filerw);        
     return 0;
@@ -106,6 +110,18 @@ static int xml_load_items(const char* filename)
 
 FINSH_FUNCTION_EXPORT(xml_load_items, filename ) ;
 #endif
+
+static void exec_app(rtgui_widget_t* widget, void* parameter)
+{
+    char path[64];
+
+    RT_ASSERT(parameter != RT_NULL);
+
+    rt_snprintf(path, sizeof(path), "%s/%s/%s.mo", APP_PATH, 
+        (char*)parameter, (char*)parameter);
+    
+    rt_module_open(path);
+}
 
 static void scan_app_dir(const char* path)
 {
@@ -140,12 +156,17 @@ void realtouch_entry(void* parameter)
     struct rtgui_application* application;
     struct rtgui_win* win;    
     rtgui_rect_t rect;
+    int i = 0;
 
     items = (struct rtgui_list_item *) rtgui_malloc((ITEM_MAX) * sizeof(struct rtgui_list_item));
+    for(i=0; i< ITEM_MAX; i++) items[i].action = exec_app;
 
     application = rtgui_application_create(rt_thread_self(), "rtouch");
     if (application != RT_NULL)
     {    
+        /* do touch panel calibartion */
+        calibration_init();
+        
         rtgui_graphic_driver_get_rect(rtgui_graphic_driver_get_default(), &rect);
         win = rtgui_win_create(RT_NULL, "rtouch", &rect, RTGUI_WIN_STYLE_DEFAULT);
 
@@ -178,10 +199,14 @@ void realtouch_gui_init(void)
     }    
 
     /* re-set graphic device */    
-    rtgui_graphic_set_device(device);            
+    rtgui_graphic_set_device(device);       
 
+    picture_show();
+
+#if 0                
     tid = rt_thread_create("rtouch", realtouch_entry, RT_NULL, 4096, 20, 20);
     if (tid != RT_NULL)
         rt_thread_startup(tid);    
+#endif      
 }
 
