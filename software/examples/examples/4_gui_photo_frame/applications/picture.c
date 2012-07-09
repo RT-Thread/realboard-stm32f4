@@ -198,12 +198,18 @@ static rt_bool_t picture_view_event_handler(rtgui_object_t *object, rtgui_event_
     return rtgui_container_event_handler(object, event);
 }
 
+void timeout(struct rtgui_timer* timer, void* parameter)
+{
+    picture_show_next();
+}
+
 void picture_show(void)
 {
     /* create application */
     struct rtgui_application *app;
     struct rtgui_rect rect1;
     struct rtgui_win *win_main;
+    rtgui_timer_t *timer;
 
     app = rtgui_application_create(rt_thread_self(), "gui_app");
     if (app == RT_NULL)
@@ -237,6 +243,8 @@ void picture_show(void)
     rtgui_object_set_event_handler(RTGUI_OBJECT(container), picture_view_event_handler);
     rtgui_container_add_child(RTGUI_CONTAINER(win_main), RTGUI_WIDGET(container));
 
+    timer = rtgui_timer_create(500, RT_TIMER_FLAG_PERIODIC, timeout, RT_NULL);
+    rtgui_timer_start(timer);
     rtgui_win_set_onkey(win_main, onkey_handle);
     rtgui_win_show(win_main, RT_FALSE);
 

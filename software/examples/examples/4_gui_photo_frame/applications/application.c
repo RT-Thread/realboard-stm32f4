@@ -41,9 +41,21 @@ void rt_init_thread_entry(void *parameter)
 	else rt_kprintf("File System initialzation failed!\n");
 #endif
 
+#ifdef RT_USING_RTGUI
 	gui_init();
 
 	picture_show();
+
+	/* initial touch. */
+	{
+        rt_device_t device;
+	    device = rt_device_find("touch");
+	    if (device != RT_NULL)
+        {
+            rt_device_init(device);
+        }
+	}
+#endif /* RT_USING_RTGUI */
 }
 
 int rt_application_init(void)
