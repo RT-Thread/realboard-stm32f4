@@ -1,4 +1,7 @@
-*.pyc
+*~
 *.bak
+*.swp
+
+*.pyc
 .sconsign.dblite
 JLinkLog.txt
