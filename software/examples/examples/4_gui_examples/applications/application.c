@@ -75,14 +75,6 @@ void rt_init_thread_entry(void* parameter)
 		extern void application_init(void);
 
 		device = rt_device_find("lcd");
-		if (device != RT_NULL)
-		{
-			info.width = 800;
-			info.height = 480;
-			/* set graphic resolution */
-			rt_device_control(device, RTGRAPHIC_CTRL_SET_MODE, &info);
-		}
-
 		/* re-set graphic device */
 		rtgui_graphic_set_device(device);
 
