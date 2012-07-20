@@ -39,12 +39,22 @@
 
 void rt_init_thread_entry(void* parameter)
 {
-    /* Filesystem Initialization */
-#ifdef RT_USING_DFS
+#ifdef RT_USING_COMPONENTS_INIT
+	/* initialization RT-Thread Components */
+	rt_components_init();
+#endif
 
-    {
-        /* init the device filesystem */
-        dfs_init();
+	rt_platform_init();
+
+	/* Filesystem Initialization */
+#ifdef RT_USING_DFS
+	/* mount sd card fat partition 1 as root directory */
+	if (dfs_mount("sd0", "/", "elm", 0, 0) == 0)
+	{
+		rt_kprintf("File System initialized!\n");
+	}
+	else rt_kprintf("File System initialzation failed!\n");
+#endif
 
 #define DFS_ROMFS_ROOT (&romfs_root)
 
@@ -58,29 +68,25 @@ void rt_init_thread_entry(void* parameter)
 //		rt_kprintf("ROM File System initialzation failed!\n");
 //#endif
 
-#ifdef RT_USING_DFS_ELMFAT
-        rt_hw_sdcard_init();
-
-        /* init the elm chan FatFs filesystam*/
-        elm_init();
-
-        /* mount sd card fat partition 1 as root directory */
-        if (dfs_mount("sd0", "/", "elm", 0, 0) == 0)
-        {
-            rt_kprintf("File System initialized!\n");
-        }
-        else
-            rt_kprintf("File System initialzation failed!\n");
-#endif
-    }
-#endif
-
 #ifdef RT_USING_RTGUI
 	{
-//	    rt_hw_lcd_init();
-		extern void gui_init(void);
-		//gui_init();
-		//rt_hw_key_init();
+		rt_device_t device;
+		struct rt_device_rect_info info;
+		extern void application_init(void);
+
+		device = rt_device_find("lcd");
+		if (device != RT_NULL)
+		{
+			info.width = 800;
+			info.height = 480;
+			/* set graphic resolution */
+			rt_device_control(device, RTGRAPHIC_CTRL_SET_MODE, &info);
+		}
+
+		/* re-set graphic device */
+		rtgui_graphic_set_device(device);
+
+		application_init();
 	}
 #endif
 

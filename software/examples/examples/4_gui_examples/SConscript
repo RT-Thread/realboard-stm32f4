@@ -8,6 +8,7 @@ list = os.listdir(cwd)
 
 objs += SConscript(cwd + "/../../STM32F4xx_Libraries/SConscript")
 objs += SConscript(cwd + "/../../drivers/SConscript")
+objs += SConscript(os.path.join(RTT_ROOT, 'examples', 'gui', 'SConscript'))
 
 for d in list:
     path = os.path.join(cwd, d)
