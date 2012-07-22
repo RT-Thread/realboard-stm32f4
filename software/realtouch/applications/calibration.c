@@ -2,7 +2,7 @@
 #include <rtgui/dc.h>
 #include <rtgui/rtgui_system.h>
 #include <rtgui/widgets/window.h>
-#include <rtgui/rtgui_application.h>
+#include <rtgui/rtgui_app.h>
 
 #include "touch.h"
 
@@ -113,7 +113,7 @@ static void calibration_data_post(rt_uint16_t x, rt_uint16_t y)
                     calibration_ptr->data.max_x,
                     calibration_ptr->data.min_y,
                     calibration_ptr->data.max_y);
-                rtgui_application_send(calibration_ptr->tid, &ecmd.parent, sizeof(struct rtgui_event_command));
+                rtgui_send(calibration_ptr->tid, &ecmd.parent, sizeof(struct rtgui_event_command));
             }
             return;
         }
@@ -127,7 +127,7 @@ static void calibration_data_post(rt_uint16_t x, rt_uint16_t y)
             ecmd.wid = calibration_ptr->win;
             ecmd.command_id = TOUCH_WIN_UPDATE;
 
-            rtgui_application_send(calibration_ptr->tid, &ecmd.parent, sizeof(struct rtgui_event_command));
+            rtgui_send(calibration_ptr->tid, &ecmd.parent, sizeof(struct rtgui_event_command));
         }
     }
 }

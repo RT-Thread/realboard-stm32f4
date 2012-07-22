@@ -2,7 +2,7 @@
 #include <rtgui/image.h>
 #include <rtgui/rtgui_system.h>
 #include <rtgui/widgets/window.h>
-#include <rtgui/rtgui_application.h>
+#include <rtgui/rtgui_app.h>
 
 #include <dfs_posix.h>
 #include <string.h>
@@ -203,12 +203,12 @@ void timeout(struct rtgui_timer* timer, void* parameter)
 void picture_show(void)
 {
     /* create application */
-    struct rtgui_application *app;
+    struct rtgui_app *app;
     struct rtgui_rect rect1;
     struct rtgui_win *win_main;
     rtgui_timer_t *timer;
     
-    app = rtgui_application_create(rt_thread_self(), "gui_app");
+    app = rtgui_app_create(rt_thread_self(), "gui_app");
     if (app == RT_NULL)
     {
         rt_kprintf("Create application \"gui_app\" failed!\n");
@@ -224,7 +224,7 @@ void picture_show(void)
     if (win_main == RT_NULL)
     {
         rt_kprintf("Create window \"main\" failed!\n");
-                rtgui_application_destroy(app);
+                rtgui_app_destroy(app);
         return;
     }
 
@@ -249,7 +249,7 @@ void picture_show(void)
     /* show next picture */
     picture_show_next();
 
-    rtgui_application_run(app);
-    rtgui_application_destroy(app);
+    rtgui_app_run(app);
+    rtgui_app_destroy(app);
 }
 

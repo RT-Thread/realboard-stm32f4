@@ -1,7 +1,7 @@
 #include <rtthread.h>
 #include <rtgui/rtgui_server.h>
 #include <rtgui/rtgui_system.h>
-#include <rtgui/rtgui_application.h>
+#include <rtgui/rtgui_app.h>
 #include <rtgui/widgets/window.h>
 #include <rtgui/widgets/list_view.h>
 #include <rtgui/rtgui_xml.h>
@@ -153,7 +153,7 @@ static void scan_app_dir(const char* path)
 
 void realtouch_entry(void* parameter)
 {
-    struct rtgui_application* application;
+    struct rtgui_app* application;
     struct rtgui_win* win;    
     rtgui_rect_t rect;
     int i = 0;
@@ -161,7 +161,7 @@ void realtouch_entry(void* parameter)
     items = (struct rtgui_list_item *) rtgui_malloc((ITEM_MAX) * sizeof(struct rtgui_list_item));
     for(i=0; i< ITEM_MAX; i++) items[i].action = exec_app;
 
-    application = rtgui_application_create(rt_thread_self(), "rtouch");
+    application = rtgui_app_create(rt_thread_self(), "rtouch");
     if (application != RT_NULL)
     {    
         /* do touch panel calibartion */
@@ -178,8 +178,8 @@ void realtouch_entry(void* parameter)
         }        
         rtgui_win_show(win, RT_FALSE);
         
-        rtgui_application_run(application);
-        rtgui_application_destroy(application);
+        rtgui_app_run(application);
+        rtgui_app_destroy(application);
     }
 }
 
