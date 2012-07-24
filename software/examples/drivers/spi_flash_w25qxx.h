@@ -12,8 +12,8 @@
  * 2011-12-16     aozima      the first version
  */
 
-#ifndef SPI_FLASH_SST25VFXX_H_INCLUDED
-#define SPI_FLASH_SST25VFXX_H_INCLUDED
+#ifndef SPI_FLASH_W25QXX_H_INCLUDED
+#define SPI_FLASH_W25QXX_H_INCLUDED
 
 #include <rtthread.h>
 #include <drivers/spi.h>
@@ -25,7 +25,8 @@ struct spi_flash_device
     struct rt_spi_device *          rt_spi_device;
 };
 
-extern rt_err_t sst25vfxx_init(const char * flash_device_name, const char * spi_device_name);
+extern rt_err_t w25qxx_init(const char * flash_device_name,
+                            const char * spi_device_name);
 
 
-#endif // SPI_FLASH_SST25VFXX_H_INCLUDED
+#endif // SPI_FLASH_W25QXX_H_INCLUDED
