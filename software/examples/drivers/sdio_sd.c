@@ -1526,7 +1526,7 @@ SD_Error SD_WaitReadOperation(void)
   timeout = SD_DATATIMEOUT;
   while(((SDIO->STA & SDIO_FLAG_RXACT)) && (timeout > 0))
   {
-    timeout--;  
+    timeout--;
   }
   if (StopCondition == 1)
   {
@@ -1801,7 +1801,7 @@ SD_Error SD_WaitWriteOperation(void)
   timeout = SD_DATATIMEOUT;
   while(((SDIO->STA & SDIO_FLAG_TXACT)) && (timeout > 0))
   {
-    timeout--;  
+    timeout--;
   }
   if (StopCondition == 1)
   {
@@ -2124,7 +2124,7 @@ SD_Error SD_ProcessIRQSrc(void)
     TransferError = SD_OK;
     SDIO_ClearITPendingBit(SDIO_IT_DATAEND);
     TransferEnd = 1;
-  }  
+  }
   else if (SDIO_GetITStatus(SDIO_IT_DCRCFAIL) != RESET)
   {
     SDIO_ClearITPendingBit(SDIO_IT_DCRCFAIL);
@@ -2951,6 +2951,7 @@ static rt_err_t rt_sdcard_close(rt_device_t dev)
 	return RT_EOK;
 }
 
+static uint32_t dma_buffer[512/sizeof(uint32_t)];
 static rt_size_t rt_sdcard_read(rt_device_t dev, rt_off_t pos, void* buffer, rt_size_t size)
 {
 	SD_Error status;
@@ -2962,59 +2963,50 @@ static rt_size_t rt_sdcard_read(rt_device_t dev, rt_off_t pos, void* buffer, rt_
 	//rt_kprintf("sd: read 0x%X, sector 0x%X, 0x%X\n", (uint32_t)buffer ,pos, size);
 	rt_sem_take(&sd_lock, RT_WAITING_FOREVER);
 
-//    retry = 3;
-//    while(retry)
-//    {
-        // /* read all sectors */
-        // if (((rt_uint32_t)buffer % 4 != 0) ||
-            // ((rt_uint32_t)buffer > 0x20080000))
-        // {
-            // rt_uint32_t index;
+    if(((uint32_t)buffer & 0x03) != 0)
+    {
+        /* non-aligned. */
+        uint32_t i;
+        rt_size_t sector_adr;
+        uint8_t* copy_buffer;
 
-            // /* which is not alignment with 4 or chip SRAM */
-            // for (index = 0; index < size; index ++)
-            // {
-                // status = SD_ReadBlock((part.offset + index + pos) * factor,
-                    // (uint8_t*)_sdcard_buffer, SECTOR_SIZE);
+        sector_adr = pos*SECTOR_SIZE;
+        copy_buffer = (uint8_t*)buffer;
 
-                // status = SD_WaitReadOperation();
-        		// while(SD_GetStatus() != SD_TRANSFER_OK);
-				// if (status != SD_OK) break;
+        for(i=0; i<size; i++)
+        {
+            status = SD_ReadBlock((uint8_t*)dma_buffer,
+                                  sector_adr,
+                                  SECTOR_SIZE);
 
-                // /* copy to the buffer */
-                // rt_memcpy(((rt_uint8_t*)buffer + index * SECTOR_SIZE), _sdcard_buffer, SECTOR_SIZE);
-            // }
-        // }
-        // else
-        // {
-             if (size == 1)
-             {
-                 status = SD_ReadBlock((uint8_t*)buffer, pos*SECTOR_SIZE, SECTOR_SIZE);
-             }
-             else
-             {
-                 status = SD_ReadMultiBlocks((uint8_t*)buffer, pos*SECTOR_SIZE, SECTOR_SIZE, size);
-             }
-			 status = SD_WaitReadOperation();
-        	 while(SD_GetStatus() != SD_TRANSFER_OK);
-			 /*rt_kprintf("===DUMP SECTOR %d===\n",pos);
-			 {
-				 int i, j;
-				 char* tmp = (char*)buffer;
-				 for(i =0; i < 32;i++)
-				 {
-					 rt_kprintf("%2d: ",i);
-					 for(j= 0; j < 16;j++)
-						 rt_kprintf("%02X ",tmp[i*16+j]);
-					 rt_kprintf("\n");
-				 }
-			 } */
-        // }
+            status = SD_WaitReadOperation();
+            while(SD_GetStatus() != SD_TRANSFER_OK);
 
-//        if (status == SD_OK) break;
+            memcpy(copy_buffer, dma_buffer, SECTOR_SIZE);
+            sector_adr += SECTOR_SIZE;
+            copy_buffer += SECTOR_SIZE;
+        }
+    }
+    else
+    {
+        if (size == 1)
+        {
+            status = SD_ReadBlock((uint8_t*)buffer,
+                                  pos*SECTOR_SIZE,
+                                  SECTOR_SIZE);
+        }
+        else
+        {
+            status = SD_ReadMultiBlocks((uint8_t*)buffer,
+                                        pos*SECTOR_SIZE,
+                                        SECTOR_SIZE,
+                                        size);
+        }
+        status = SD_WaitReadOperation();
+        while(SD_GetStatus() != SD_TRANSFER_OK);
+    }
 
-//        retry --;
-//    }
+
 	rt_sem_release(&sd_lock);
 	if (status == SD_OK) return size;
 
@@ -3033,40 +3025,43 @@ static rt_size_t rt_sdcard_write (rt_device_t dev, rt_off_t pos, const void* buf
 	//rt_kprintf("sd: write 0x%X, sector 0x%X, 0x%X\n", (uint32_t)buffer , pos, size);
 	rt_sem_take(&sd_lock, RT_WAITING_FOREVER);
 
-	// /* read all sectors */
-	// if (((rt_uint32_t)buffer % 4 != 0) ||
-        // ((rt_uint32_t)buffer > 0x20080000))
-	// {
-	    // rt_uint32_t index;
+    if(((uint32_t)buffer & 0x03) != 0)
+    {
+        /* non-aligned. */
+        uint32_t i;
+        rt_size_t sector_adr;
+        uint8_t* copy_buffer;
 
-        // /* which is not alignment with 4 or not chip SRAM */
-        // for (index = 0; index < size; index ++)
-        // {
-            // /* copy to the buffer */
-            // rt_memcpy(_sdcard_buffer, ((rt_uint8_t*)buffer + index * SECTOR_SIZE), SECTOR_SIZE);
+        sector_adr = pos*SECTOR_SIZE;
+        copy_buffer = (uint8_t*)buffer;
 
-            // status = SD_WriteBlock((part.offset + index + pos) * factor,
-                // (uint8_t*)_sdcard_buffer, SECTOR_SIZE);
+        for(i=0; i<size; i++)
+        {
+            memcpy(dma_buffer, copy_buffer, SECTOR_SIZE);
+            status = SD_WriteBlock((uint8_t*)dma_buffer,
+                                  sector_adr,
+                                  SECTOR_SIZE);
 
-			// status = SD_WaitWriteOperation();
-        	// while(SD_GetStatus() != SD_TRANSFER_OK);
+            sector_adr += SECTOR_SIZE;
+            copy_buffer += SECTOR_SIZE;
 
-            // if (status != SD_OK) break;
-        // }
-	// }
-	// else
-	// {
-         if (size == 1)
-         {
-             status = SD_WriteBlock((uint8_t*)buffer, pos*SECTOR_SIZE, SECTOR_SIZE);
-         }
-         else
-         {
-             status = SD_WriteMultiBlocks((uint8_t*)buffer, pos*SECTOR_SIZE, SECTOR_SIZE, size);
-         }
-
-		 status = SD_WaitWriteOperation();
-         while(SD_GetStatus() != SD_TRANSFER_OK);
+            status = SD_WaitWriteOperation();
+            while(SD_GetStatus() != SD_TRANSFER_OK);
+        }
+    }
+    else
+    {
+        if (size == 1)
+        {
+            status = SD_WriteBlock((uint8_t*)buffer, pos*SECTOR_SIZE, SECTOR_SIZE);
+        }
+        else
+        {
+            status = SD_WriteMultiBlocks((uint8_t*)buffer, pos*SECTOR_SIZE, SECTOR_SIZE, size);
+        }
+        status = SD_WaitWriteOperation();
+        while(SD_GetStatus() != SD_TRANSFER_OK);
+    }
 	// }
 	rt_sem_release(&sd_lock);
 
@@ -3198,5 +3193,5 @@ void SDIO_IRQHandler(void)
 
 void SD_SDIO_DMA_IRQHANDLER(void)
 {
-  SD_ProcessDMAIRQ();  
-}     
+  SD_ProcessDMAIRQ();
+}
