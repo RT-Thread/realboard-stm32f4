@@ -29,32 +29,17 @@
 
 void rt_init_thread_entry(void* parameter)
 {
+#ifdef RT_USING_LWIP
+	/* initialize eth interface */
+	rt_hw_stm32_eth_init();
+#endif
+
 #ifdef RT_USING_COMPONENTS_INIT
     /* initialization RT-Thread Components */
     rt_components_init();
 #endif
 
     rt_platform_init();
-
-    /* LwIP Initialization */
-#ifdef RT_USING_LWIP
-    {
-        extern void lwip_sys_init(void);
-
-        /* register ethernetif device */
-        eth_system_device_init();
-
-        /* initialize eth interface */
-        rt_hw_stm32_eth_init();
-
-        /* re-init device driver */
-        rt_device_init_all();
-
-        /* init lwip system */
-        lwip_sys_init();
-        rt_kprintf("TCP/IP initialized!\n");
-    }
-#endif
 
     /* do some thing here. */
 }
