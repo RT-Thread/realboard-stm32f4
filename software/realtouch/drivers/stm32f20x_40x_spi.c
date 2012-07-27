@@ -10,6 +10,7 @@
  * Change Logs:
  * Date           Author       Notes
  * 20012-01-01    aozima       first implementation.
+ * 20012-07-27    aozima       fixed variable uninitialized.
  */
 
 #include "stm32f20x_40x_spi.h"
@@ -119,6 +120,8 @@ static rt_err_t configure(struct rt_spi_device* device,
 {
     struct stm32_spi_bus * stm32_spi_bus = (struct stm32_spi_bus *)device->bus;
     SPI_InitTypeDef SPI_InitStructure;
+
+    SPI_StructInit(&SPI_InitStructure);
 
     /* data_width */
     if(configuration->data_width <= 8)
