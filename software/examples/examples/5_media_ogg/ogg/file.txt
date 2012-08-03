@@ -1,0 +1,25 @@
+卷 本地磁盘 的文件夹 PATH 列表
+卷序列号为 00000200 0E10:A060
+F:.
+    bitwise.c
+    CHANGELOG
+    codebook.c
+    configure.in
+    COPYING
+    dsp.c
+    file.txt
+    floor0.c
+    floor1.c
+    floor_lookup.c
+    framing.c
+    info.c
+    ivorbisfile_example.c
+    Makefile.am
+    mapping0.c
+    mdct.c
+    ogg_misc.c
+    README
+    res012.c
+    SConscript
+    TODO
+    vorbisfile.c

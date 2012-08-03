@@ -1,0 +1,28 @@
+Import('RTT_ROOT')
+Import('rtconfig')
+from building import *
+
+cwd     = os.path.join(str(Dir('#')), 'ogg')
+
+src = Split("""
+bitwise.c
+codebook.c
+dsp.c
+floor0.c
+floor1.c
+floor_lookup.c
+framing.c
+info.c
+ivorbisfile_example.c
+mapping0.c
+mdct.c
+ogg_misc.c
+res012.c
+vorbisfile.c
+""")
+
+CPPPATH = [cwd, str(Dir('#'))]
+
+group = DefineGroup('ogg', src, depend = [''], CPPPATH = CPPPATH)
+
+Return('group')
