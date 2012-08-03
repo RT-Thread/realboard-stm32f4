@@ -1,0 +1,29 @@
+Import('RTT_ROOT')
+Import('rtconfig')
+from building import *
+
+cwd = os.path.join(str(Dir('#')), 'mp3')
+CPPPATH = [cwd, str(Dir('#')), cwd + '/pub', cwd + '/real']
+
+src = Split("""
+mp3dec.c
+mp3tabs.c
+real/bitstream.c
+real/buffers.c
+real/dct32.c
+real/dequant.c
+real/dqchan.c
+real/huffman.c
+real/hufftabs.c
+real/imdct.c
+real/scalfact.c
+real/stproc.c
+real/subband.c
+real/trigtabs.c
+real/arm/asmpoly_thumb2.s
+real/arm/asmmisc.s
+""")
+
+group = DefineGroup('mp3', src, depend = [''], CPPPATH = CPPPATH)
+
+Return('group')
