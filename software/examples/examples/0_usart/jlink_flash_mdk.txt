@@ -1,0 +1,8 @@
+  si 1
+  h
+  speed 4800
+  exec device = STM32F103VC
+  loadbin obj\rtthread.bin 0x8000000
+  r
+  g
+  qc
