@@ -1,0 +1,25 @@
+Import('RTT_ROOT')
+Import('rtconfig')
+from building import *
+
+cwd     = os.path.join(str(Dir('#')), 'ape')
+
+src = Split("""
+decoder.c
+demac.c
+entropy.c
+filter_1280_15.c
+filter_16_11.c
+filter_256_13.c
+filter_32_10.c
+filter_64_11.c
+parser.c
+predictor-arm.S
+predictor.c
+""")
+
+CPPPATH = [cwd, str(Dir('#'))]
+
+group = DefineGroup('ape', src, depend = [''], CPPPATH = CPPPATH)
+
+Return('group')

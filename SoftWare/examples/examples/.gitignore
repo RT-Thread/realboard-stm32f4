@@ -1,9 +1,0 @@
-*/build
-*.dep
-*.bin
-*.map
-*.axf
-
-project.uvproj
-project.uvopt
-project.uvgui.*
