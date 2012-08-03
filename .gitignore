@@ -12,5 +12,5 @@
 *.gdbinit
 .sconsign.dblite
 JLinkLog.txt
-*.txt
+jlink_flash.txt
 build/
