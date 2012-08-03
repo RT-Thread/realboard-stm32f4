@@ -37,10 +37,16 @@ if GetDepend('RT_USING_RTGUI') == True:
 	src += ['key.c']
 	src += ['touch.c']
 
+# add USB driver.
 if GetDepend('RT_USING_USB_HOST') == True:
 	src+= ['stm32f4xx_hcd.c']
 	src+= ['usb_bsp.c']
 
+# add RTC driver.
+if GetDepend('RT_USING_RTC') == True:
+	src+= ['stm32f4_rtc.c']
+
+	
 CPPPATH = [cwd]
 
 group = DefineGroup('Drivers', src, depend = [''], CPPPATH = CPPPATH)

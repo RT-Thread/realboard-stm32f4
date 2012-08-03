@@ -1,8 +1,13 @@
 #include <rtthread.h>
 #include "board.h"
 
+#ifdef RT_USING_RTC
+#include "stm32f4_rtc.h"
+#endif /* RT_USING_RTC */
+
 #ifdef RT_USING_SPI
 #include "stm32f20x_40x_spi.h"
+#include "spi_flash_w25qxx.h"
 
 /*
 SPI2_MOSI: PB15
@@ -128,6 +133,11 @@ void rt_platform_init(void)
 #endif /* RT_USING_RTGUI */
 #endif /* RT_USING_SPI */
 
+#ifdef RT_USING_USB_HOST
+    /* register stm32 usb host controller driver */
+    rt_hw_susb_init();
+#endif
+
 #ifdef RT_USING_DFS
     /* initilize sd card */
     rt_hw_sdcard_init();
@@ -140,5 +150,12 @@ void rt_platform_init(void)
     /* initilize key module */
     rt_hw_key_init();
 #endif /* RT_USING_RTGUI */
+
+#ifdef RT_USING_RTC
+    rt_hw_rtc_init();
+#endif /* RT_USING_RTC */
+
+    rt_thread_delay(50);
+    rt_device_init_all();
 }
 

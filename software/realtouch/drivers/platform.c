@@ -1,8 +1,13 @@
 #include <rtthread.h>
 #include "board.h"
 
+#ifdef RT_USING_RTC
+#include "stm32f4_rtc.h"
+#endif /* RT_USING_RTC */
+
 #ifdef RT_USING_SPI
 #include "stm32f20x_40x_spi.h"
+#include "spi_flash_w25qxx.h"
 
 /*
 SPI2_MOSI: PB15
@@ -145,6 +150,10 @@ void rt_platform_init(void)
     /* initilize key module */
     rt_hw_key_init();
 #endif /* RT_USING_RTGUI */
+
+#ifdef RT_USING_RTC
+    rt_hw_rtc_init();
+#endif /* RT_USING_RTC */
 
     rt_thread_delay(50);
     rt_device_init_all();
