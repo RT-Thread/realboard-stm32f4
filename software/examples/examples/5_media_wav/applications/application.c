@@ -32,38 +32,34 @@
 #include <dfs_fs.h>
 #endif
 
-// #include <drivers/i2c.h>
-// extern struct rt_i2c_bus_device stm32_i2c1;
-
 void rt_init_thread_entry(void* parameter)
 {
+	rt_platform_init();
+
 #ifdef RT_USING_I2C
     rt_i2c_core_init();
     rt_hw_i2c_init();
 #endif
 
+#ifdef RT_USING_COMPONENTS_INIT
+	/* initialization RT-Thread Components */
+	rt_components_init();
+#endif
+
     /* Filesystem Initialization */
 #ifdef RT_USING_DFS
-    rt_hw_sdcard_init();
-
-    {
-        /* init the device filesystem */
-        dfs_init();
-
 #ifdef RT_USING_DFS_ELMFAT
-        /* init the elm chan FatFs filesystam*/
-        elm_init();
-
         /* mount sd card fat partition 1 as root directory */
         if (dfs_mount("sd0", "/", "elm", 0, 0) == 0)
         {
             rt_kprintf("File System initialized!\n");
         }
         else
+        {
             rt_kprintf("File System initialzation failed!\n");
-#endif
-    }
-#endif
+        }
+#endif /* RT_USING_DFS_ELMFAT */
+#endif /* RT_USING_DFS */
 
     /* do some thing here. */
     codec_hw_init("i2c1");
