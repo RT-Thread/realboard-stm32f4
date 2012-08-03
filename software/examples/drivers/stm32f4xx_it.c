@@ -198,7 +198,14 @@ EXTI6: KEY_RIGHT PF9
 */
 extern void key_handler(void);
 
+#if defined(__CC_ARM)
 __weak void key_handler(void)
+#elif defined(__GNUC__)
+void  key_handler(void) __attribute__ ((weak));
+void key_handler(void)
+#else
+#error "not supported yet!"
+#endif
 {
     /* do nothing. */
 }

@@ -24,7 +24,7 @@
 struct stm32_uart
 {
 	USART_TypeDef* uart_device;
-	IRQn_Type irq; 
+	IRQn_Type irq;
 };
 
 static rt_err_t stm32_configure(struct rt_serial_device *serial, struct serial_configure *cfg)
@@ -331,6 +331,7 @@ static void NVIC_Configuration(struct stm32_uart* uart)
 
 	/* Enable the USART1 Interrupt */
 	NVIC_InitStructure.NVIC_IRQChannel = uart->irq;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
