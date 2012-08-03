@@ -1,5 +1,5 @@
-#ifndef __CODEC_H__
-#define __CODEC_H__
+#ifndef __CODEC_WM8978_I2C_H__
+#define __CODEC_WM8978_I2C_H__
 
 #include <stdint.h>
 
