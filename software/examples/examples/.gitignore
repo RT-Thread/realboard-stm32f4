@@ -1,0 +1,7 @@
+*/build
+*.dep
+*.bin
+
+project.uvproj
+project.uvopt
+project.uvgui.*
