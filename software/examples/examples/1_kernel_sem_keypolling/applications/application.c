@@ -32,7 +32,7 @@
 
 #define KEY_PORT  GPIOF
 #define KEY_PIN   (GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 |\
-	           	  GPIO_Pin_10| GPIO_Pin_11)
+                     GPIO_Pin_10| GPIO_Pin_11)
 #define KEY_CLCOK RCC_AHB1Periph_GPIOF
 
 void rt_init_thread_entry(void* parameter)
@@ -65,9 +65,9 @@ static void rt_thread_entry1(void* parameter)
     
     while (1)
     {
-		key = GPIO_ReadInputData(KEY_PORT);
+        key = GPIO_ReadInputData(KEY_PORT);
 
-		if (key & KEY_PIN)
+        if (key & KEY_PIN)
         {
             temp = key;
             rt_thread_delay(RT_TICK_PER_SECOND / 50);
@@ -88,11 +88,11 @@ static void rt_thread_entry2(void* parameter)
 {
     while (1)
     {
-		rt_sem_take(&sem, RT_WAITING_FOREVER);
+        rt_sem_take(&sem, RT_WAITING_FOREVER);
 
-		if (key & KEY_PIN)
+        if (key & KEY_PIN)
         {
-			rt_kprintf("some keys has been pressed : %x\n", key);
+            rt_kprintf("some keys has been pressed : %x\n", key);
         }
     }
 }
@@ -102,12 +102,12 @@ int rt_application_init()
     rt_thread_t init_thread;
     rt_err_t result;
     
-	result = rt_sem_init(&sem, "sem", 0, RT_IPC_FLAG_FIFO);
-	if (result != RT_EOK)
-	{
+    result = rt_sem_init(&sem, "sem", 0, RT_IPC_FLAG_FIFO);
+    if (result != RT_EOK)
+    {
         rt_kprintf("error, init sem failed!\n");
-		return 0;
-	}
+        return 0;
+    }
     
 #if (RT_THREAD_PRIORITY_MAX == 32)
     init_thread = rt_thread_create("init",
