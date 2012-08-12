@@ -1,0 +1,26 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+MAXSEM	application.c	20;"	d	file:
+STM32_SRAM_BEGIN	startup.c	35;"	d	file:
+STM32_SRAM_BEGIN	startup.c	38;"	d	file:
+STM32_SRAM_BEGIN	startup.c	41;"	d	file:
+THREAD_STACK_SIZE	application.c	18;"	d	file:
+array	application.c	/^rt_uint32_t array[MAXSEM];$/;"	v
+assert_failed	startup.c	/^void assert_failed(u8* file, u32 line)$/;"	f
+consumer_thread_entry	application.c	/^void consumer_thread_entry(void* parameter)$/;"	f
+consumer_tid	application.c	/^static rt_thread_t consumer_tid = RT_NULL;$/;"	v	file:
+get	application.c	/^static rt_uint32_t set, get;$/;"	v	file:
+main	startup.c	/^int main(void)$/;"	f
+producer_thread_entry	application.c	/^void producer_thread_entry(void* parameter)$/;"	f
+producer_tid	application.c	/^static rt_thread_t producer_tid = RT_NULL;$/;"	v	file:
+rt_application_init	application.c	/^int rt_application_init()$/;"	f
+rt_init_thread_entry	application.c	/^void rt_init_thread_entry(void* parameter)$/;"	f
+rtthread_startup	startup.c	/^void rtthread_startup(void)$/;"	f
+sem_empty	application.c	/^struct rt_semaphore sem_empty, sem_full;$/;"	v	typeref:struct:rt_semaphore
+sem_full	application.c	/^struct rt_semaphore sem_empty, sem_full;$/;"	v	typeref:struct:
+sem_lock	application.c	/^struct rt_semaphore sem_lock;$/;"	v	typeref:struct:rt_semaphore
+set	application.c	/^static rt_uint32_t set, get;$/;"	v	file:
