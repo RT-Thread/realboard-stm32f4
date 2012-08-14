@@ -26,7 +26,7 @@ Export('rtconfig')
 objs = PrepareBuilding(env, RTT_ROOT, has_libcpu=False)
 
 # build program 
-env.Program(TARGET, objs)
+program = env.Program(TARGET, objs)
 
 # end building 
-EndBuilding(TARGET)
+EndBuilding(TARGET,program)
