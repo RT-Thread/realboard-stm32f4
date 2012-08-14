@@ -2,8 +2,6 @@
 #ifndef __RTTHREAD_CFG_H__
 #define __RTTHREAD_CFG_H__
 
-//#define RT_USING_NEWLIB
-
 /* RT_NAME_MAX*/
 #define RT_NAME_MAX	   8
 
@@ -71,10 +69,10 @@
 /* console name */
 #define RT_CONSOLE_DEVICE_NAME	"uart3"
 
-#define RT_USING_COMPONENTS_INIT
+//#define RT_USING_COMPONENTS_INIT
 
 /* SECTION: finsh, a C-Express shell */
-#define RT_USING_FINSH
+//#define RT_USING_FINSH
 /* Using symbol table */
 #define FINSH_USING_SYMTAB
 #define FINSH_USING_DESCRIPTION
