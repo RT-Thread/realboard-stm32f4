@@ -1,16 +1,16 @@
-#include <rtthread.h>
+ï»¿#include <rtthread.h>
 #include <finsh.h>
 #include <dfs_posix.h>
 #include "board.h"
 
 #define CODEC_CMD_SAMPLERATE	2
 
-//¶¨Òåmempool¿é´óĞ¡.
+//å®šä¹‰mempoolå—å¤§å°.
 #define  mempll_block_size      16384
-//ÎÒÃÇ¹²ÉêÇëÁ½¿émempool,²¢Áô³ö4×Ö½Ú×öÎª¿ØÖÆ¿é.
+//æˆ‘ä»¬å…±ç”³è¯·ä¸¤å—mempool,å¹¶ç•™å‡º4å­—èŠ‚åšä¸ºæ§åˆ¶å—.
 static rt_uint8_t mempool[ (mempll_block_size+4) *2];
 static struct rt_mempool _mp;
-//ÄÚ´æ³Ø³õÊ¼»¯±êÊ¶
+//å†…å­˜æ± åˆå§‹åŒ–æ ‡è¯†
 static rt_bool_t is_inited = RT_FALSE;
 
 static rt_err_t wav_tx_done(rt_device_t dev, void *buffer)
@@ -50,7 +50,7 @@ void wav(char* filename)
     int fd;
     struct FMT_BLOCK_DEF   fmt_block;
 
-    //¼ì²émempoolÊÇ·ñ±»³õÊ¼»¯,·ñÔò½øĞĞ³õÊ¼»¯.
+    //æ£€æŸ¥mempoolæ˜¯å¦è¢«åˆå§‹åŒ–,å¦åˆ™è¿›è¡Œåˆå§‹åŒ–.
     if (is_inited == RT_FALSE)
     {
         rt_mp_init(&_mp, "wav_buf", &mempool[0], sizeof(mempool), mempll_block_size);
@@ -58,7 +58,7 @@ void wav(char* filename)
     }
 
 
-    //´ò¿ªÎÄ¼ş
+    //æ‰“å¼€æ–‡ä»¶
     fd = open(filename, O_RDONLY, 0);
     if (fd >= 0)
     {
@@ -126,7 +126,7 @@ void wav(char* filename)
                 return;
             }
 
-            /* print paly time */
+            /* print play time */
             {
                 uint32_t hour, min, sec;
 
@@ -152,7 +152,7 @@ void wav(char* filename)
                     rt_kprintf("Channels:%d ", fmt_block.wav_format.Channels);
                     rt_kprintf("SamplesPerSec:%d ", fmt_block.wav_format.SamplesPerSec);
                     rt_kprintf("BitsPerSample:%d\r\n", fmt_block.wav_format.BitsPerSample);
-                    rt_kprintf("paly time: %02d:%02d:%02d\r\n", hour, min, sec);
+                    rt_kprintf("play time: %02d:%02d:%02d\r\n", hour, min, sec);
                 }
             }
         } /* get data size */
@@ -177,22 +177,22 @@ void wav(char* filename)
             }
         }
 
-        //ÉèÖÃ·¢ËÍÍê³É»Øµ÷º¯Êı,ÈÃDACÊı¾İ·¢ÍêÊ±Ö´ĞĞwav_tx_doneº¯ÊıÊÍ·Å¿Õ¼ä.
+        //è®¾ç½®å‘é€å®Œæˆå›è°ƒå‡½æ•°,è®©DACæ•°æ®å‘å®Œæ—¶æ‰§è¡Œwav_tx_doneå‡½æ•°é‡Šæ”¾ç©ºé—´.
         rt_device_set_tx_complete(device, wav_tx_done);
         rt_device_open(device, RT_DEVICE_OFLAG_WRONLY);
 
         do
         {
-            //ÏòmempollÉêÇë¿Õ¼ä,Èç¹ûÉêÇë²»³É¹¦ÔòÒ»Ö±ÔÚ´ËµÈ´ı.
+            //å‘mempollç”³è¯·ç©ºé—´,å¦‚æœç”³è¯·ä¸æˆåŠŸåˆ™ä¸€ç›´åœ¨æ­¤ç­‰å¾….
             buf = rt_mp_alloc(&_mp, RT_WAITING_FOREVER);
-            //´ÓÎÄ¼ş¶ÁÈ¡Êı¾İ
+            //ä»æ–‡ä»¶è¯»å–æ•°æ®
             len = read(fd, (char*)buf, mempll_block_size);
-            //¶ÁÈ¡³É¹¦¾Í°ÑÊı¾İĞ´ÈëÉè±¸
+            //è¯»å–æˆåŠŸå°±æŠŠæ•°æ®å†™å…¥è®¾å¤‡
             if (len > 0)
             {
                 rt_device_write(device, 0, buf, len);
             }
-            //·ñÔòÊÍ·Å¸Õ²ÅÉêÇëµÄ¿Õ¼ä,Õı³£Çé¿öÏÂÊÇ¶Áµ½ÎÄ¼şÎ²Ê±.
+            //å¦åˆ™é‡Šæ”¾åˆšæ‰ç”³è¯·çš„ç©ºé—´,æ­£å¸¸æƒ…å†µä¸‹æ˜¯è¯»åˆ°æ–‡ä»¶å°¾æ—¶.
             else
             {
                 rt_mp_free(buf);
