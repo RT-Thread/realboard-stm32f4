@@ -4,12 +4,12 @@
 /********* control ***********/
 #include "board.h"
 
-//输出重定向.当不进行重定向时.
-#define printf               rt_kprintf     //使用rt_kprintf来输出
-//#define printf(...)                       //无输出
+/* redirect. */
+#define printf               rt_kprintf     /* use rt_kprintf. */
+//#define printf(...)                       /* none. */
 
 /* LCD is connected to the FSMC_Bank1_NOR/SRAM2 and NE2 is used as ship select signal */
-/* RS <==> A2 */
+/* RS <==> A19 */
 #define LCD_DATA              (*((volatile unsigned short *) 0x6C000000)) /* RS = 0 */
 #define LCD_CMD               (*((volatile unsigned short *) (0x6C000000 | 0x02 << 19))) /* RS = 1 */
 
@@ -19,9 +19,10 @@
 
 static struct rt_device _lcd_device;
 
+/* LCD_busy --> PD6 --> FSMC_NWAIT */
 rt_inline void _wait_bus_ready(void)
 {
-    while(!(GPIOE->IDR & GPIO_Pin_4)); // 0-busy 1-ready
+    while(!(GPIOD->IDR & GPIO_Pin_6)); // 0-busy 1-ready
 }
 
 rt_inline void _wait_lcd_ready(void)
@@ -35,6 +36,35 @@ rt_inline void _wait_lcd_ready(void)
     while(status & (1<<7)); // [7] 0-ready 1- busy
 }
 
+static void _set_gpio_od(void)
+{
+    GPIO_InitTypeDef GPIO_InitStructure;
+
+    /* PG12 NE4 */
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
+
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
+    GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_UP;
+
+    GPIO_Init(GPIOG, &GPIO_InitStructure);
+}
+
+static void _set_gpio_pp(void)
+{
+    GPIO_InitTypeDef GPIO_InitStructure;
+
+    /* PG12 NE4 */
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
+
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_NOPULL;
+
+    GPIO_Init(GPIOG, &GPIO_InitStructure);
+}
 
 static void LCD_FSMCConfig(void)
 {
@@ -47,9 +77,9 @@ static void LCD_FSMCConfig(void)
     FSMC_NORSRAMStructInit(&FSMC_NORSRAMInitStructure);
 
     /*--------------------- read timings configuration ---------------------*/
-    Timing_read.FSMC_AddressSetupTime = 2;  /* [3:0] F2/F4 1~15 HCLK */
+    Timing_read.FSMC_AddressSetupTime = 3;  /* [3:0] F2/F4 1~15 HCLK */
     Timing_read.FSMC_AddressHoldTime = 0;   /* [7:4] keep 0x00 in SRAM mode */
-    Timing_read.FSMC_DataSetupTime = 3;     /* [15:8] F2/F4 0~255 HCLK */
+    Timing_read.FSMC_DataSetupTime = 4;     /* [15:8] F2/F4 0~255 HCLK */
     /* [19:16] Time between NEx high to NEx low (BUSTURN HCLK) */
     Timing_read.FSMC_BusTurnAroundDuration = 1;
     Timing_read.FSMC_CLKDivision = 0; /* [24:20] keep 0x00 in SRAM mode  */
@@ -64,7 +94,7 @@ static void LCD_FSMCConfig(void)
     Timing_write.FSMC_BusTurnAroundDuration = 1;
     Timing_write.FSMC_CLKDivision = 0; /* [24:20] keep 0x00 in SRAM mode  */
     Timing_write.FSMC_DataLatency = 0; /* [27:25] keep 0x00 in SRAM mode  */
-    Timing_write.FSMC_AccessMode = FSMC_AccessMode_A;   /* FSMC 访问模式 */
+    Timing_write.FSMC_AccessMode = FSMC_AccessMode_A;
 
 
     /* Color LCD configuration ------------------------------------
@@ -80,12 +110,12 @@ static void LCD_FSMCConfig(void)
     FSMC_NORSRAMInitStructure.FSMC_MemoryType = FSMC_MemoryType_SRAM;
     FSMC_NORSRAMInitStructure.FSMC_MemoryDataWidth = FSMC_MemoryDataWidth_16b;
     FSMC_NORSRAMInitStructure.FSMC_BurstAccessMode = FSMC_BurstAccessMode_Disable;
-    FSMC_NORSRAMInitStructure.FSMC_AsynchronousWait = FSMC_AsynchronousWait_Disable; // bit 15  关了就不起作用了
-    FSMC_NORSRAMInitStructure.FSMC_WaitSignalPolarity = FSMC_WaitSignalPolarity_Low; // 极性有效 0-低 1-高
+    FSMC_NORSRAMInitStructure.FSMC_AsynchronousWait = FSMC_AsynchronousWait_Disable;
+    FSMC_NORSRAMInitStructure.FSMC_WaitSignalPolarity = FSMC_WaitSignalPolarity_Low;
     FSMC_NORSRAMInitStructure.FSMC_WrapMode = FSMC_WrapMode_Disable;
-    FSMC_NORSRAMInitStructure.FSMC_WaitSignalActive = FSMC_WaitSignalActive_BeforeWaitState;//等待时序 0-NWAIT信号在等待状态前的一个数据周期有效 1-NWAIT信号在等待状态期间有效(不适用于Cellular RAM)
+    FSMC_NORSRAMInitStructure.FSMC_WaitSignalActive = FSMC_WaitSignalActive_BeforeWaitState;
     FSMC_NORSRAMInitStructure.FSMC_WriteOperation = FSMC_WriteOperation_Enable;
-    FSMC_NORSRAMInitStructure.FSMC_WaitSignal = FSMC_WaitSignal_Disable;// WAIT信号 使能, 关了也有作用
+    FSMC_NORSRAMInitStructure.FSMC_WaitSignal = FSMC_WaitSignal_Disable;
     FSMC_NORSRAMInitStructure.FSMC_ExtendedMode = FSMC_ExtendedMode_Enable;
     FSMC_NORSRAMInitStructure.FSMC_WriteBurst = FSMC_WriteBurst_Disable;
 
@@ -174,7 +204,7 @@ static void LCD_Initial(void)
 
 //--------------------------------------------//
 //REG[46h]~REG[49h]
-static void XY_Coordinate(uint32_t X,uint32_t Y)
+static void _set_write_cursor(uint32_t X, uint32_t Y)
 {
     LCD_CmdWrite(CURH1);
     LCD_DataWrite(X>>8);
@@ -184,6 +214,19 @@ static void XY_Coordinate(uint32_t X,uint32_t Y)
     LCD_CmdWrite(CURV1);
     LCD_DataWrite(Y>>8);
     LCD_CmdWrite(CURV0);
+    LCD_DataWrite(Y);
+}
+
+static void _set_read_cursor(uint32_t X, uint32_t Y)
+{
+    LCD_CmdWrite(RCURH1);
+    LCD_DataWrite(X>>8);
+    LCD_CmdWrite(RCURH0);
+    LCD_DataWrite(X);
+
+    LCD_CmdWrite(RCURV1);
+    LCD_DataWrite(Y>>8);
+    LCD_CmdWrite(RCURV0);
     LCD_DataWrite(Y);
 }
 
@@ -261,16 +304,17 @@ static rt_err_t lcd_control(rt_device_t dev, rt_uint8_t cmd, void *args)
 
 static void ra8875_lcd_set_pixel(const char* pixel, int x, int y)
 {
-    XY_Coordinate(x, y);
-    LCD_CmdWrite(0x02);//set CMD02 to  prepare data write
+    _set_write_cursor(x, y);
+    LCD_CmdWrite(MRWC);//set CMD02 to  prepare data write
     LCD_DataWrite(*(uint16_t *)pixel);  //write red data
 }
 
 static void ra8875_lcd_get_pixel(char* pixel, int x, int y)
 {
-    XY_Coordinate(x, y);
-    LCD_CmdWrite(0x02);//set CMD02 to  prepare data write
-//    LCD_DataWrite(*(uint16_t *)pixel);  //write red data
+    _set_read_cursor(x, y);
+    LCD_CmdWrite(MRWC);//set CMD02 to  prepare data write
+
+    *(rt_uint16_t*)pixel = LCD_DATA; /* dummy read */
     *(rt_uint16_t*)pixel = LCD_DATA;
 }
 
@@ -279,9 +323,9 @@ static void ra8875_lcd_draw_hline(const char* pixel, int x1, int x2, int y)
     LCD_CmdWrite(0x40);
     LCD_DataWrite(0x00);
 
-    XY_Coordinate(x1,y);
+    _set_write_cursor(x1,y);
 
-    LCD_CmdWrite(0x02);//set CMD02 to  prepare data write
+    LCD_CmdWrite(MRWC);//set CMD02 to  prepare data write
 
     for(; x1<x2; x1++)
     {
@@ -294,9 +338,9 @@ static void ra8875_lcd_draw_vline(const char* pixel, int x, int y1, int y2)
     LCD_CmdWrite(0x40);
     LCD_DataWrite(0x00 | 1<<3);
 
-    XY_Coordinate(x,y1);
+    _set_write_cursor(x,y1);
 
-    LCD_CmdWrite(0x02);//set CMD02 to  prepare data write
+    LCD_CmdWrite(MRWC);//set CMD02 to  prepare data write
 
     for(; y1<y2; y1++)
     {
@@ -311,11 +355,11 @@ static void ra8875_lcd_blit_line(const char* pixels, int x, int y, rt_size_t siz
     LCD_CmdWrite(0x40);
     LCD_DataWrite(0x00);
 
-    XY_Coordinate(x,y);
+    _set_write_cursor(x,y);
 
     ptr = (rt_uint16_t*)pixels;
 
-    LCD_CmdWrite(0x02);//set CMD02 to  prepare data write
+    LCD_CmdWrite(MRWC);//set CMD02 to  prepare data write
 
     while(size--)
     {
@@ -332,29 +376,15 @@ static struct rt_device_graphic_ops ra8875_ops =
     ra8875_lcd_blit_line
 };
 
-/*RA8875 reset Pin PE2*/
-/*RA8875 Busy PE4*/
+/*RA8875 reset Pin PC6*/
 /*RA8875 INT PE5*/
 static void _lcd_gpio_init(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
 
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE | RCC_AHB1Periph_GPIOC, ENABLE);
-    /* Enable GPIOs clocks */
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_GPIOE, ENABLE);
     /* Enable SYSCFG clock */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
-
-    /* Configure MCO (PA8) */
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL ;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-    /* Output HSE clock (25MHz) on MCO pin (PA8) to clock the PHY */
-    RCC_MCO1Config(RCC_MCO1Source_HSE, RCC_MCO1Div_1);
 
     /*RA8875 reset Pin PC6*/
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;
@@ -363,14 +393,6 @@ static void _lcd_gpio_init(void)
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
-
-    /*RA8875 Busy PE4*/
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-    GPIO_Init(GPIOE, &GPIO_InitStructure);
 
     /*RA8875 INT PE5*/
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
@@ -383,32 +405,41 @@ static void _lcd_gpio_init(void)
 
 void ra8875_init(void)
 {
-    uint32_t i;
-
     _lcd_gpio_init();
 
     GPIO_ResetBits(GPIOC, GPIO_Pin_6);  /* RESET LCD */
     LCD_FSMCConfig();
     rt_thread_delay(20);
-    GPIO_SetBits(GPIOC,GPIO_Pin_6);  /* release LCD */
+    GPIO_SetBits(GPIOC, GPIO_Pin_6);  /* release LCD */
     rt_thread_delay(20);
 
-//    /* register rw test */
-//    {
-//        uint8_t tmp;
-//
-//        LCD_CmdWrite(0x04);
-//        LCD_DataWrite(0xFF);
-//        LCD_CmdWrite(0x04);
-//
-//        _wait_bus_ready();
-//        tmp = LCD_DATA;
-//        rt_kprintf("tmp:%02X\r\n", tmp);
-//        if (tmp != 0x83)
-//        {
-//            //error
-//        }
-//    }
+    /* register rw test */
+    {
+        uint8_t tmp1, tmp2;
+
+        LCD_CmdWrite(0x23);
+        LCD_DataWrite(0x55);
+        LCD_CmdWrite(0x23);
+        _wait_bus_ready();
+        tmp1 = LCD_DATA;
+
+        LCD_CmdWrite(0x23);
+        LCD_DataWrite(0xAA);
+        LCD_CmdWrite(0x23);
+        _wait_bus_ready();
+        tmp2 = LCD_DATA;
+
+        if ((tmp1 == 0x55) && (tmp2 == 0xAA))
+        {
+            rt_kprintf("[OK] LCD register rw test pass!\r\n");
+        }
+        else
+        {
+            /* error */
+            rt_kprintf("[ERR] LCD register rw test failed! %02X %02X\r\n",
+                       tmp1, tmp2);
+        }
+    } /* register rw test */
 
     LCD_Initial();
 
@@ -426,16 +457,51 @@ void ra8875_init(void)
     LCD_CmdWrite(0x20);
     LCD_DataWrite(0x08);
 
-    /* clear */
+    /* data bus test. */
     {
-        XY_Coordinate(0,0);	//cursor position
+        uint16_t pixel;
+        uint32_t i;
 
-        LCD_CmdWrite(0x02);//set CMD02 to  prepare data write
+        LCD_CmdWrite(0x40);
+        LCD_DataWrite(0x00);
+
+        _set_write_cursor(0, 0);
+
+        LCD_CmdWrite(MRWC); //set CMD02 to  prepare data write
         for(i=0; i<800*480; i++)
         {
-            LCD_DataWrite(0xF800);  //write red data
+            LCD_DataWrite(i);
         }
-    }
+
+        LCD_CmdWrite(MRCD);
+        LCD_DataWrite(0x00);
+
+        _set_read_cursor(0, 0);
+
+        LCD_CmdWrite(MRWC); /* Memory Read Data. */
+
+        _set_gpio_od();
+
+        _wait_bus_ready();
+        pixel = LCD_DATA; /* dummy read cycle. */
+
+        for(i=0; i<0x10000; i++)
+        {
+            _wait_bus_ready();
+            pixel = LCD_DATA;
+            if(pixel != i)
+            {
+                rt_kprintf("[ERR] GRAM data error! %d\r\n", i);
+                break;
+            }
+        }
+
+        if(i == 0x10000)
+        {
+            rt_kprintf("[OK] GRAM data test pass!\r\n");
+        }
+        _set_gpio_pp();
+    } /* data bus test. */
 
     /* register lcd device */
     _lcd_device.type  = RT_Device_Class_Graphic;
