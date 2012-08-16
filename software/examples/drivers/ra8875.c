@@ -13,8 +13,8 @@
 #define LCD_DATA              (*((volatile unsigned short *) 0x6C000000)) /* RS = 0 */
 #define LCD_CMD               (*((volatile unsigned short *) (0x6C000000 | 0x02 << 19))) /* RS = 1 */
 
-#define LCD_CmdWrite(cmd)     _wait_bus_ready();LCD_CMD = cmd
-#define LCD_DataWrite(data)    _wait_bus_ready();LCD_DATA = data
+#define LCD_CmdWrite(cmd)     LCD_CMD = cmd
+#define LCD_DataWrite(data)   LCD_DATA = data
 #define Delay1ms(tick)        rt_thread_delay(tick)
 
 static struct rt_device _lcd_device;
@@ -34,6 +34,12 @@ rt_inline void _wait_lcd_ready(void)
         status = LCD_CMD;
     }
     while(status & (1<<7)); // [7] 0-ready 1- busy
+}
+
+rt_inline uint16_t LCD_DataRead(void)
+{
+    _wait_bus_ready();
+    return LCD_DATA;
 }
 
 static void _set_gpio_od(void)
@@ -110,7 +116,7 @@ static void LCD_FSMCConfig(void)
     FSMC_NORSRAMInitStructure.FSMC_MemoryType = FSMC_MemoryType_SRAM;
     FSMC_NORSRAMInitStructure.FSMC_MemoryDataWidth = FSMC_MemoryDataWidth_16b;
     FSMC_NORSRAMInitStructure.FSMC_BurstAccessMode = FSMC_BurstAccessMode_Disable;
-    FSMC_NORSRAMInitStructure.FSMC_AsynchronousWait = FSMC_AsynchronousWait_Disable;
+    FSMC_NORSRAMInitStructure.FSMC_AsynchronousWait = FSMC_AsynchronousWait_Enable;
     FSMC_NORSRAMInitStructure.FSMC_WaitSignalPolarity = FSMC_WaitSignalPolarity_Low;
     FSMC_NORSRAMInitStructure.FSMC_WrapMode = FSMC_WrapMode_Disable;
     FSMC_NORSRAMInitStructure.FSMC_WaitSignalActive = FSMC_WaitSignalActive_BeforeWaitState;
@@ -482,13 +488,11 @@ void ra8875_init(void)
 
         _set_gpio_od();
 
-        _wait_bus_ready();
-        pixel = LCD_DATA; /* dummy read cycle. */
+        pixel = LCD_DataRead(); /* dummy read cycle. */
 
         for(i=0; i<0x10000; i++)
         {
-            _wait_bus_ready();
-            pixel = LCD_DATA;
+            pixel = LCD_DataRead();
             if(pixel != i)
             {
                 rt_kprintf("[ERR] GRAM data error! %d\r\n", i);
