@@ -32,8 +32,8 @@ if RTT_RTGUI:
 else:
     objs = PrepareBuilding(env, RTT_ROOT, has_libcpu=False)
 
-# build program 
-env.Program(TARGET, objs)
+# build program
+program = env.Program(TARGET, objs)
 
-# end building 
-EndBuilding(TARGET)
+# end building
+EndBuilding(TARGET, program)
