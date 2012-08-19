@@ -11,13 +11,15 @@ CMSIS/ST/STM32F4xx/Source/Templates/system_stm32f4xx.c
 """)
 
 src += Glob('STM32F4xx_StdPeriph_Driver/src/*.c')
-src += Split("""
-STM32_USB_HOST_Library/Core/src/usbh_hcs.c
-STM32_USB_HOST_Library/Core/src/usbh_ioreq.c
-STM32_USB_OTG_Driver/src/usb_core.c
-STM32_USB_OTG_Driver/src/usb_hcd.c
-STM32_USB_OTG_Driver/src/usb_hcd_int.c
-""")
+
+if GetDepend('RT_USING_USB_HOST') == True:
+     src += Split("""
+          STM32_USB_HOST_Library/Core/src/usbh_hcs.c
+          STM32_USB_HOST_Library/Core/src/usbh_ioreq.c
+          STM32_USB_OTG_Driver/src/usb_core.c
+          STM32_USB_OTG_Driver/src/usb_hcd.c
+          STM32_USB_OTG_Driver/src/usb_hcd_int.c
+          """)
 
 #add for startup script 
 if rtconfig.CROSS_TOOL == 'gcc':
