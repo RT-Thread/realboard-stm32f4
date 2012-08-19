@@ -161,6 +161,8 @@
 //#define RTGUI_IMAGE_PNG
 // <bool name="RTGUI_IMAGE_BMP" description="Using bmp image in RTGUI" default="true" />
 #define RTGUI_IMAGE_BMP
+// <bool name="RTGUI_USING_NOTEBOOK_IMAGE" description="Using notebook image in RTGUI" default="true" />
+#define RTGUI_USING_NOTEBOOK_IMAGE
 // </section>
 
 
