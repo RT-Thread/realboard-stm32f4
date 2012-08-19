@@ -54,6 +54,11 @@ s  A2-A0 MODE SER/DFR PD1-PD0
 #define TOUCH_MSR_X     (START | MEASURE_X | MODE_12BIT | DIFFERENTIAL | POWER_MODE0)
 #define TOUCH_MSR_Y     (START | MEASURE_Y | MODE_12BIT | DIFFERENTIAL | POWER_MODE0)
 
+#define MIN_X_DEFAULT   0x7bd
+#define MAX_X_DEFAULT   0x20
+#define MIN_Y_DEFAULT   0x53
+#define MAX_Y_DEFAULT   0x79b
+
 struct rtgui_touch_device
 {
     struct rt_device parent;
@@ -263,6 +268,9 @@ static rt_err_t rtgui_touch_control (rt_device_t dev, rt_uint8_t cmd, void *args
         touch->min_y = data->min_y;
         touch->max_y = data->max_y;
 
+        rt_kprintf("0x%x, 0x%x, 0x%x, 0x%x\n", data->min_x, data->max_x,
+            data->min_y, data->max_y);
+
 #ifdef SAVE_CALIBRATION
         //save setup
         radio_setup.touch_min_x = touch->min_x;
@@ -289,8 +297,8 @@ static void touch_thread_entry(void *parameter)
         rt_uint32_t y;
     } touch_previous;
 
-	RTGUI_EVENT_MOUSE_BUTTON_INIT(&emouse);
-	emouse.wid = RT_NULL;
+    RTGUI_EVENT_MOUSE_BUTTON_INIT(&emouse);
+    emouse.wid = RT_NULL;
 
     while(1)
     {
@@ -305,26 +313,26 @@ static void touch_thread_entry(void *parameter)
             {
                 if (IS_TOUCH_UP())
                 {
-					/* touch up */
+                    /* touch up */
                     emouse.button = (RTGUI_MOUSE_BUTTON_LEFT |RTGUI_MOUSE_BUTTON_UP);
 
                     /* use old value */
                     emouse.x = touch->x;
                     emouse.y = touch->y;
 
-					if(touch_down == RT_TRUE)
-					{
-	                    if ((touch->calibrating == RT_TRUE) && (touch->calibration_func != RT_NULL))
-	                    {
-	                        /* callback function */
-	                        touch->calibration_func(emouse.x, emouse.y);
-	                    }
-	                    else
-	                    {
-	                        rtgui_server_post_event(&emouse.parent, sizeof(struct rtgui_event_mouse));
-	                    }
-					}
-					rt_kprintf("touch up: (%d, %d)\n", emouse.x, emouse.y);
+                    if(touch_down == RT_TRUE)
+                    {
+                        if ((touch->calibrating == RT_TRUE) && (touch->calibration_func != RT_NULL))
+                        {
+                            /* callback function */
+                            touch->calibration_func(emouse.x, emouse.y);
+                        }
+                        else
+                        {
+                            rtgui_server_post_event(&emouse.parent, sizeof(struct rtgui_event_mouse));
+                        }
+                    }
+                    rt_kprintf("touch up: (%d, %d)\n", emouse.x, emouse.y);
 
                     /* clean */
                     touch_previous.x = touch_previous.y = 0;
@@ -335,10 +343,10 @@ static void touch_thread_entry(void *parameter)
                 } /* touch up */
                 else /* touch down or move */
                 {
-					if(touch_down == RT_FALSE)
-					{
-						rt_thread_delay(RT_TICK_PER_SECOND / 10);
-					}
+                    if(touch_down == RT_FALSE)
+                    {
+                        rt_thread_delay(RT_TICK_PER_SECOND / 10);
+                    }
 
                     /* calculation */
                     rtgui_touch_calculate();
@@ -377,10 +385,10 @@ static void touch_thread_entry(void *parameter)
                             }
                         }
                     }
-					else
-					{
-						touch_down = RT_TRUE;
-					}
+                    else
+                    {
+                        touch_down = RT_TRUE;
+                    }
                 } /* touch down or move */
 
                 rt_thread_delay(RT_TICK_PER_SECOND / 10);
@@ -435,10 +443,11 @@ rt_err_t rtgui_touch_hw_init(const char * spi_device_name)
 //    touch->max_x = radio_setup.touch_max_x;
 //    touch->min_y = radio_setup.touch_min_y;
 //    touch->max_y = radio_setup.touch_max_y;
-    touch->min_x = 0;
-    touch->max_x = 0;
-    touch->min_y = 0;
-    touch->max_y = 0;
+
+    touch->min_x = MIN_X_DEFAULT;
+    touch->max_x = MAX_X_DEFAULT;
+    touch->min_y = MIN_Y_DEFAULT;
+    touch->max_y = MAX_Y_DEFAULT;
 
     /* init device structure */
     touch->parent.type = RT_Device_Class_Unknown;
