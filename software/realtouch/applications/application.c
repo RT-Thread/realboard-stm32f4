@@ -42,7 +42,7 @@ void rt_init_thread_entry(void *parameter)
     else rt_kprintf("File System initialzation failed!\n");
 #endif
 
-    realtouch_gui_init();
+    realtouch_ui_init();
 }
 
 int rt_application_init(void)
