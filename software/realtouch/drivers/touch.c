@@ -113,6 +113,8 @@ static void rtgui_touch_calculate(void)
                                       2);
                 tmpy[i]  = (recv_buffer[0] & 0x7F) << 4;
                 tmpy[i] |= (recv_buffer[1] >> 4) & 0x0F;
+
+                rt_kprintf("%d %d\n", tmpx[i], tmpy[i]);
             }
             send_buffer[0] = 1 << 7;
             rt_spi_send(touch->spi_device, send_buffer, 1);
@@ -320,17 +322,20 @@ static void touch_thread_entry(void *parameter)
                     emouse.x = touch->x;
                     emouse.y = touch->y;
 
-                    if(touch_down == RT_TRUE)
+                    if(touch_down != RT_TRUE) 
+                    {                    
+                        touch_int_cmd(ENABLE);
+                        break;
+                    }    
+
+                    if ((touch->calibrating == RT_TRUE) && (touch->calibration_func != RT_NULL))
                     {
-                        if ((touch->calibrating == RT_TRUE) && (touch->calibration_func != RT_NULL))
-                        {
-                            /* callback function */
-                            touch->calibration_func(emouse.x, emouse.y);
-                        }
-                        else
-                        {
-                            rtgui_server_post_event(&emouse.parent, sizeof(struct rtgui_event_mouse));
-                        }
+                        /* callback function */
+                        touch->calibration_func(emouse.x, emouse.y);
+                    }
+                    else
+                    {
+                        rtgui_server_post_event(&emouse.parent, sizeof(struct rtgui_event_mouse));
                     }
                     rt_kprintf("touch up: (%d, %d)\n", emouse.x, emouse.y);
 
@@ -347,10 +352,16 @@ static void touch_thread_entry(void *parameter)
                     {
                         rt_thread_delay(RT_TICK_PER_SECOND / 10);
                     }
+                    else
+                    {
+                        rt_thread_delay(5);
+                    }
+
+                    if(IS_TOUCH_UP()) continue;
 
                     /* calculation */
                     rtgui_touch_calculate();
-
+                    
                     /* send mouse event */
                     emouse.parent.type = RTGUI_EVENT_MOUSE_BUTTON;
                     emouse.parent.sender = RT_NULL;
@@ -390,8 +401,6 @@ static void touch_thread_entry(void *parameter)
                         touch_down = RT_TRUE;
                     }
                 } /* touch down or move */
-
-                rt_thread_delay(RT_TICK_PER_SECOND / 10);
             } /* read touch */
         } /* event recv */
     } /* thread while(1) */
