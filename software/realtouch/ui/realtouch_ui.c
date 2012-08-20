@@ -9,7 +9,6 @@ void realtouch_ui_init(void)
 {
     rt_device_t device;    
     struct rt_device_rect_info info;    
-    rt_thread_t tid;
 
     device = rt_device_find("lcd");    
     if (device != RT_NULL)    

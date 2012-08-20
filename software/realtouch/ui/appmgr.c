@@ -33,20 +33,11 @@ rt_bool_t event_handler(struct rtgui_object* object, rtgui_event_t* event)
     return result;
 }
 
-const static struct rtgui_listbox_item items[] =
-{
-    {"list #0", RT_NULL},
-    {"list #1", RT_NULL},
-    {"list #2", RT_NULL},
-    {"list #3", RT_NULL},
-};
-
 void app_mgr_win_init(void)
 {
     struct rtgui_win* win;
     rtgui_rect_t rect;
     struct rtgui_notebook *notebook;
-    rtgui_listbox_t* box;
     struct rtgui_image* pressed_image;
     struct rtgui_image* unpressed_image;
     int font_size;
