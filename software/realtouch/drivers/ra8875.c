@@ -320,8 +320,12 @@ static void ra8875_lcd_get_pixel(char* pixel, int x, int y)
     _set_read_cursor(x, y);
     LCD_CmdWrite(MRWC);//set CMD02 to  prepare data write
 
-    *(rt_uint16_t*)pixel = LCD_DATA; /* dummy read */
-    *(rt_uint16_t*)pixel = LCD_DATA;
+    _set_gpio_od();
+
+    *(rt_uint16_t*)pixel = LCD_DataRead(); /* dummy read */
+    *(rt_uint16_t*)pixel = LCD_DataRead();
+
+    _set_gpio_pp();
 }
 
 static void ra8875_lcd_draw_hline(const char* pixel, int x1, int x2, int y)
@@ -437,7 +441,7 @@ void ra8875_init(void)
 
         if ((tmp1 == 0x55) && (tmp2 == 0xAA))
         {
-            rt_kprintf("[OK] LCD register rw test pass!\r\n");
+            //rt_kprintf("[OK] LCD register rw test pass!\r\n");
         }
         else
         {
@@ -502,7 +506,7 @@ void ra8875_init(void)
 
         if(i == 0x10000)
         {
-            rt_kprintf("[OK] GRAM data test pass!\r\n");
+            //rt_kprintf("[OK] GRAM data test pass!\r\n");
         }
         _set_gpio_pp();
     } /* data bus test. */
