@@ -270,9 +270,6 @@ static rt_err_t rtgui_touch_control (rt_device_t dev, rt_uint8_t cmd, void *args
         touch->min_y = data->min_y;
         touch->max_y = data->max_y;
 
-        rt_kprintf("0x%x, 0x%x, 0x%x, 0x%x\n", data->min_x, data->max_x,
-            data->min_y, data->max_y);
-
 #ifdef SAVE_CALIBRATION
         //save setup
         radio_setup.touch_min_x = touch->min_x;
