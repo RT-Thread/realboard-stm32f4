@@ -11,6 +11,8 @@
  * Date           Author       Notes
  * 2011-12-16     aozima       the first version
  * 2012-05-06     aozima       can page write.
+ * 2012-08-23     aozima       add flash lock.
+ * 2012-08-24     aozima       fixed write status register BUG.
  */
 
 #include <stdint.h>
@@ -37,28 +39,37 @@
 #define MTC_W25Q256_FV        (TBD)    /* W25Q256FV */
 
 /* command list */
-#define CMD_RDSR                    (0x05)  /* ¶Á×´Ì¬¼Ä´æÆ÷     */
-#define CMD_WRSR                    (0x01)  /* Ð´×´Ì¬¼Ä´æÆ÷     */
-#define CMD_EWSR                    (0x50)  /* Ê¹ÄÜÐ´×´Ì¬¼Ä´æÆ÷ */
-#define CMD_WRDI                    (0x04)  /* ¹Ø±ÕÐ´Ê¹ÄÜ       */
-#define CMD_WREN                    (0x06)  /* ´ò¿ªÐ´Ê¹ÄÜ       */
-#define CMD_READ                    (0x03)  /* ¶ÁÊý¾Ý           */
-#define CMD_FAST_READ               (0x0B)  /* ¿ìËÙ¶Á           */
-#define CMD_BP                      (0x02)  /* ×Ö½Ú±à³Ì         */
-#define CMD_ERASE_4K                (0x20)  /* ÉÈÇø²Á³ý:4K      */
-#define CMD_ERASE_32K               (0x52)  /* ÉÈÇø²Á³ý:32K     */
-#define CMD_ERASE_64K               (0xD8)  /* ÉÈÇø²Á³ý:64K     */
-#define CMD_ERASE_full              (0xC7)  /* È«Æ¬²Á³ý         */
-#define CMD_JEDEC_ID                (0x9F)  /* ¶Á JEDEC_ID      */
-
+#define CMD_WRSR                    (0x01)  /* Write Status Register */
+#define CMD_PP                      (0x02)  /* Page Program */
+#define CMD_READ                    (0x03)  /* Read Data */
+#define CMD_WRDI                    (0x04)  /* Write Disable */
+#define CMD_RDSR1                   (0x05)  /* Read Status Register-1 */
+#define CMD_WREN                    (0x06)  /* Write Enable */
+#define CMD_FAST_READ               (0x0B)  /* Fast Read */
+#define CMD_ERASE_4K                (0x20)  /* Sector Erase:4K */
+#define CMD_RDSR2                   (0x35)  /* Read Status Register-2 */
+#define CMD_ERASE_32K               (0x52)  /* 32KB Block Erase */
+#define CMD_JEDEC_ID                (0x9F)  /* Read JEDEC ID */
+#define CMD_ERASE_full              (0xC7)  /* Chip Erase */
+#define CMD_ERASE_64K               (0xD8)  /* 64KB Block Erase */
 
 #define DUMMY                       (0xFF)
 
 static struct spi_flash_device  spi_flash_device;
 
+static void flash_lock(struct spi_flash_device * flash_device)
+{
+    rt_mutex_take(&flash_device->lock, RT_WAITING_FOREVER);
+}
+
+static void flash_unlock(struct spi_flash_device * flash_device)
+{
+    rt_mutex_release(&flash_device->lock);
+}
+
 static uint8_t w25qxx_read_status(void)
 {
-    return rt_spi_sendrecv8(spi_flash_device.rt_spi_device, CMD_RDSR);
+    return rt_spi_sendrecv8(spi_flash_device.rt_spi_device, CMD_RDSR1);
 }
 
 static void w25qxx_wait_busy(void)
@@ -124,7 +135,7 @@ uint32_t w25qxx_page_write(uint32_t page, const uint8_t * buffer, uint32_t size)
         send_buffer[0] = CMD_WREN;
         rt_spi_send(spi_flash_device.rt_spi_device, send_buffer, 1);
 
-        send_buffer[0] = CMD_BP;
+        send_buffer[0] = CMD_PP;
         send_buffer[1] = (uint8_t)(page >> 16);
         send_buffer[2] = (uint8_t)(page >> 8);
         send_buffer[3] = (uint8_t)(page);
@@ -154,6 +165,8 @@ static rt_err_t w25qxx_flash_open(rt_device_t dev, rt_uint16_t oflag)
 {
     uint8_t send_buffer[3];
 
+    flash_lock((struct spi_flash_device *)dev);
+
     send_buffer[0] = CMD_WREN;
     rt_spi_send(spi_flash_device.rt_spi_device, send_buffer, 1);
 
@@ -161,6 +174,10 @@ static rt_err_t w25qxx_flash_open(rt_device_t dev, rt_uint16_t oflag)
     send_buffer[1] = 0;
     send_buffer[2] = 0;
     rt_spi_send(spi_flash_device.rt_spi_device, send_buffer, 3);
+
+    w25qxx_wait_busy();
+
+    flash_unlock((struct spi_flash_device *)dev);
 
     return RT_EOK;
 }
@@ -194,9 +211,14 @@ static rt_size_t w25qxx_flash_read(rt_device_t dev,
                                    void* buffer,
                                    rt_size_t size)
 {
+    flash_lock((struct spi_flash_device *)dev);
+
     w25qxx_read(pos*spi_flash_device.geometry.bytes_per_sector,
                 buffer,
                 size*spi_flash_device.geometry.bytes_per_sector);
+
+    flash_unlock((struct spi_flash_device *)dev);
+
     return size;
 }
 
@@ -205,15 +227,27 @@ static rt_size_t w25qxx_flash_write(rt_device_t dev,
                                     const void* buffer,
                                     rt_size_t size)
 {
+    flash_lock((struct spi_flash_device *)dev);
+
     w25qxx_page_write(pos*spi_flash_device.geometry.bytes_per_sector,
                       buffer,
                       size*spi_flash_device.geometry.bytes_per_sector);
+
+    flash_unlock((struct spi_flash_device *)dev);
+
     return size;
 }
 
 rt_err_t w25qxx_init(const char * flash_device_name, const char * spi_device_name)
 {
     struct rt_spi_device * rt_spi_device;
+
+    /* initialize mutex */
+    if (rt_mutex_init(&spi_flash_device.lock, spi_device_name, RT_IPC_FLAG_FIFO) != RT_EOK)
+    {
+        rt_kprintf("init sd lock mutex failed\n");
+        return -RT_ENOSYS;
+    }
 
     rt_spi_device = (struct rt_spi_device *)rt_device_find(spi_device_name);
     if(rt_spi_device == RT_NULL)
@@ -228,7 +262,7 @@ rt_err_t w25qxx_init(const char * flash_device_name, const char * spi_device_nam
         struct rt_spi_configuration cfg;
         cfg.data_width = 8;
         cfg.mode = RT_SPI_MODE_0 | RT_SPI_MSB; /* SPI Compatible: Mode 0 and Mode 3 */
-        cfg.max_hz = 1000000; /* 50M */
+        cfg.max_hz = 50 * 1000 * 1000; /* 50M */
         rt_spi_configure(spi_flash_device.rt_spi_device, &cfg);
     }
 
@@ -238,6 +272,8 @@ rt_err_t w25qxx_init(const char * flash_device_name, const char * spi_device_nam
         rt_uint8_t id_recv[3];
         uint16_t memory_type_capacity;
 
+        flash_lock(&spi_flash_device);
+
         cmd = CMD_WRDI;
         rt_spi_send(spi_flash_device.rt_spi_device, &cmd, 1);
 
@@ -245,9 +281,11 @@ rt_err_t w25qxx_init(const char * flash_device_name, const char * spi_device_nam
         cmd = CMD_JEDEC_ID;
         rt_spi_send_then_recv(spi_flash_device.rt_spi_device, &cmd, 1, id_recv, 3);
 
+        flash_unlock(&spi_flash_device);
+
         if(id_recv[0] != MF_ID)
         {
-            FLASH_TRACE("Manufacturer¡¯s ID error!\r\n");
+            FLASH_TRACE("Manufacturers ID error!\r\n");
             FLASH_TRACE("JEDEC Read-ID Data : %02X %02X %02X\r\n", id_recv[0], id_recv[1], id_recv[2]);
             return -RT_ENOSYS;
         }
