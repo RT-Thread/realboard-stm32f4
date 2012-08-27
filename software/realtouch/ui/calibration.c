@@ -5,6 +5,7 @@
 #include <rtgui/rtgui_app.h>
 
 #include "touch.h"
+#include "setup.h"
 
 #define CALIBRATION_STEP_LEFTTOP        0
 #define CALIBRATION_STEP_RIGHTTOP        1
@@ -223,11 +224,12 @@ rt_bool_t calibration_event_handler(struct rtgui_object* object, struct rtgui_ev
     return RT_FALSE;
 }
 
-void calibration_entry(void)
+void calibration_entry(void* parameter)
 {
     rt_device_t device;
     struct rtgui_rect rect;
     struct rtgui_app* application;
+    struct setup_items setup;
 
     device = rt_device_find("touch");
     if (device == RT_NULL) return; /* no this device */
@@ -269,6 +271,13 @@ void calibration_entry(void)
     rt_device_control(calibration_ptr->device, RT_TOUCH_CALIBRATION_DATA, 
         &calibration_ptr->data);
 
+    //save setup
+    setup.touch_min_x = calibration_ptr->data.min_x;
+    setup.touch_max_x = calibration_ptr->data.max_x;
+    setup.touch_min_y = calibration_ptr->data.min_y;
+    setup.touch_max_y = calibration_ptr->data.max_y;
+    setup_save(&setup);
+    
     /* recover to normal */
     rt_device_control(calibration_ptr->device, RT_TOUCH_NORMAL, RT_NULL);
 
@@ -280,7 +289,24 @@ void calibration_entry(void)
 void calibration_init(void)
 {
     rt_thread_t tid;
+    struct setup_items setup;
+    
+    if(setup_load(&setup) == RT_EOK)
+    {    
+        struct calibration_data data;        
+        rt_device_t device;
+        
+        data.min_x = setup.touch_min_x;
+        data.max_x = setup.touch_max_x;
+        data.min_y = setup.touch_min_y;
+        data.max_y = setup.touch_max_y;
 
+        device = rt_device_find("touch");
+        if(device != RT_NULL)
+            rt_device_control(device, RT_TOUCH_CALIBRATION_DATA, &data);
+        return;
+    }
+        
     tid = rt_thread_create("cali", calibration_entry, RT_NULL, 1024, 20, 20);
     if (tid != RT_NULL)
         rt_thread_startup(tid);

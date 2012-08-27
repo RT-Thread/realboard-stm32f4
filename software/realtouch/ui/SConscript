@@ -3,6 +3,6 @@ from building import *
 
 src = Glob('*.c')
 
-group = DefineGroup('Startup', src, depend = [''])
+group = DefineGroup('ui', src, depend = [''])
 
 Return('group')

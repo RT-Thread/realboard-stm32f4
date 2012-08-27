@@ -25,8 +25,6 @@ void realtouch_ui_init(void)
     app_mgr_init();
     rt_thread_delay(10);
 
-    picture_app_create();
-
     calibration_init();
 }
 

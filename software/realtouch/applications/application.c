@@ -31,7 +31,7 @@ void rt_init_thread_entry(void *parameter)
 #endif
 
     rt_platform_init();
-
+		
     /* Filesystem Initialization */
 #ifdef RT_USING_DFS
     /* mount sd card fat partition 1 as root directory */

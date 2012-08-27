@@ -8,10 +8,6 @@ TOUCH INT: PA3
 */
 #define IS_TOUCH_UP()     GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_3)
 
-#ifdef SAVE_CALIBRATION
-#include "setup.h"
-#endif
-
 #include <rtthread.h>
 #include <rtdevice.h>
 #include <rtgui/event.h>
@@ -113,8 +109,6 @@ static void rtgui_touch_calculate(void)
                                       2);
                 tmpy[i]  = (recv_buffer[0] & 0x7F) << 4;
                 tmpy[i] |= (recv_buffer[1] >> 4) & 0x0F;
-
-                rt_kprintf("%d %d\n", tmpx[i], tmpy[i]);
             }
             send_buffer[0] = 1 << 7;
             rt_spi_send(touch->spi_device, send_buffer, 1);
@@ -261,7 +255,6 @@ static rt_err_t rtgui_touch_control (rt_device_t dev, rt_uint8_t cmd, void *args
     case RT_TOUCH_CALIBRATION_DATA:
     {
         struct calibration_data* data;
-
         data = (struct calibration_data*) args;
 
         //update
@@ -269,15 +262,6 @@ static rt_err_t rtgui_touch_control (rt_device_t dev, rt_uint8_t cmd, void *args
         touch->max_x = data->max_x;
         touch->min_y = data->min_y;
         touch->max_y = data->max_y;
-
-#ifdef SAVE_CALIBRATION
-        //save setup
-        radio_setup.touch_min_x = touch->min_x;
-        radio_setup.touch_max_x = touch->max_x;
-        radio_setup.touch_min_y = touch->min_y;
-        radio_setup.touch_max_y = touch->max_y;
-        save_setup();
-#endif
     }
     break;
     }
@@ -444,11 +428,6 @@ rt_err_t rtgui_touch_hw_init(const char * spi_device_name)
 
     touch->spi_device = spi_device;
     touch->calibrating = false;
-
-//    touch->min_x = radio_setup.touch_min_x;
-//    touch->max_x = radio_setup.touch_max_x;
-//    touch->min_y = radio_setup.touch_min_y;
-//    touch->max_y = radio_setup.touch_max_y;
 
     touch->min_x = MIN_X_DEFAULT;
     touch->max_x = MAX_X_DEFAULT;
