@@ -59,7 +59,7 @@ static int xml_event_handler(rt_uint8_t event, const char* text, rt_size_t len, 
             break;
         case READ_ICON:
             rt_snprintf(fn, sizeof(fn), "%s/%s", APP_PATH, text);
-            items[pos].image = rtgui_image_create_from_file("bmp", fn, RT_FALSE);
+            items[pos].image = rtgui_image_create(fn, RT_FALSE);
             break;
         case READ_AUTHOR:
             break;
@@ -109,6 +109,7 @@ static int xml_load_items(const char* filename)
 static void exec_app(rtgui_widget_t* widget, void* parameter)
 {
     char path[64];
+    rt_module_t module;
 
     RT_ASSERT(parameter != RT_NULL);
 
@@ -116,7 +117,18 @@ static void exec_app(rtgui_widget_t* widget, void* parameter)
         (char*)parameter, (char*)parameter);
     
 #ifndef _WIN32
-    rt_module_open(path);
+    module = rt_module_find((const char*)parameter);
+    if(module == RT_NULL)
+        rt_module_open(path);
+    else
+    {
+        struct rtgui_app* app;
+        RT_ASSERT(module->module_thread);
+        app = (struct rtgui_app*)(module->module_thread->user_data);
+        
+        if(app != RT_NULL) rtgui_app_activate(app);
+        else rt_kprintf("application is null\n");
+    }
 #endif
 }
 
