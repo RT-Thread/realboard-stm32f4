@@ -4,7 +4,7 @@
 #include <rtgui/widgets/window.h>
 #include <rtgui/widgets/button.h>
 
-void main()
+void main(void)
 {
 	struct rtgui_app* application;
 	struct rtgui_win* win;	
@@ -12,12 +12,12 @@ void main()
 
 	application = rtgui_app_create(rt_thread_self(), "button");
 	if (application != RT_NULL)
-	{	
+	{			
 		rtgui_rect_t rect = {220, 250, 400, 450};
-		win = rtgui_win_create(RT_NULL, "label", &rect, RTGUI_WIN_STYLE_DEFAULT |
-			RTGUI_WIN_STYLE_DESTROY_ON_CLOSE);
+		win = rtgui_mainwin_create(RT_NULL, "Button", 
+			RTGUI_WIN_STYLE_MAINWIN | RTGUI_WIN_STYLE_DESTROY_ON_CLOSE);
 
-		/* create button in info window */
+		/* create button in app window */
 		button = rtgui_button_create("Button Demo");
 		rtgui_widget_set_rect(RTGUI_WIDGET(button), &rect);
 		rtgui_container_add_child(RTGUI_CONTAINER(win), RTGUI_WIDGET(button));

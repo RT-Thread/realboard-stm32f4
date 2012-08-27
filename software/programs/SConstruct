@@ -1,10 +1,13 @@
 import os
 import sys
 import SCons.cpp
-import rtconfig
+import rtconfig 
 
-if os.getenv('RTT_ROOT'):
-    RTT_ROOT = os.getenv('RTT_ROOT')
+sconstruct = File('SConstruct')
+fn = sconstruct.rfile()
+name = fn.name
+building_dir = os.path.dirname(fn.abspath)
+RTT_ROOT = os.path.join(building_dir, '.', 'rt-thread')
 
 sys.path = sys.path + [os.path.join(RTT_ROOT, 'tools')]
 from building import *
@@ -33,11 +36,6 @@ if GetOption('type') == 'ext':
     linkflags = rtconfig.LFLAGS + ' -e 0'
 else:
     linkflags = rtconfig.LFLAGS + ' -e main'
-
-sconstruct = File('SConstruct')
-fn = sconstruct.rfile()
-name = fn.name
-building_dir = os.path.dirname(fn.abspath)
 
 env = Environment(tools = ['mingw'],
         AS = rtconfig.AS, ASFLAGS = rtconfig.AFLAGS,
