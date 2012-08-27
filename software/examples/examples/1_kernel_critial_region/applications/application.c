@@ -12,28 +12,11 @@
  * 2009-01-05     Bernard      the first version
  */
 
-/**
- * @addtogroup STM32
- */
-/*@{*/
-
 #include <stdio.h>
 
 #include "stm32f4xx.h"
 #include <board.h>
 #include <rtthread.h>
-
-#ifdef RT_USING_LWIP
-#include <lwip/sys.h>
-#include <lwip/api.h>
-#include <netif/ethernetif.h>
-#include "stm32_eth.h"
-#endif
-
-void rt_init_thread_entry(void* parameter)
-{
-
-}
 
 static int share_var;
 
@@ -65,21 +48,6 @@ static void rt_thread_entry2(void* parameter)
 
 int rt_application_init()
 {
-    rt_thread_t init_thread;
-
-#if (RT_THREAD_PRIORITY_MAX == 32)
-    init_thread = rt_thread_create("init",
-                                   rt_init_thread_entry, RT_NULL,
-                                   2048, 8, 20);
-#else
-    init_thread = rt_thread_create("init",
-                                   rt_init_thread_entry, RT_NULL,
-                                   2048, 80, 20);
-#endif
-
-    if (init_thread != RT_NULL)
-        rt_thread_startup(init_thread);
-
     rt_thread_init(&thread1,
                    "thread1",
                    rt_thread_entry1,
@@ -98,5 +66,3 @@ int rt_application_init()
 
     return 0;
 }
-
-/*@}*/
