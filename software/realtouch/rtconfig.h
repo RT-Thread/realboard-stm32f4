@@ -132,7 +132,7 @@
 // <bool name="RT_USING_DFS_ROMFS" description="Using ROMFS" default="false" />
 //#define RT_USING_DFS_ROMFS
 // </section>
-
+#define RT_USING_SDIO
 // <section name="RT_USING_RTGUI" description="RTGUI, a graphic user interface" default="true" >
 #define RT_USING_RTGUI
 // <integer name="RTGUI_NAME_MAX" description="Maximal size of RTGUI object name length" default="16" />
