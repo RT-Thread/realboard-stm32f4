@@ -15,7 +15,10 @@ stm32f4xx_it.c
 
 # add SD driver.
 if GetDepend('RT_USING_DFS') == True:
-	src += ['sdio_sd.c']
+	if GetDepend('RT_USING_SDIO') == True:
+		src += ['stm32f4xx_sd.c']
+	else:
+		src += ['sdio_sd.c']
 
 # add ethernet driver.
 if GetDepend('RT_USING_LWIP') == True:
