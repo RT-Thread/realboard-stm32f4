@@ -81,6 +81,7 @@ void rtthread_startup(void)
     rt_system_timer_init();
 
 #if STM32_EXT_SRAM
+    ext_sram_init();
     rt_system_heap_init((void*)STM32_EXT_SRAM_BEGIN,
                         (void*)STM32_EXT_SRAM_END);
 #else
