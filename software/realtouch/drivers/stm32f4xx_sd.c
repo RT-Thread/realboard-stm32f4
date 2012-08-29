@@ -258,7 +258,8 @@ static void stm32f4xx_sdio_completed_command(struct stm32f4xx_sdio *sdio, rt_uin
         }
         else
         {
-            if (status & (SDIO_IT_DCRCFAIL | SDIO_IT_DTIMEOUT))
+            if (status & (SDIO_IT_DCRCFAIL | SDIO_IT_DTIMEOUT | 
+				SDIO_IT_RXOVERR | SDIO_IT_TXUNDERR))
             {
                 if (data)
                 {
@@ -278,9 +279,9 @@ static void stm32f4xx_sdio_completed_command(struct stm32f4xx_sdio *sdio, rt_uin
                     cmd->err = -RT_ERROR;
             }
 
-            rt_kprintf("error detected and set to %d/%d (cmd = %d)\n",
+            rt_kprintf("error detected and set to %d/%d (cmd = %d),0x%08x\n",
                        cmd->err, data ? data->err : 0,
-                       cmd->cmd_code);
+                       cmd->cmd_code, status);
         }
     }
     else
