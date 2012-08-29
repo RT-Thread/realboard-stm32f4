@@ -63,6 +63,8 @@
 /* Using Device System */
 #define RT_USING_DEVICE
 #define RT_USING_SERIAL
+#define RT_USING_SDIO
+#define RT_MMCSD_THREAD_PREORITY	15
 
 /* SECTION: Console options */
 #define RT_USING_CONSOLE
