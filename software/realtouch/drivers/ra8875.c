@@ -42,6 +42,18 @@ rt_inline uint16_t LCD_DataRead(void)
     return LCD_DATA;
 }
 
+static void LCD_write_reg(uint8_t reg, uint8_t value)
+{
+    LCD_CmdWrite(reg);
+    LCD_DataWrite(value);
+}
+
+static uint8_t LCD_read_reg(uint8_t reg)
+{
+    LCD_CmdWrite(reg);
+    return LCD_DataRead();
+}
+
 static void _set_gpio_od(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
@@ -423,25 +435,20 @@ void ra8875_init(void)
     GPIO_SetBits(GPIOC, GPIO_Pin_6);  /* release LCD */
     rt_thread_delay(20);
 
+#if 0 /* release */
     /* register rw test */
     {
         uint8_t tmp1, tmp2;
 
-        LCD_CmdWrite(0x23);
-        LCD_DataWrite(0x55);
-        LCD_CmdWrite(0x23);
-        _wait_bus_ready();
-        tmp1 = LCD_DATA;
+        LCD_write_reg(0x23, 0x55);
+        tmp1 = LCD_read_reg(0x23);
 
-        LCD_CmdWrite(0x23);
-        LCD_DataWrite(0xAA);
-        LCD_CmdWrite(0x23);
-        _wait_bus_ready();
-        tmp2 = LCD_DATA;
+        LCD_write_reg(0x23, 0xAA);
+        tmp2 = LCD_read_reg(0x23);
 
         if ((tmp1 == 0x55) && (tmp2 == 0xAA))
         {
-            //rt_kprintf("[OK] LCD register rw test pass!\r\n");
+            rt_kprintf("[OK] LCD register rw test pass!\r\n");
         }
         else
         {
@@ -450,30 +457,27 @@ void ra8875_init(void)
                        tmp1, tmp2);
         }
     } /* register rw test */
+#endif
 
     LCD_Initial();
 
-    LCD_CmdWrite(0x01);//Display on
-    LCD_DataWrite(0x80);
+    LCD_write_reg(0x01, 0x80); /* Display on */
 
     /*PWM set*/
     pwm_setting(60);
 
     /*set RA8875 GPOX pin to 1 - disp panel on*/
-//	write_reg(0xC7,0x01);
-    LCD_CmdWrite(0xC7);
-    LCD_DataWrite(0x01);
+    LCD_write_reg(0xC7, 0x01);
     /*set lift right*/
-    LCD_CmdWrite(0x20);
-    LCD_DataWrite(0x08);
+    LCD_write_reg(0x20, 0x08);
 
+#if 0 /* release */
     /* data bus test. */
     {
         uint16_t pixel;
         uint32_t i;
 
-        LCD_CmdWrite(0x40);
-        LCD_DataWrite(0x00);
+        LCD_write_reg(0x40, 0x00);
 
         _set_write_cursor(0, 0);
 
@@ -506,10 +510,11 @@ void ra8875_init(void)
 
         if(i == 0x10000)
         {
-            //rt_kprintf("[OK] GRAM data test pass!\r\n");
+            rt_kprintf("[OK] GRAM data test pass!\r\n");
         }
         _set_gpio_pp();
     } /* data bus test. */
+#endif
 
     /* register lcd device */
     _lcd_device.type  = RT_Device_Class_Graphic;
