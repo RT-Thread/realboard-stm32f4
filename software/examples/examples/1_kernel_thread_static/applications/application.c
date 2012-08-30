@@ -1,3 +1,16 @@
+/*
+ * File      : application.c
+ * This file is part of RT-Thread RTOS
+ * COPYRIGHT (C) 2006 - 2012, RT-Thread Development Team
+ *
+ * The license and distribution terms for this file may be
+ * found in the file LICENSE in this distribution or at
+ * http://www.rt-thread.org/license/LICENSE
+ *
+ * Change Logs:
+ * Date           Author       Notes
+ */
+
 #include <rtthread.h>
 
 /* 线程1控制块 */
@@ -10,7 +23,7 @@ static struct rt_thread thread2;
 static rt_uint8_t thread2_stack[512];
 
 /* 线程1入口 */
-static void thread1_entry(void* parameter)
+static void thread1_entry(void *parameter)
 {
     rt_uint32_t count = 0;
 
@@ -18,17 +31,18 @@ static void thread1_entry(void* parameter)
     {
         /* 线程1采用低优先级运行，一直打印计数值 */
         rt_kprintf("thread count: %d\n", count ++);
+        /* 线程1延时1秒 */
         rt_thread_delay(RT_TICK_PER_SECOND);
     }
 }
 
 /* 线程2入口 */
-static void thread2_entry(void* parameter)
+static void thread2_entry(void *parameter)
 {
     /* 线程2拥有较高的优先级，以抢占线程1而获得执行 */
 
-    /* 线程2启动后先睡眠10个OS Tick */
-    rt_thread_delay(RT_TICK_PER_SECOND*10);
+    /* 线程2启动后先睡眠10秒 */
+    rt_thread_delay(RT_TICK_PER_SECOND * 10);
 
     /*
      * 线程2唤醒后直接执行线程1脱离，线程1将从就绪线程队列中删除
@@ -39,11 +53,10 @@ static void thread2_entry(void* parameter)
      * 线程2继续休眠10个OS Tick然后退出
      */
     rt_thread_delay(10);
-
 }
 
 /* 用户应用入口 */
-int rt_application_init()
+int rt_application_init(void)
 {
     rt_err_t result;
 
@@ -54,7 +67,6 @@ int rt_application_init()
         7, 10);
     if (result == RT_EOK) /* 如果返回正确，启动线程1 */
         rt_thread_startup(&thread1);
-    
 
     /* 初始化线程2 */
     result = rt_thread_init(&thread2, "t2", /* 线程名：t2 */
@@ -63,8 +75,6 @@ int rt_application_init()
         6, 10);
     if (result == RT_EOK) /* 如果返回正确，启动线程2 */
         rt_thread_startup(&thread2);
-    
 
     return 0;
 }
-
