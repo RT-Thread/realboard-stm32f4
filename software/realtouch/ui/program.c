@@ -59,7 +59,8 @@ static int xml_event_handler(rt_uint8_t event, const char* text, rt_size_t len, 
             break;
         case READ_ICON:
             rt_snprintf(fn, sizeof(fn), "%s/%s", APP_PATH, text);
-            items[pos].image = rtgui_image_create(fn, RT_FALSE);
+            items[pos].image = rtgui_image_create(fn, RT_TRUE);
+            if(items[pos].image == RT_NULL) rt_kprintf("image create failed\n");
             break;
         case READ_AUTHOR:
             break;
