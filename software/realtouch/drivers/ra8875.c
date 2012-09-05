@@ -231,7 +231,36 @@ static void LCD_Initial(void)
 }
 
 //--------------------------------------------//
-//REG[46h]~REG[49h]
+
+/* LCD fun */
+static void _set_draw_start_cursor(uint32_t X, uint32_t Y)
+{
+    LCD_write_reg(DLHSR1, X>>8);
+    LCD_write_reg(DLHSR0, X);
+    LCD_write_reg(DLVSR1, Y>>8);
+    LCD_write_reg(DLVSR0, Y);
+}
+
+static void _set_draw_end_cursor(uint32_t X, uint32_t Y)
+{
+    LCD_write_reg(DLHER1, X>>8);
+    LCD_write_reg(DLHER0, X);
+    LCD_write_reg(DLVER1, Y>>8);
+    LCD_write_reg(DLVER0, Y);
+}
+
+static void _set_fore_color(uint16_t pixel)
+{
+    /* REG 565 */
+    LCD_write_reg(FGCR2, pixel & 0x1F); /* blue */
+    pixel >>= 5;
+
+    LCD_write_reg(FGCR1, pixel & 0x3F); /* green */
+    pixel >>= 6;
+
+    LCD_write_reg(FGCR0, pixel & 0x1F); /* red */
+}
+
 static void _set_write_cursor(uint32_t X, uint32_t Y)
 {
     LCD_CmdWrite(CURH1);
@@ -352,31 +381,63 @@ static void ra8875_lcd_get_pixel(char* pixel, int x, int y)
 
 static void ra8875_lcd_draw_hline(const char* pixel, int x1, int x2, int y)
 {
-    LCD_CmdWrite(0x40);
-    LCD_DataWrite(0x00);
-
-    _set_write_cursor(x1,y);
-
-    LCD_CmdWrite(MRWC);//set CMD02 to  prepare data write
-
-    for(; x1<x2; x1++)
+#ifdef USE_DRAW_FUNCTION
+    if(x2 > (x1 + 25))
     {
-        LCD_DataWrite(*(uint16_t *)pixel);  //write red data
+        /* wait draw complete. */
+        while(LCD_read_reg(LCD_DCR) &
+                (DCR_DRAW3_CIRCLE | DCR_DRAW3_LINE_SQUARE_TRIANGLE));
+
+        _set_draw_start_cursor(x1, y);
+        _set_draw_end_cursor(x2, y);
+        _set_fore_color(*(uint16_t *)pixel);
+        LCD_write_reg(LCD_DCR, DCR_DRAW0_LINE_SQUARE | DCR_DRAW1_LINE
+                      | DCR_DRAW2_NO_FILL | DCR_DRAW3_LINE_SQUARE_TRIANGLE);
+    }
+    else
+#endif /* USE_DRAW_FUNCTION */
+    {
+        LCD_write_reg(0x40, 0x00);
+
+        _set_write_cursor(x1,y);
+
+        LCD_CmdWrite(MRWC);//set CMD02 to  prepare data write
+
+        for(; x1<x2; x1++)
+        {
+            LCD_DataWrite(*(uint16_t *)pixel);  //write red data
+        }
     }
 }
 
 static void ra8875_lcd_draw_vline(const char* pixel, int x, int y1, int y2)
 {
-    LCD_CmdWrite(0x40);
-    LCD_DataWrite(0x00 | 1<<3);
-
-    _set_write_cursor(x,y1);
-
-    LCD_CmdWrite(MRWC);//set CMD02 to  prepare data write
-
-    for(; y1<y2; y1++)
+#ifdef USE_DRAW_FUNCTION
+    if(y2 > (y1 + 25))
     {
-        LCD_DataWrite(*(uint16_t *)pixel);  //write red data
+        /* wait draw complete. */
+        while(LCD_read_reg(LCD_DCR) &
+                (DCR_DRAW3_CIRCLE | DCR_DRAW3_LINE_SQUARE_TRIANGLE));
+
+        _set_draw_start_cursor(x, y1);
+        _set_draw_end_cursor(x, y2);
+        _set_fore_color(*(uint16_t *)pixel);
+        LCD_write_reg(LCD_DCR, DCR_DRAW0_LINE_SQUARE | DCR_DRAW1_LINE
+                      | DCR_DRAW2_NO_FILL | DCR_DRAW3_LINE_SQUARE_TRIANGLE);
+    }
+    else
+#endif /* USE_DRAW_FUNCTION */
+    {
+        LCD_write_reg(0x40, 0x00 | 1<<3);
+
+        _set_write_cursor(x,y1);
+
+        LCD_CmdWrite(MRWC);//set CMD02 to  prepare data write
+
+        for(; y1<y2; y1++)
+        {
+            LCD_DataWrite(*(uint16_t *)pixel);  //write red data
+        }
     }
 }
 
@@ -384,8 +445,7 @@ static void ra8875_lcd_blit_line(const char* pixels, int x, int y, rt_size_t siz
 {
     rt_uint16_t *ptr;
 
-    LCD_CmdWrite(0x40);
-    LCD_DataWrite(0x00);
+    LCD_write_reg(0x40, 0x00);
 
     _set_write_cursor(x,y);
 
@@ -445,7 +505,7 @@ void ra8875_init(void)
     GPIO_SetBits(GPIOC, GPIO_Pin_6);  /* release LCD */
     rt_thread_delay(20);
 
-#if 0 /* release */
+#ifdef USE_REGISTER_TEST
     /* register rw test */
     {
         uint8_t tmp1, tmp2;
@@ -467,7 +527,7 @@ void ra8875_init(void)
                        tmp1, tmp2);
         }
     } /* register rw test */
-#endif
+#endif /* USE_REGISTER_TEST */
 
     LCD_Initial();
 
@@ -481,7 +541,7 @@ void ra8875_init(void)
     /*set lift right*/
     LCD_write_reg(0x20, 0x08);
 
-#if 0 /* release */
+#ifdef USE_GRAM_TEST
     /* data bus test. */
     {
         uint16_t pixel;
@@ -497,8 +557,7 @@ void ra8875_init(void)
             LCD_DataWrite(i);
         }
 
-        LCD_CmdWrite(MRCD);
-        LCD_DataWrite(0x00);
+        LCD_write_reg(MRCD, 0x00);
 
         _set_read_cursor(0, 0);
 
@@ -524,7 +583,7 @@ void ra8875_init(void)
         }
         _set_gpio_pp();
     } /* data bus test. */
-#endif
+#endif /* USE_GRAM_TEST */
 
     /* register lcd device */
     _lcd_device.type  = RT_Device_Class_Graphic;
