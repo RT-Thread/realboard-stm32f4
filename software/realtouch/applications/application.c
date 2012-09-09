@@ -28,6 +28,11 @@
 
 void rt_init_thread_entry(void *parameter)
 {
+#ifdef RT_USING_LWIP
+	/* initialize eth interface */
+	rt_hw_stm32_eth_init();
+#endif
+
 #ifdef RT_USING_COMPONENTS_INIT
     /* initialization RT-Thread Components */
     rt_components_init();
