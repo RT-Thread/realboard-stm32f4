@@ -111,7 +111,7 @@
 // <integer name="DFS_FILESYSTEMS_MAX" description="The maximal number of mounted file system" default="4" />
 #define DFS_FILESYSTEMS_MAX	2
 // <integer name="DFS_FD_MAX" description="The maximal number of opened files" default="4" />
-#define DFS_FD_MAX	4
+#define DFS_FD_MAX	16
 // <bool name="RT_USING_DFS_ELMFAT" description="Using ELM FatFs" default="true" />
 #define RT_USING_DFS_ELMFAT
 // <integer name="RT_DFS_ELM_USE_LFN" description="Support long file name" default="0">
@@ -119,6 +119,10 @@
 // <item description="LFN1">2</item>
 // </integer>
 #define RT_DFS_ELM_USE_LFN	1
+// <integer name="RT_DFS_ELM_CODE_PAGE" description="OEM code page" default="936">
+#define RT_DFS_ELM_CODE_PAGE	936
+// <bool name="RT_DFS_ELM_CODE_PAGE_FILE" description="Using OEM code page file" default="false" />
+#define RT_DFS_ELM_CODE_PAGE_FILE
 // <integer name="RT_DFS_ELM_MAX_LFN" description="Maximal size of file name length" default="256" />
 #define RT_DFS_ELM_MAX_LFN	256
 // <integer name="RT_DFS_ELM_MAX_SECTOR_SIZE" description="Maximal size of sector" default="512" />
