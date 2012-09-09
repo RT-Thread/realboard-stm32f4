@@ -43,17 +43,32 @@ void rt_init_thread_entry(void *parameter)
     /* Filesystem Initialization */
 #ifdef RT_USING_DFS
     /* mount sd card fat partition 1 as root directory */
-    if (dfs_mount("sd0", "/", "elm", 0, 0) == 0)
+    if (dfs_mount("flash0", "/", "elm", 0, 0) == 0)
     {
-        rt_kprintf("File System initialized!\n");
+        rt_kprintf("flash0 mount to / \n");
+
+        /* download resource from www.rt-thread.org */
+        {
+            resource_download();
+        }
+
 #if (RT_DFS_ELM_USE_LFN != 0) && (defined RT_DFS_ELM_CODE_PAGE_FILE)
         {
             extern void ff_convert_init(void);
             ff_convert_init();
         }
 #endif
+
+        if (dfs_mount("sd0", "/SD", "elm", 0, 0) == 0)
+        {
+            rt_kprintf("sd0 mount to /SD \n");
+        }
+        else
+        {
+            rt_kprintf("sd0 mount to /SD failed!\n");
+        }
     }
-    else rt_kprintf("File System initialzation failed!\n");
+    else rt_kprintf("flash0 mount to / failed!\n");
 #endif
 
 #ifdef RT_USING_RTGUI
