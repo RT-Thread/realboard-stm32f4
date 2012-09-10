@@ -1,16 +1,16 @@
 /*
- * linker script for RTArduino with GNU ld
- * bernard.xiong 2012-02-28
+ * linker script for realtouch-STM32F4 with GNU ld
+ * bernard.xiong 2009-10-14
  */
 
 /* Program Entry, set to mark it as "used" and avoid gc */
 MEMORY
 {
-    CODE (rx) : ORIGIN = 0x08000000, LENGTH = 1024k /* 1M flash */
+    CODE (rx) : ORIGIN = 0x08000000, LENGTH = 1M /* 1M flash */
     DATA (rw) : ORIGIN = 0x20000000, LENGTH = 128k /* 128K sram  */
 }
 ENTRY(Reset_Handler)
-_system_stack_size = 0x100;
+_system_stack_size = 0x200;
 
 SECTIONS
 {
@@ -27,11 +27,11 @@ SECTIONS
         *(.glue_7t)
         *(.gnu.linkonce.t*)
 
-    /* section information for module symbol */
-    . = ALIGN(4);
-    __rtmsymtab_start = .;
-    KEEP(*(RTMSymTab))
-    __rtmsymtab_end = .;
+        /* section information for module symbol */
+        . = ALIGN(4);
+        __rtmsymtab_start = .;
+        KEEP(*(RTMSymTab))
+        __rtmsymtab_end = .;
         
         /* section information for finsh shell */
         . = ALIGN(4);
