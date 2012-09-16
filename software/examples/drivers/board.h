@@ -19,11 +19,6 @@
 #include <rtthread.h>
 #include <stm32f4xx.h>
 
-/* board configuration */
-// <o> SDCard Driver <1=>SDIO sdcard <0=>SPI MMC card
-// 	<i>Default: 1
-#define STM32_USE_SDIO			0
-
 /* whether use board external SRAM memory */
 // <e>Use external SRAM memory on the board
 // 	<i>Enable External SRAM memory
@@ -33,10 +28,10 @@
 #define STM32_EXT_SRAM_BEGIN    0x60000000 /* the begining address of external SRAM */
 //	<o>End Address of External SRAM
 //		<i>Default: 0x60080000
-#define STM32_EXT_SRAM_END      0x60080000 /* the end address of external SRAM */
+#define STM32_EXT_SRAM_END      0x600FFFFF /* the end address of external SRAM */
 // </e>
 
-// <o> Internal SRAM memory size[Kbytes] <8-64>
+// <o> Internal SRAM memory size[Kbytes] <8-128>
 //	<i>Default: 64
 #define STM32_SRAM_SIZE         128
 #define STM32_SRAM_END          (0x20000000 + STM32_SRAM_SIZE * 1024)
