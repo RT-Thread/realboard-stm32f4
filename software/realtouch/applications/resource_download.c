@@ -28,6 +28,16 @@ static const struct resource_item resource_table[] =
         1024 * 128,
         "http://www.rt-thread.org/realtouch/resource/uni2gbk.tbl"
     },
+    {
+        "/resource/hzk12.fnt",
+        196272,
+        "http://www.rt-thread.org/realtouch/resource/hzk12.fnt"
+    },
+    {
+        "/resource/hzk16.fnt",
+        267616,
+        "http://www.rt-thread.org/realtouch/resource/hzk16.fnt"
+    },
 };
 
 #define ARRAY_SIZE(array)  (sizeof(array) / sizeof(array[0]))
@@ -204,8 +214,6 @@ int http_down(const char * file_name, const char * url)
             // End of headers is a blank line.  exit.
             if (rc == 0) break;
 
-            rt_kprintf("[http] recv %u\r\n", rc);
-
             get_buffer += rc;
             get_count += rc;
 
@@ -214,7 +222,6 @@ int http_down(const char * file_name, const char * url)
             {
                 write(fd, buf, BUFFER_SIZE);
                 rt_kprintf("#");
-                rt_kprintf("[http] write BUFFER_SIZE %u, get_count %u.\r\n", BUFFER_SIZE, get_count);
                 get_size -= BUFFER_SIZE;
 
                 if(get_size > 0)
@@ -272,6 +279,10 @@ rt_err_t resource_download(void)
                 rt_kprintf("[ERR] %s create failed!\r\n", RESOURCE_DIR);
             }
         }
+        else
+        {
+            close(fd);
+        }
 
         /* /SD */
         fd = open("/SD", DFS_O_DIRECTORY, 0);
@@ -288,12 +299,19 @@ rt_err_t resource_download(void)
                 rt_kprintf("[ERR] %s create failed!\r\n", "/SD");
             }
         }
+        else
+        {
+            close(fd);
+        }
     } /* check RESOURCE_DIR */
 
     for(i=0; i<ARRAY_SIZE(resource_table); i++)
     {
-        stat(resource_table[i].name, &file_stat);
-        if(file_stat.st_size != resource_table[i].size)
+        int result;
+
+        result = stat(resource_table[i].name, &file_stat);
+
+        if((result != 0) || (file_stat.st_size != resource_table[i].size))
         {
             rt_kprintf("[INFO] download %s\r\n", resource_table[i].name);
             http_down(resource_table[i].name, resource_table[i].url);
