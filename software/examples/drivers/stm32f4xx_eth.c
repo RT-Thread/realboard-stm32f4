@@ -3892,15 +3892,20 @@ static void phy_monitor_thread_entry(void *parameter)
     STM32_ETH_PRINTF("RESET PHY!\r\n");
     ETH_WritePHYRegister(phy_addr, PHY_BCR, PHY_Reset);
     rt_thread_delay(RT_TICK_PER_SECOND * 2);
+    ETH_WritePHYRegister(phy_addr, PHY_BCR, PHY_AutoNegotiation);
 
     while(1)
     {
         uint16_t status  = ETH_ReadPHYRegister(phy_addr, PHY_BSR);
         STM32_ETH_PRINTF("LAN8720 status:0x%04X\r\n", status);
 
-        if(status & (PHY_AutoNego_Complete || PHY_Linked_Status))
+        phy_speed_new = 0;
+
+        if(status & (PHY_AutoNego_Complete | PHY_Linked_Status))
         {
-            uint16_t SR = ETH_ReadPHYRegister(phy_addr, 31);
+            uint16_t SR;
+
+            SR = ETH_ReadPHYRegister(phy_addr, 31);
             STM32_ETH_PRINTF("LAN8720 REG 31:0x%04X\r\n", SR);
 
             SR = (SR >> 2) & 0x07; /* LAN8720, REG31[4:2], Speed Indication. */
@@ -3915,10 +3920,6 @@ static void phy_monitor_thread_entry(void *parameter)
             {
                 phy_speed_new |= PHY_DUPLEX_MASK;
             }
-        }
-        else
-        {
-            phy_speed_new = 0;
         }
 
         /* linkchange */

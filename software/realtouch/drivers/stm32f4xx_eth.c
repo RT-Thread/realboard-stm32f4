@@ -23,7 +23,9 @@
 /*
  * Change Logs:
  * Date           Author       Notes
- * 2011-07-22     aozima       first implementation(stm32f207,dp83848,rmii,MCO)
+ * 2011-07-22     aozima       first implementation.
+ * 2012-09-24     aozima       update for stm32f4.
+ * 2012-09-26     aozima       add phy monitor.
 */
 
 /* Includes ------------------------------------------------------------------*/
@@ -31,17 +33,11 @@
 #include "stm32f4xx_rcc.h"
 
 /* STM32F ETH dirver options */
+#define RMII_MODE                       /* MII_MODE or RMII_MODE */
+#define RMII_TX_GPIO_GROUP        2     /* 1:GPIOB or 2:GPIOG */
 #define CHECKSUM_BY_HARDWARE
-#define TX_GPIO_GROUP           2 /* 1:GPIOB or 2:GPIOG */
 
-/* PHY configuration section **************************************************/
-/* PHY Reset delay */
-#define PHY_RESET_DELAY    ((uint32_t)0x000FFFFF)
-/* PHY Configuration delay */
-#define PHY_CONFIG_DELAY   ((uint32_t)0x00FFFFFF)
-
-
-/** @addtogroup STM32F2XX_ETH_Driver
+/** @addtogroup STM32F4XX_ETH_Driver
   * @brief ETH driver modules
   * @{
   */
@@ -52,8 +48,6 @@
 /**
   * @}
   */
-
-#define DP83848_PHY_ADDRESS       0x1F /* Relative to STM3220F-EVAL Board */
 
 /** @defgroup ETH_Private_Defines
   * @{
@@ -124,10 +118,6 @@ ETH_DMADESCTypeDef  *DMAPTPRxDescToGet;
   * @{
   */
 
-#ifndef USE_Delay
-static void ETH_Delay(__IO uint32_t nCount);
-#endif /* USE_Delay*/
-
 /**
   * @}
   */
@@ -156,9 +146,9 @@ void ETH_DeInit(void)
   * @retval ETH_ERROR: Ethernet initialization failed
   *         ETH_SUCCESS: Ethernet successfully initialized
   */
-uint32_t ETH_Init(ETH_InitTypeDef* ETH_InitStruct, uint16_t PHYAddress)
+uint32_t ETH_Init(ETH_InitTypeDef* ETH_InitStruct)
 {
-  uint32_t RegValue = 0, tmpreg = 0;
+  uint32_t tmpreg = 0;
   __IO uint32_t i = 0;
   RCC_ClocksTypeDef  rcc_clocks;
   uint32_t hclk = 60000000;
@@ -248,96 +238,9 @@ uint32_t ETH_Init(ETH_InitTypeDef* ETH_InitStruct, uint16_t PHYAddress)
     tmpreg |= (uint32_t)ETH_MACMIIAR_CR_Div102;
   }
 
-  /* Write to ETHERNET MAC MIIAR: Configure the ETHERNET CSR Clock Range */
+  /* Write to ETHERNET MAC MIIAR: configure the ETHERNET CSR Clock Range */
   ETH->MACMIIAR = (uint32_t)tmpreg;
-  /*-------------------- PHY initialization and configuration ----------------*/
-  /* Put the PHY in reset mode */
-  if(!(ETH_WritePHYRegister(PHYAddress, PHY_BCR, PHY_Reset)))
-  {
-    /* Return ERROR in case of write timeout */
-    return ETH_ERROR;
-  }
 
-  /* Delay to assure PHY reset */
-  _eth_delay_(PHY_RESET_DELAY);
-
-//  if(ETH_InitStruct->ETH_AutoNegotiation != ETH_AutoNegotiation_Disable)
-//  {
-//    /* We wait for linked status... */
-//    do
-//    {
-//      timeout++;
-//    } while (!(ETH_ReadPHYRegister(PHYAddress, PHY_BSR) & PHY_Linked_Status) && (timeout < PHY_READ_TO));
-//
-//    /* Return ERROR in case of timeout */
-//    if(timeout == PHY_READ_TO)
-//    {
-//      return ETH_ERROR;
-//    }
-//
-//    /* Reset Timeout counter */
-//    timeout = 0;
-//    /* Enable Auto-Negotiation */
-//    if(!(ETH_WritePHYRegister(PHYAddress, PHY_BCR, PHY_AutoNegotiation)))
-//    {
-//      /* Return ERROR in case of write timeout */
-//      return ETH_ERROR;
-//    }
-//
-//    /* Wait until the auto-negotiation will be completed */
-//    do
-//    {
-//      timeout++;
-//    } while (!(ETH_ReadPHYRegister(PHYAddress, PHY_BSR) & PHY_AutoNego_Complete) && (timeout < (uint32_t)PHY_READ_TO));
-//
-//    /* Return ERROR in case of timeout */
-//    if(timeout == PHY_READ_TO)
-//    {
-//      return ETH_ERROR;
-//    }
-//
-//    /* Reset Timeout counter */
-//    timeout = 0;
-//
-//    /* Read the result of the auto-negotiation */
-//    RegValue = ETH_ReadPHYRegister(PHYAddress, PHY_SR);
-//
-//    /* Configure the MAC with the Duplex Mode fixed by the auto-negotiation process */
-//    if((RegValue & PHY_DUPLEX_STATUS) != (uint32_t)RESET)
-//    {
-//      /* Set Ethernet duplex mode to Full-duplex following the auto-negotiation */
-//      ETH_InitStruct->ETH_Mode = ETH_Mode_FullDuplex;
-//    }
-//    else
-//    {
-//      /* Set Ethernet duplex mode to Half-duplex following the auto-negotiation */
-//      ETH_InitStruct->ETH_Mode = ETH_Mode_HalfDuplex;
-//    }
-//
-//    /* Configure the MAC with the speed fixed by the auto-negotiation process */
-//    if(RegValue & PHY_SPEED_STATUS)
-//    {
-//      /* Set Ethernet speed to 10M following the auto-negotiation */
-//      ETH_InitStruct->ETH_Speed = ETH_Speed_10M;
-//    }
-//    else
-//    {
-//      /* Set Ethernet speed to 100M following the auto-negotiation */
-//      ETH_InitStruct->ETH_Speed = ETH_Speed_100M;
-//    }
-//  }
-//  else
-//  {
-//    if(!ETH_WritePHYRegister(PHYAddress, PHY_BCR, ((uint16_t)(ETH_InitStruct->ETH_Mode >> 3) |
-//                                                   (uint16_t)(ETH_InitStruct->ETH_Speed >> 1))))
-//    {
-//      /* Return ERROR in case of write timeout */
-//      return ETH_ERROR;
-//    }
-//    /* Delay to assure PHY configuration */
-//    _eth_delay_(PHY_CONFIG_DELAY);
-//
-//  }
   /*------------------------ ETHERNET MACCR Configuration --------------------*/
   /* Get the ETHERNET MACCR value */
   tmpreg = ETH->MACCR;
@@ -1127,7 +1030,7 @@ void ETH_MACITConfig(uint32_t ETH_MAC_IT, FunctionalState NewState)
 }
 
 /**
-  * @brief  Configures the selected MAC address.
+  * @brief  configures the selected MAC address.
   * @param  MacAddr: The MAC addres to configure.
   *   This parameter can be one of the following values:
   *     @arg ETH_MAC_Address0 : MAC Address0
@@ -1618,7 +1521,7 @@ void ETH_DMATxDescTimeStampCmd(ETH_DMADESCTypeDef *DMATxDesc, FunctionalState Ne
 }
 
 /**
-  * @brief  Configures the specified DMA Tx Desc buffer1 and buffer2 sizes.
+  * @brief  configures the specified DMA Tx Desc buffer1 and buffer2 sizes.
   * @param  DMATxDesc: Pointer on a Tx desc
   * @param  BufferSize1: specifies the Tx desc buffer1 size.
   * @param  BufferSize2: specifies the Tx desc buffer2 size (put "0" if not used).
@@ -3325,21 +3228,6 @@ uint32_t ETH_HandlePTPRxPkt(uint8_t *ppkt, uint32_t *PTPRxTab)
   return (framelength);
 }
 
-#ifndef USE_Delay
-/**
-  * @brief  Inserts a delay time.
-  * @param  nCount: specifies the delay time length.
-  * @retval None
-  */
-static void ETH_Delay(__IO uint32_t nCount)
-{
-  __IO uint32_t index = 0;
-  for(index = nCount; index != 0; index--)
-  {
-  }
-}
-#endif /* USE_Delay*/
-
 /**
   * @}
   */
@@ -3370,12 +3258,6 @@ static void ETH_Delay(__IO uint32_t nCount)
 #define STM32_ETH_PRINTF(...)
 #endif
 
-/* ethernet option */
-#define MII_MODE          /* MII mode for STM3210C-EVAL Board (MB784) (check jumpers setting) */
-
-#define DP83848_PHY        	/* Ethernet pins mapped on STM3210C-EVAL Board */
-#define PHY_ADDRESS       	0x01 /* Relative to STM3210C-EVAL Board */
-
 #define ETH_RXBUFNB        	4
 #define ETH_TXBUFNB        	2
 static ETH_DMADESCTypeDef  DMARxDscrTab[ETH_RXBUFNB], DMATxDscrTab[ETH_TXBUFNB];
@@ -3389,6 +3271,9 @@ struct rt_stm32_eth
 
 	/* interface address info. */
 	rt_uint8_t  dev_addr[MAX_ADDR_LEN];			/* hw address	*/
+
+	uint32_t    ETH_Speed; /*!< @ref ETH_Speed */
+	uint32_t    ETH_Mode;  /*!< @ref ETH_Duplex_Mode */
 };
 static struct rt_stm32_eth stm32_eth_device;
 static struct rt_semaphore tx_wait;
@@ -3526,6 +3411,7 @@ void ETH_IRQHandler(void)
 /* initialize the interface */
 static rt_err_t rt_stm32_eth_init(rt_device_t dev)
 {
+    struct rt_stm32_eth * stm32_eth = (struct rt_stm32_eth *)dev;
     ETH_InitTypeDef ETH_InitStructure;
 
     /* Enable ETHERNET clock  */
@@ -3550,9 +3436,8 @@ static rt_err_t rt_stm32_eth_init(rt_device_t dev)
     /* Fill ETH_InitStructure parametrs */
     /*------------------------   MAC   -----------------------------------*/
     ETH_InitStructure.ETH_AutoNegotiation = ETH_AutoNegotiation_Enable;
-    //ETH_InitStructure.ETH_AutoNegotiation = ETH_AutoNegotiation_Disable;
-    //  ETH_InitStructure.ETH_Speed = ETH_Speed_10M;
-    //  ETH_InitStructure.ETH_Mode = ETH_Mode_FullDuplex;
+    ETH_InitStructure.ETH_Speed = stm32_eth->ETH_Speed;
+    ETH_InitStructure.ETH_Mode  = stm32_eth->ETH_Mode;
 
     ETH_InitStructure.ETH_LoopbackMode = ETH_LoopbackMode_Disable;
     ETH_InitStructure.ETH_RetryTransmission = ETH_RetryTransmission_Disable;
@@ -3584,8 +3469,8 @@ static rt_err_t rt_stm32_eth_init(rt_device_t dev)
     ETH_InitStructure.ETH_TxDMABurstLength = ETH_TxDMABurstLength_32Beat;
     ETH_InitStructure.ETH_DMAArbitration = ETH_DMAArbitration_RoundRobin_RxTx_2_1;
 
-    /* Configure Ethernet */
-    ETH_Init(&ETH_InitStructure, DP83848_PHY_ADDRESS);
+    /* configure Ethernet */
+    ETH_Init(&ETH_InitStructure);
 
     /* Enable DMA Receive interrupt (need to enable in this case Normal interrupt) */
     ETH_DMAITConfig(ETH_DMA_IT_NIS | ETH_DMA_IT_R | ETH_DMA_IT_T, ENABLE);
@@ -3857,77 +3742,231 @@ static void GPIO_Configuration(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
 
-    /* Enable GPIOs clocks */
-#if TX_GPIO_GROUP == 1
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOB |
-                           RCC_AHB1Periph_GPIOC
-                           , ENABLE);
-#elif TX_GPIO_GROUP == 2
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOC |
-                           RCC_AHB1Periph_GPIOG
-                           , ENABLE);
-#else
-#error TX_GPIO_GROUP setting error!
-#endif /*TX_GPIO_GROUP */
-
     /* Enable SYSCFG clock */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOC, ENABLE);
 
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_AF;
     GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_NOPULL;
 
-    /* Ethernet pins configuration ************************************************/
-
-    /*
-            ETH_MDIO -------------------------> PA2
-            ETH_MDC --------------------------> PC1
-            ETH_MII_RX_CLK/ETH_RMII_REF_CLK---> PA1
-            ETH_MII_RX_DV/ETH_RMII_CRS_DV ----> PA7
-            ETH_MII_RXD0/ETH_RMII_RXD0 -------> PC4
-            ETH_MII_RXD1/ETH_RMII_RXD1 -------> PC5
-
-            ETH_MII_TX_EN/ETH_RMII_TX_EN -----> PG11
-            ETH_MII_TXD0/ETH_RMII_TXD0 -------> PG13
-            ETH_MII_TXD1/ETH_RMII_TXD1 -------> PG14
-
-            ETH_MII_TX_EN/ETH_RMII_TX_EN -----> PB11
-            ETH_MII_TXD0/ETH_RMII_TXD0 -------> PB12
-            ETH_MII_TXD1/ETH_RMII_TXD1 -------> PB13
-    */
-
-    /* Configure PA1, PA2 and PA7 */
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_7;
+    /* config MDIO and MDC. */
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_ETH); /* config ETH_MDIO */
+    GPIO_PinAFConfig(GPIOC, GPIO_PinSource1, GPIO_AF_ETH); /* config ETH_MDC */
+    /* config PA2: MDIO */
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource1, GPIO_AF_ETH);
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_ETH);
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource7, GPIO_AF_ETH);
-
-    /* Configure PC1, PC2, PC3, PC4 and PC5 */
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1 |GPIO_Pin_4 | GPIO_Pin_5;
+    /* config PC1: MDC */
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
-    GPIO_PinAFConfig(GPIOC, GPIO_PinSource1, GPIO_AF_ETH);
-    GPIO_PinAFConfig(GPIOC, GPIO_PinSource4, GPIO_AF_ETH);
-    GPIO_PinAFConfig(GPIOC, GPIO_PinSource5, GPIO_AF_ETH);
 
-#if TX_GPIO_GROUP == 1
-    /* Configure TX_EN, TX_D0, TX_D1 */
+    /* Ethernet pins configuration ************************************************/
+#if defined(MII_MODE)
+/*
+    ETH_MDIO ------------> PA2
+    ETH_MDC -------------> PC1
+
+    ETH_MII_CRS ---------> PA0
+    ETH_MII_COL ---------> PA3
+
+    ETH_MII_RX_CLK ------> PA1
+    ETH_MII_RX_ER -------> PB10
+    ETH_MII_RX_ER -------> PI10
+    ETH_MII_RX_DV -------> PA7
+    ETH_MII_RXD0 --------> PC4
+    ETH_MII_RXD1 --------> PC5
+    ETH_MII_RXD2 --------> PB0
+    ETH_MII_RXD3 --------> PB1
+
+    ETH_MII_TX_EN -------> PB11
+    ETH_MII_TX_EN -------> PG11
+    ETH_MII_TX_CLK ------> PC3
+    ETH_MII_TXD0 --------> PB12
+    ETH_MII_TXD0 --------> PG13
+    ETH_MII_TXD1 --------> PB13
+    ETH_MII_TXD1 --------> PG14
+    ETH_MII_TXD2 --------> PC2
+    ETH_MII_TXD3 --------> PB8
+    ETH_MII_TXD3  -------> PE2
+*/
+
+#error insert MII GPIO initial.
+#elif defined(RMII_MODE)
+/*
+    ETH_MDIO ------------> PA2
+    ETH_MDC -------------> PC1
+
+    ETH_RMII_REF_CLK ----> PA1
+
+    ETH_RMII_CRS_DV -----> PA7
+    ETH_RMII_RXD0 -------> PC4
+    ETH_RMII_RXD1 -------> PC5
+
+    ETH_RMII_TX_EN ------> PG11
+    ETH_RMII_TXD0 -------> PG13
+    ETH_RMII_TXD1 -------> PG14
+
+    ETH_RMII_TX_EN ------> PB11
+    ETH_RMII_TXD0 -------> PB12
+    ETH_RMII_TXD1 -------> PB13
+*/
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource1, GPIO_AF_ETH); /* RMII_REF_CLK */
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource7, GPIO_AF_ETH); /* RMII_CRS_DV */
+
+    /* configure PA1:RMII_REF_CLK, PA7:RMII_CRS_DV. */
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_7;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+    GPIO_PinAFConfig(GPIOC, GPIO_PinSource4, GPIO_AF_ETH); /* RMII_RXD0 */
+    GPIO_PinAFConfig(GPIOC, GPIO_PinSource5, GPIO_AF_ETH); /* RMII_RXD1 */
+
+    /* configure PC4:RMII_RXD0, PC5:RMII_RXD1. */
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4 | GPIO_Pin_5;
+    GPIO_Init(GPIOC, &GPIO_InitStructure);
+
+#   if RMII_TX_GPIO_GROUP == 1
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
+
+    GPIO_PinAFConfig(GPIOB, GPIO_PinSource11, GPIO_AF_ETH); /* RMII_TX_EN */
+    GPIO_PinAFConfig(GPIOB, GPIO_PinSource12, GPIO_AF_ETH); /* RMII_TXD0 */
+    GPIO_PinAFConfig(GPIOB, GPIO_PinSource13, GPIO_AF_ETH); /* RMII_TXD1 */
+
+    /* configure PB11:RMII_TX_EN, PB12:RMII_TXD0, PB13:RMII_TXD1 */
     GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
-    GPIO_PinAFConfig(GPIOB, GPIO_PinSource11, GPIO_AF_ETH);
-    GPIO_PinAFConfig(GPIOB, GPIO_PinSource12, GPIO_AF_ETH);
-    GPIO_PinAFConfig(GPIOB, GPIO_PinSource13, GPIO_AF_ETH);
-#elif TX_GPIO_GROUP == 2
-    /* Configure TX_EN, TX_D0, TX_D1 */
+#   elif RMII_TX_GPIO_GROUP == 2
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOG, ENABLE);
+
+    GPIO_PinAFConfig(GPIOG, GPIO_PinSource11, GPIO_AF_ETH); /* RMII_TX_EN */
+    GPIO_PinAFConfig(GPIOG, GPIO_PinSource13, GPIO_AF_ETH); /* RMII_TXD0 */
+    GPIO_PinAFConfig(GPIOG, GPIO_PinSource14, GPIO_AF_ETH); /* RMII_TXD1 */
+
+    /* configure PG11:RMII_TX_EN, PG13:RMII_TXD0, PG14:RMII_TXD1 */
     GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_11 | GPIO_Pin_13 | GPIO_Pin_14;
     GPIO_Init(GPIOG, &GPIO_InitStructure);
-    GPIO_PinAFConfig(GPIOG, GPIO_PinSource11, GPIO_AF_ETH);
-    GPIO_PinAFConfig(GPIOG, GPIO_PinSource13, GPIO_AF_ETH);
-    GPIO_PinAFConfig(GPIOG, GPIO_PinSource14, GPIO_AF_ETH);
-#else
-#error TX_GPIO_GROUP setting error!
-#endif /*TX_GPIO_GROUP */
+#   else
+#   error RMII_TX_GPIO_GROUP setting error!
+#   endif /*RMII_TX_GPIO_GROUP */
+#endif /* RMII_MODE */
+}
+
+/* PHY: LAN8720 */
+static uint8_t phy_speed = 0;
+#define PHY_LINK_MASK       (1<<0)
+#define PHY_100M_MASK       (1<<1)
+#define PHY_DUPLEX_MASK     (1<<2)
+static void phy_monitor_thread_entry(void *parameter)
+{
+    uint8_t phy_addr = 0xFF;
+    uint8_t phy_speed_new = 0;
+
+    /* phy search */
+    {
+        rt_uint32_t i;
+        rt_uint16_t temp;
+
+        for(i=0; i<=0x1F; i++)
+        {
+            temp = ETH_ReadPHYRegister(i, 0x02);
+
+            if( temp != 0xFFFF )
+            {
+                phy_addr = i;
+                break;
+            }
+        }
+    } /* phy search */
+
+    if(phy_addr == 0xFF)
+    {
+        STM32_ETH_PRINTF("phy not probe!\r\n");
+        return;
+    }
+    else
+    {
+        STM32_ETH_PRINTF("found a phy, address:0x%02X\r\n", phy_addr);
+    }
+
+    /* RESET PHY */
+    STM32_ETH_PRINTF("RESET PHY!\r\n");
+    ETH_WritePHYRegister(phy_addr, PHY_BCR, PHY_Reset);
+    rt_thread_delay(RT_TICK_PER_SECOND * 2);
+    ETH_WritePHYRegister(phy_addr, PHY_BCR, PHY_AutoNegotiation);
+
+    while(1)
+    {
+        uint16_t status  = ETH_ReadPHYRegister(phy_addr, PHY_BSR);
+        STM32_ETH_PRINTF("LAN8720 status:0x%04X\r\n", status);
+
+        phy_speed_new = 0;
+
+        if(status & (PHY_AutoNego_Complete | PHY_Linked_Status))
+        {
+            uint16_t SR;
+
+            SR = ETH_ReadPHYRegister(phy_addr, 31);
+            STM32_ETH_PRINTF("LAN8720 REG 31:0x%04X\r\n", SR);
+
+            SR = (SR >> 2) & 0x07; /* LAN8720, REG31[4:2], Speed Indication. */
+            phy_speed_new = PHY_LINK_MASK;
+
+            if((SR & 0x03) == 2)
+            {
+                phy_speed_new |= PHY_100M_MASK;
+            }
+
+            if(SR & 0x04)
+            {
+                phy_speed_new |= PHY_DUPLEX_MASK;
+            }
+        }
+
+        /* linkchange */
+        if(phy_speed_new != phy_speed)
+        {
+            if(phy_speed_new & PHY_LINK_MASK)
+            {
+                STM32_ETH_PRINTF("link up ");
+
+                if(phy_speed_new & PHY_100M_MASK)
+                {
+                    STM32_ETH_PRINTF("100Mbps");
+                    stm32_eth_device.ETH_Speed = ETH_Speed_100M;
+                }
+                else
+                {
+                    stm32_eth_device.ETH_Speed = ETH_Speed_10M;
+                    STM32_ETH_PRINTF("10Mbps");
+                }
+
+                if(phy_speed_new & PHY_DUPLEX_MASK)
+                {
+                    STM32_ETH_PRINTF(" full-duplex\r\n");
+                    stm32_eth_device.ETH_Mode = ETH_Mode_FullDuplex;
+                }
+                else
+                {
+                    STM32_ETH_PRINTF(" half-duplex\r\n");
+                    stm32_eth_device.ETH_Mode = ETH_Mode_HalfDuplex;
+                }
+                rt_stm32_eth_init((rt_device_t)&stm32_eth_device);
+
+                /* send link up. */
+                eth_device_linkchange(&stm32_eth_device.parent, RT_TRUE);
+            } /* link up. */
+            else
+            {
+                STM32_ETH_PRINTF("link down\r\n");
+                /* send link down. */
+                eth_device_linkchange(&stm32_eth_device.parent, RT_FALSE);
+            } /* link down. */
+
+            phy_speed = phy_speed_new;
+        } /* linkchange */
+
+        rt_thread_delay(RT_TICK_PER_SECOND);
+    } /* while(1) */
 }
 
 void rt_hw_stm32_eth_init(void)
@@ -3955,6 +3994,9 @@ void rt_hw_stm32_eth_init(void)
     GPIO_Configuration();
     NVIC_Configuration();
 
+    stm32_eth_device.ETH_Speed = ETH_Speed_100M;
+    stm32_eth_device.ETH_Mode  = ETH_Mode_FullDuplex;
+
     /* OUI 00-80-E1 STMICROELECTRONICS. */
     stm32_eth_device.dev_addr[0] = 0x00;
     stm32_eth_device.dev_addr[1] = 0x80;
@@ -3980,4 +4022,17 @@ void rt_hw_stm32_eth_init(void)
 
     /* register eth device */
     eth_device_init(&(stm32_eth_device.parent), "e0");
+
+    /* start phy monitor */
+    {
+        rt_thread_t tid;
+        tid = rt_thread_create("phy",
+                               phy_monitor_thread_entry,
+                               RT_NULL,
+                               512,
+                               RT_THREAD_PRIORITY_MAX - 2,
+                               2);
+        if (tid != RT_NULL)
+            rt_thread_startup(tid);
+    }
 }
