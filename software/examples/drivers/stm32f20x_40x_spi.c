@@ -351,6 +351,7 @@ rt_err_t stm32_spi_register(SPI_TypeDef * SPI,
 {
     if(SPI == SPI1)
     {
+    	stm32_spi->SPI = SPI1;
 #ifdef SPI_USE_DMA
         RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);
         /* DMA2_Stream0 DMA_Channel_3 : SPI1_RX */
@@ -384,6 +385,7 @@ rt_err_t stm32_spi_register(SPI_TypeDef * SPI,
     }
     else if(SPI == SPI3)
     {
+    	stm32_spi->SPI = SPI3;
 #ifdef SPI_USE_DMA
         RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
         /* DMA1_Stream2 DMA_Channel_0 : SPI3_RX */
