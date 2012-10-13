@@ -162,6 +162,10 @@
 		<Unit filename="..\..\STM32F4xx_Libraries\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_wwdg.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="..\..\drivers\K9F2G08U0X.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\drivers\K9F2G08U0X.h" />
 		<Unit filename="..\..\drivers\board.c">
 			<Option compilerVar="CC" />
 		</Unit>
