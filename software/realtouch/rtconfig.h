@@ -116,6 +116,8 @@
 #define RT_USING_DFS_ELMFAT
 // <integer name="RT_DFS_ELM_DRIVES" description="The maximal number of drives of FatFs" default="4" />
 #define RT_DFS_ELM_DRIVES    2
+// <bool name="RT_DFS_ELM_REENTRANT" description="Support reentrant" default="true" />
+#define RT_DFS_ELM_REENTRANT
 // <integer name="RT_DFS_ELM_USE_LFN" description="Support long file name" default="0">
 // <item description="LFN1">1</item>
 // <item description="LFN1">2</item>
