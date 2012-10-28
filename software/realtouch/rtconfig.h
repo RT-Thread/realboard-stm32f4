@@ -119,10 +119,11 @@
 // <bool name="RT_DFS_ELM_REENTRANT" description="Support reentrant" default="true" />
 #define RT_DFS_ELM_REENTRANT
 // <integer name="RT_DFS_ELM_USE_LFN" description="Support long file name" default="0">
-// <item description="LFN1">1</item>
-// <item description="LFN1">2</item>
+// <item description="LFN with static LFN working buffer">1</item>
+// <item description="LFN with dynamic LFN working buffer on the stack">2</item>
+// <item description="LFN with dynamic LFN working buffer on the heap">3</item>
 // </integer>
-#define RT_DFS_ELM_USE_LFN	1
+#define RT_DFS_ELM_USE_LFN	3
 // <integer name="RT_DFS_ELM_CODE_PAGE" description="OEM code page" default="936">
 #define RT_DFS_ELM_CODE_PAGE	936
 // <bool name="RT_DFS_ELM_CODE_PAGE_FILE" description="Using OEM code page file" default="false" />
