@@ -6,7 +6,6 @@
 #include <ctype.h>
 #include <dfs_posix.h>
 #include <lwip/sockets.h>
-#include <lwip/netdb.h>
 
 #define HTTP_RCV_TIMEO	6000 /* 6 second */
 

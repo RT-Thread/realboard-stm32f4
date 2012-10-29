@@ -18,7 +18,6 @@
 /*@{*/
 
 #include <stdio.h>
-
 #include <rtthread.h>
 #include <board.h>
 
@@ -29,8 +28,13 @@
 void rt_init_thread_entry(void *parameter)
 {
 #ifdef RT_USING_LWIP
-	/* initialize eth interface */
-	rt_hw_stm32_eth_init();
+    /* initialize eth interface */
+    rt_hw_stm32_eth_init();
+#endif
+
+#ifdef RT_USING_I2C
+    rt_i2c_core_init();
+    rt_hw_i2c_init();
 #endif
 
 #ifdef RT_USING_COMPONENTS_INIT
@@ -42,6 +46,7 @@ void rt_init_thread_entry(void *parameter)
 
     /* Filesystem Initialization */
 #ifdef RT_USING_DFS
+#if 0
     /* mount sd card fat partition 1 as root directory */
     if (dfs_mount("flash0", "/", "elm", 0, 0) == 0)
     {
@@ -70,6 +75,29 @@ void rt_init_thread_entry(void *parameter)
     }
     else rt_kprintf("flash0 mount to / failed!\n");
 #endif
+    if (dfs_mount("sd0", "/", "elm", 0, 0) == 0)
+    {
+        rt_kprintf("sd0 mount to / \n");
+    }
+    else
+    {
+        rt_kprintf("sd0 mount to / failed!\n");
+    }
+#endif
+
+#ifdef RT_USING_USB_DEVICE
+    /* usb device controller driver initilize */
+    rt_hw_usbd_init();
+
+    rt_usb_device_init("usbd");
+#endif
+
+#if STM32_EXT_SRAM
+    /* init netbuf worker */
+    net_buf_init(320 * 1024);
+#endif
+
+    codec_hw_init("i2c1");
 
 #ifdef RT_USING_RTGUI
     realtouch_ui_init();

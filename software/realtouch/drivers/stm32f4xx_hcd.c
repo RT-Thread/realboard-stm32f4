@@ -21,6 +21,8 @@
 #include "usbh_hcs.h"
 #include "usb_bsp.h"
 
+#ifdef RT_USING_USB_HOST
+
 static struct uhcd susb_hcd;
 static struct uhubinst root_hub;
 static rt_bool_t ignore_disconnect = RT_FALSE;
@@ -323,19 +325,32 @@ USBH_Status USBH_DeInit(USB_OTG_CORE_HANDLE *pdev, USBH_HOST *phost)
   */
 rt_uint8_t susb_connect (USB_OTG_CORE_HANDLE *pdev)
 {
-    struct umsg msg;
+    struct uhost_msg msg;
 
     pdev->host.ConnSts = 1;
 
     rt_kprintf("susb_connect\n");
     
     if(root_hub.port_status[0] & PORT_CCS) return 0;
-    if(ignore_disconnect == RT_FALSE) return 0;
+    if(ignore_disconnect == RT_TRUE) return 0;
+
+    USB_Host.Control.hc_num_out = USBH_Alloc_Channel(&USB_OTG_Core, 0x00);
+    USB_Host.Control.hc_num_in = USBH_Alloc_Channel(&USB_OTG_Core, 0x80);  
+
+    /* Open Control pipes */
+    USBH_Open_Channel(&USB_OTG_Core, USB_Host.Control.hc_num_in,
+        USB_Host.device_prop.address,USB_Host.device_prop.speed, EP_TYPE_CTRL,
+        USB_Host.Control.ep0size); 
+
+    /* Open Control pipes */
+    USBH_Open_Channel(&USB_OTG_Core, USB_Host.Control.hc_num_out,
+        USB_Host.device_prop.address, USB_Host.device_prop.speed,
+        EP_TYPE_CTRL, USB_Host.Control.ep0size);   
         
     root_hub.port_status[0] |= (PORT_CCS | PORT_CCSC);
     msg.type = USB_MSG_CONNECT_CHANGE;
     msg.content.uhub = &root_hub;
-    rt_usb_post_event(&msg, sizeof(struct umsg));    
+    rt_usb_post_event(&msg, sizeof(struct uhost_msg));    
 
     return 0;
 }
@@ -348,17 +363,21 @@ rt_uint8_t susb_connect (USB_OTG_CORE_HANDLE *pdev)
   */
 rt_uint8_t susb_disconnect (USB_OTG_CORE_HANDLE *pdev)
 {    
-    struct umsg msg;
+    struct uhost_msg msg;
 
     pdev->host.ConnSts = 0;
 
     rt_kprintf("susb_disconnect\n");
 
+    USBH_DeInit(&USB_OTG_Core , &USB_Host);
+    USBH_DeAllocate_AllChannel(&USB_OTG_Core);  
+    USB_Host.gState = HOST_IDLE;
+
     root_hub.port_status[0] |= PORT_CCSC;
     root_hub.port_status[0] &= ~PORT_CCS;
     msg.type = USB_MSG_CONNECT_CHANGE;
     msg.content.uhub = &root_hub;
-    rt_usb_post_event(&msg, sizeof(struct umsg));    
+    rt_usb_post_event(&msg, sizeof(struct uhost_msg));    
 
     return 0;
 }
@@ -413,9 +432,9 @@ static int susb_control_xfer(uinst_t uinst, ureq_t setup, void* buffer,
     rt_memcpy((void*)USB_Host.Control.setup.d8, (void*)setup, 8);
     
     USBH_Modify_Channel (&USB_OTG_Core, USB_Host.Control.hc_num_out,
-        uinst->address, 0, speed, uinst->max_packet_size);
+        uinst->address, speed, EP_TYPE_CTRL, uinst->max_packet_size);
     USBH_Modify_Channel (&USB_OTG_Core, USB_Host.Control.hc_num_in,
-        uinst->address, 0, speed, uinst->max_packet_size);  
+        uinst->address, speed, EP_TYPE_CTRL, uinst->max_packet_size);  
 
     while(1)
     {
@@ -490,14 +509,28 @@ static int susb_bulk_xfer(upipe_t pipe, void* buffer, int nbytes, int timeout)
         {
             USBH_BulkReceiveData(&USB_OTG_Core, ptr, pipe->ep.wMaxPacketSize, 
                 channel);
-            while(HCD_GetURB_State(&USB_OTG_Core , channel) != URB_DONE);
-
+            while(1)
+            {
+                state = HCD_GetURB_State(&USB_OTG_Core , channel);
+                if(state == URB_DONE) break;
+                else if(state == URB_NOTREADY) rt_kprintf("not ready\n");
+                else if(state == URB_STALL) rt_kprintf("stall\n");
+                //else if(state == URB_IDLE) rt_kprintf("idle\n");
+            }
+            
             ptr += pipe->ep.wMaxPacketSize;
             left -= pipe->ep.wMaxPacketSize;
         }
 
         USBH_BulkReceiveData(&USB_OTG_Core, ptr, left, channel);
-        while(HCD_GetURB_State(&USB_OTG_Core , channel) != URB_DONE);
+        while(1)
+        {
+            state = HCD_GetURB_State(&USB_OTG_Core , channel);
+            if(state == URB_DONE) break;
+            else if(state == URB_NOTREADY) rt_kprintf("not ready\n");
+            else if(state == URB_STALL) rt_kprintf("stall\n");
+            //else if(state == URB_IDLE) rt_kprintf("idle\n");            
+        }
     }    
     else
     {    
@@ -578,9 +611,9 @@ static rt_err_t susb_alloc_pipe(upipe_t* pipe, uifinst_t ifinst, uep_desc_t ep,
     speed = HCD_GetCurrentSpeed(&USB_OTG_Core);
     channel = USBH_Alloc_Channel(&USB_OTG_Core, p->ep.bEndpointAddress);
 
-    if(ep->bmAttributes & USB_EP_ATTR_TYPE_MASK == USB_EP_ATTR_BULK)
+    if((ep->bmAttributes & USB_EP_ATTR_TYPE_MASK) == USB_EP_ATTR_BULK)
     ep_type = EP_TYPE_BULK;
-    else if(ep->bmAttributes & USB_EP_ATTR_TYPE_MASK == USB_EP_ATTR_INT)
+    else if((ep->bmAttributes & USB_EP_ATTR_TYPE_MASK) == USB_EP_ATTR_INT)
     ep_type = EP_TYPE_INTR;
     else rt_kprintf("unsupported endpoint type\n");
         
@@ -663,10 +696,10 @@ static rt_err_t susb_hub_control(rt_uint16_t port, rt_uint8_t cmd, void* args)
             root_hub.port_status[port - 1] |= PORT_PPS;
             break;
         case PORT_FEAT_RESET:            
+            ignore_disconnect = RT_TRUE;            
             root_hub.port_status[port - 1] |= PORT_PRS;    
             USB_OTG_ResetPort(&USB_OTG_Core);             
             root_hub.port_status[port - 1] &= ~PORT_PRS;  
-            ignore_disconnect = RT_TRUE;          
             break;
         case PORT_FEAT_ENABLE:
             root_hub.port_status[port - 1] |= PORT_PES;            
@@ -716,22 +749,11 @@ static rt_err_t susb_init(rt_device_t dev)
     
     /* Host de-initializations */
     USBH_DeInit(&USB_OTG_Core, &USB_Host);
-
-    USB_Host.Control.hc_num_out = USBH_Alloc_Channel(&USB_OTG_Core, 0x00);
-    USB_Host.Control.hc_num_in = USBH_Alloc_Channel(&USB_OTG_Core, 0x80);  
     
     /* Start the USB OTG core */     
     HCD_Init(&USB_OTG_Core , USB_OTG_FS_CORE_ID);
 
-    /* Open Control pipes */
-    USBH_Open_Channel(&USB_OTG_Core, USB_Host.Control.hc_num_in,
-        USB_Host.device_prop.address,USB_Host.device_prop.speed, EP_TYPE_CTRL,
-        USB_Host.Control.ep0size); 
-
-    /* Open Control pipes */
-    USBH_Open_Channel(&USB_OTG_Core, USB_Host.Control.hc_num_out,
-        USB_Host.device_prop.address, USB_Host.device_prop.speed,
-        EP_TYPE_CTRL, USB_Host.Control.ep0size);   
+    USBH_DeAllocate_AllChannel(&USB_OTG_Core);  
           
     /* Enable Interrupts */
     USB_OTG_BSP_EnableInterrupt(&USB_OTG_Core);    
@@ -754,3 +776,5 @@ void rt_hw_susb_init(void)
     
     rt_device_register(&susb_hcd.parent, "susb", 0);    
 }
+
+#endif

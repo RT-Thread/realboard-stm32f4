@@ -142,6 +142,7 @@
 //#define RT_USING_DFS_ROMFS
 // </section>
 
+#define RT_USING_I2C
 #define RT_USING_SDIO
 #define RT_MMCSD_THREAD_PREORITY	15
 

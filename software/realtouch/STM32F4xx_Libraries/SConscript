@@ -36,6 +36,24 @@ path = [cwd + '/STM32F4xx_StdPeriph_Driver/inc',
     cwd + '/STM32_USB_HOST_Library/Core/inc',
     cwd + '/STM32_USB_OTG_Driver/inc']
 
+# source files for USB device library
+if GetDepend('RT_USING_USB_HOST') == True:
+    usb_src = Split('''
+        STM32_USB_Device_Library/Core/src/usbd_ioreq.c
+        STM32_USB_OTG_Driver/src/usb_core.c
+        STM32_USB_OTG_Driver/src/usb_dcd.c
+        STM32_USB_OTG_Driver/src/usb_dcd_int.c
+        ''')
+
+    usb_path = [cwd + '/STM32_USB_Device_Library/Core/inc',
+        cwd + '/STM32_USB_OTG_Driver/inc',
+        cwd + '/STM32_USB_Device_Library/Class/cdc/inc',
+        cwd + '/STM32_USB_HOST_Library/Core/inc']
+
+# add USB related source code 
+    path += usb_path
+    src += usb_src
+
 CPPDEFINES = ['USE_STDPERIPH_DRIVER']
 group = DefineGroup('STM32_StdPeriph', src, depend = [''], CPPPATH = path, CPPDEFINES = CPPDEFINES)
 

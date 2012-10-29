@@ -45,6 +45,10 @@ if GetDepend('RT_USING_USB_HOST') == True:
 	src+= ['stm32f4xx_hcd.c']
 	src+= ['usb_bsp.c']
 
+if GetDepend('RT_USING_USB_DEVICE') == True:
+	src+= ['usb_bsp.c']
+	src+= ['stm32f4xx_dcd.c']
+
 # add RTC driver.
 if GetDepend('RT_USING_RTC') == True:
 	src+= ['stm32f4_rtc.c']
