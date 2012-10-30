@@ -1,0 +1,17 @@
+Import('RTT_ROOT')
+from building import *
+
+src = Glob('*.c')
+src += Glob('./real/*.c')
+
+SrcRemove(src, 'polyphase.c')
+src += ['./real/arm/asmmisc.s', './real/arm/asmpoly_thumb2.s']
+
+cwd     = GetCurrentDir()
+
+CPPPATH = [cwd + '/pub']
+
+
+group = DefineGroup('mp3', src, depend = [''], CPPPATH = CPPPATH)
+
+Return('group')
