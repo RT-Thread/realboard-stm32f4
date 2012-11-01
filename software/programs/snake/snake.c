@@ -9,10 +9,28 @@
 
 #define LATTICE_SIZE        (20)
 
+#define WALL_COLOR          RTGUI_RGB(255, 0, 0)
+#define LATTICE_COLOR       RTGUI_RGB(0, 0, 255)
+#define BACKGROUND_COLOR    RTGUI_RGB(153, 153, 0)
+
 static rtgui_timer_t *timer;
 static rt_size_t room_size_x, room_size_y;
 static rt_size_t lattice_size_x, lattice_size_y;
 static struct rtgui_rect room_rect, lattice_rect;
+
+static void snake_fill_lattice(struct rtgui_dc *dc, rt_uint32_t x, rt_uint32_t y)
+{
+    struct rtgui_rect rect;
+
+    RTGUI_DC_BC(dc) = LATTICE_COLOR;
+
+    rect.x1 = lattice_rect.x1 + (LATTICE_SIZE * x);
+    rect.x2 = rect.x1 + LATTICE_SIZE;
+
+    rect.y1 = lattice_rect.y1 + (LATTICE_SIZE * y);
+    rect.y2 = rect.y1 + LATTICE_SIZE;
+    rtgui_dc_fill_rect(dc, &rect);
+}
 
 static void snake_draw(struct rtgui_widget *widget)
 {
@@ -29,8 +47,8 @@ static void snake_draw(struct rtgui_widget *widget)
         return;
     }
 
-    rtgui_widget_get_rect(widget, &rect);
-    rt_kprintf("rect => x1:%d x2:%d, y1:%d y2:%d\r\n", rect.x1, rect.x2, rect.y1, rect.y2);
+//    rtgui_widget_get_rect(widget, &rect);
+//    rt_kprintf("rect => x1:%d x2:%d, y1:%d y2:%d\r\n", rect.x1, rect.x2, rect.y1, rect.y2);
 //    rtgui_widget_rect_to_device(widget, &rect);
 //    rt_kprintf("rect => x1:%d x2:%d, y1:%d y2:%d\r\n", rect.x1, rect.x2, rect.y1, rect.y2);
 
@@ -39,47 +57,85 @@ static void snake_draw(struct rtgui_widget *widget)
     {
         rt_size_t tmp;
 
+        rtgui_widget_get_rect(widget, &rect);
+        rt_kprintf("rect => x1:%d x2:%d, y1:%d y2:%d\r\n", rect.x1, rect.x2, rect.y1, rect.y2);
+
         room_size_x = rect.x2 - rect.x1;
         room_size_y = rect.y2 - rect.y1;
         memcpy(&room_rect, &rect, sizeof(struct rtgui_rect));
         rt_kprintf("room_rect => x1:%d x2:%d, y1:%d y2:%d\r\n",
                    room_rect.x1, room_rect.x2,
                    room_rect.y1, room_rect.y2);
+
         lattice_size_x = (room_rect.x2 - room_rect.x1) / LATTICE_SIZE;
         lattice_size_y = (room_rect.y2 - room_rect.y1) / LATTICE_SIZE;
         lattice_size_x -= 2;
         lattice_size_y -= 2;
 
-        tmp = (room_rect.x2 - room_rect.x1) - (lattice_size_x * LATTICE_SIZE);
+        tmp = (room_rect.x2 - room_rect.x1) - (LATTICE_SIZE * lattice_size_x);
         lattice_rect.x1 = room_rect.x1 + (tmp / 2);
-        lattice_rect.x2 = lattice_rect.x1 + (lattice_size_x * LATTICE_SIZE);
+        lattice_rect.x2 = lattice_rect.x1 + (LATTICE_SIZE * lattice_size_x);
 
-        tmp = (room_rect.y2 - room_rect.y1) - (lattice_size_y * LATTICE_SIZE);
+        tmp = (room_rect.y2 - room_rect.y1) - (LATTICE_SIZE * lattice_size_y);
         lattice_rect.y1 = room_rect.y1 + (tmp / 2);
-        lattice_rect.y2 = lattice_rect.y1 + (lattice_size_y * LATTICE_SIZE);
+        lattice_rect.y2 = lattice_rect.y1 + (LATTICE_SIZE * lattice_size_y);
         rt_kprintf("lattice_rect => x1:%d x2:%d, y1:%d y2:%d\r\n",
                    lattice_rect.x1, lattice_rect.x2,
                    lattice_rect.y1, lattice_rect.y2);
     }
 
-    RTGUI_DC_BC(dc) = RTGUI_RGB(153, 153, 0);
-    rtgui_dc_fill_rect(dc, &room_rect);// !!!
-    RTGUI_DC_FC(dc) = RTGUI_RGB(255, 0, 0);
+    RTGUI_DC_BC(dc) = BACKGROUND_COLOR;
+    rtgui_dc_fill_rect(dc, &room_rect);
+
+    RTGUI_DC_FC(dc) = WALL_COLOR;
     rtgui_dc_draw_rect(dc, &lattice_rect);
+
     for(i=1; i<lattice_size_y; i++)
     {
         rtgui_dc_draw_horizontal_line(dc, lattice_rect.x1, lattice_rect.x2,
                                       lattice_rect.y1 + (LATTICE_SIZE * i));
     }
+
     for(i=1; i<lattice_size_x; i++)
     {
         rtgui_dc_draw_vertical_line(dc, lattice_rect.x1 + (LATTICE_SIZE * i),
                                     lattice_rect.y1, lattice_rect.y2);
     }
 
+    snake_fill_lattice(dc, 0, 0);
+    snake_fill_lattice(dc, 1, 1);
+    snake_fill_lattice(dc, lattice_size_x - 1, lattice_size_y - 1);
+
     rtgui_dc_end_drawing(dc);
 
     return;
+}
+
+static void snake_handler(struct rtgui_widget *widget, rtgui_event_t *event)
+{
+    struct rtgui_event_kbd* ekbd;
+
+    ekbd = (struct rtgui_event_kbd*) event;
+    if (ekbd->type == RTGUI_KEYDOWN)
+    {
+        switch (ekbd->key)
+        {
+        case RTGUIK_UP:
+            rt_kprintf("RTGUIK_UP\r\n");
+            break;
+        case RTGUIK_DOWN:
+            rt_kprintf("RTGUIK_DOWN\r\n");
+            break;
+        case RTGUIK_LEFT:
+            rt_kprintf("RTGUIK_LEFT\r\n");
+            break;
+        case RTGUIK_RIGHT:
+            rt_kprintf("RTGUIK_RIGHT\r\n");
+            break;
+        default:
+            break;
+        }
+    }
 }
 
 static rt_bool_t event_handler(struct rtgui_object *object, rtgui_event_t *event)
@@ -106,6 +162,12 @@ static rt_bool_t event_handler(struct rtgui_object *object, rtgui_event_t *event
         rt_kprintf("RTGUI_EVENT_HIDE\r\n");
         rtgui_container_event_handler(object, event);
         rtgui_timer_stop(timer);
+    }
+    else if (event->type == RTGUI_EVENT_KBD)
+    {
+//        rt_kprintf("RTGUI_EVENT_KBD\r\n");
+        rtgui_container_event_handler(object, event);
+        snake_handler(widget, event);
     }
     else
     {
