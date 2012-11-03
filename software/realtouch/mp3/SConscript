@@ -1,11 +1,15 @@
 Import('RTT_ROOT')
+Import('rtconfig')
 from building import *
 
 src = Glob('*.c')
 src += Glob('./real/*.c')
 
 SrcRemove(src, 'polyphase.c')
-src += ['./real/arm/asmmisc.s', './real/arm/asmpoly_thumb2.s']
+if rtconfig.PLATFORM == 'iar':
+	src += ['./real/arm/asmmisc_iar.s', './real/arm/asmpoly_thumb2_iar.s']
+if rtconfig.PLATFORM == 'armcc':
+	src += ['./real/arm/asmmisc.s', './real/arm/asmpoly_thumb2.s']
 
 cwd     = GetCurrentDir()
 
