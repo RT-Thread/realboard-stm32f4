@@ -2,27 +2,121 @@
  * export for c library symbols or aeabi symbols
  */
 #include <rtm.h>
+#include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <time.h>
+#include <math.h>
 
-/* export for libc */
-RTM_EXPORT(memmove);
+/********** begin export for libc **********/
+
+/* Standard C String & Character */
+//RTM_EXPORT(atof);
+RTM_EXPORT(atoi);
 RTM_EXPORT(atol);
-RTM_EXPORT(tolower);
-RTM_EXPORT(toupper);
+//RTM_EXPORT(isalnum);
+RTM_EXPORT(isalpha);
+//RTM_EXPORT(iscntrl);
+RTM_EXPORT(isdigit);
+//RTM_EXPORT(isgraph);
+//RTM_EXPORT(islower);
+RTM_EXPORT(isprint);
+//RTM_EXPORT(ispunct);
 RTM_EXPORT(isspace);
-RTM_EXPORT(strrchr);
-RTM_EXPORT(strstr);
+//RTM_EXPORT(isupper);
+//RTM_EXPORT(isxdigit);
+//RTM_EXPORT(memchr);
+RTM_EXPORT(memcmp);
+RTM_EXPORT(memcpy);
+RTM_EXPORT(memmove);
+RTM_EXPORT(memset);
+RTM_EXPORT(strcat);
 RTM_EXPORT(strchr);
 RTM_EXPORT(strcmp);
-RTM_EXPORT(strncmp);
+//RTM_EXPORT(strcoll);
 RTM_EXPORT(strcpy);
+RTM_EXPORT(strcspn);
+//RTM_EXPORT(strerror);
+RTM_EXPORT(strlen);
+RTM_EXPORT(strncat);
+RTM_EXPORT(strncmp);
 RTM_EXPORT(strncpy);
-RTM_EXPORT(malloc);
-RTM_EXPORT(free);
-RTM_EXPORT(realloc);
+//RTM_EXPORT(strpbrk);
+RTM_EXPORT(strrchr);
+RTM_EXPORT(strspn);
+RTM_EXPORT(strstr);
+//RTM_EXPORT(strtod);
+RTM_EXPORT(strtok);
+//RTM_EXPORT(strtol);
+//RTM_EXPORT(strtoul);
+//RTM_EXPORT(strxfrm);
+RTM_EXPORT(tolower);
+RTM_EXPORT(toupper);
+
+/* Standard C Math */
+//RTM_EXPORT(abs);
+//RTM_EXPORT(acos);
+//RTM_EXPORT(asin);
+//RTM_EXPORT(atan);
+//RTM_EXPORT(atan2);
+//RTM_EXPORT(ceil);
+//RTM_EXPORT(cos);
+//RTM_EXPORT(cosh);
+//RTM_EXPORT(div);
+//RTM_EXPORT(exp);
+//RTM_EXPORT(fabs);
+//RTM_EXPORT(floor);
+//RTM_EXPORT(fmod);
+//RTM_EXPORT(frexp);
+//RTM_EXPORT(labs);
+//RTM_EXPORT(ldexp);
+//RTM_EXPORT(ldiv);
+//RTM_EXPORT(log);
+//RTM_EXPORT(log10);
+//RTM_EXPORT(modf);
+//RTM_EXPORT(pow);
+//RTM_EXPORT(sin);
+//RTM_EXPORT(sinh);
+//RTM_EXPORT(sqrt);
+//RTM_EXPORT(tan);
+//RTM_EXPORT(tanh);
+
+/* Standard C Time & Date */
+//RTM_EXPORT(asctime);
+//RTM_EXPORT(clock);
+//RTM_EXPORT(ctime);
+//RTM_EXPORT(difftime);
+//RTM_EXPORT(gmtime);
+//RTM_EXPORT(localtime);
+//RTM_EXPORT(mktime);
+//RTM_EXPORT(strftime);
+//RTM_EXPORT(time);
+
+/* Standard C Memory */
 RTM_EXPORT(calloc);
+RTM_EXPORT(free);
+RTM_EXPORT(malloc);
+RTM_EXPORT(realloc);
+
+/* Other standard C functions */
+//RTM_EXPORT(abort);
+//RTM_EXPORT(assert);
+//RTM_EXPORT(atexit);
+//RTM_EXPORT(bsearch);
+//RTM_EXPORT(exit);
+//RTM_EXPORT(getenv);
+//RTM_EXPORT(longjmp);
+//RTM_EXPORT(qsort);
+//RTM_EXPORT(raise);
+RTM_EXPORT(rand);
+//RTM_EXPORT(setjmp);
+//RTM_EXPORT(signal);
+RTM_EXPORT(srand);
+//RTM_EXPORT(system);
+//RTM_EXPORT(va_arg);
+
+/********** end export for libc **********/
 
 /* BPABI symbols */
 extern int __aeabi_cdcmpeq;
