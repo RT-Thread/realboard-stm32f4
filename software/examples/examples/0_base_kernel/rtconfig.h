@@ -64,6 +64,7 @@
 #define RT_USING_DEVICE
 // <bool name=RT_USING_DEVICE_IPC description="Using IPC in Device Driver Framework" default="true" />
 #define RT_USING_DEVICE_IPC
+// <bool name="RT_USING_SERIAL" description="Using Serial Device Driver Framework" default="true" />
 #define RT_USING_SERIAL
 
 /* SECTION: Console options */

@@ -62,7 +62,13 @@
 /* SECTION: Device System */
 /* Using Device System */
 #define RT_USING_DEVICE
+// <bool name=RT_USING_DEVICE_IPC description="Using IPC in Device Driver Framework" default="true" />
+#define RT_USING_DEVICE_IPC
+// <bool name="RT_USING_SERIAL" description="Using Serial Device Driver Framework" default="true" />
 #define RT_USING_SERIAL
+// <integer name="RT_UART_RX_BUFFER_SIZE" description="The buffer size for UART reception" default="64" />
+#define RT_UART_RX_BUFFER_SIZE	64
+// </section>
 
 /* SECTION: Console options */
 #define RT_USING_CONSOLE
