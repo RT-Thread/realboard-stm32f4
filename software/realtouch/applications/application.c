@@ -46,7 +46,7 @@ void rt_init_thread_entry(void *parameter)
 
     /* Filesystem Initialization */
 #ifdef RT_USING_DFS
-#if 0
+#if 1
     /* mount sd card fat partition 1 as root directory */
     if (dfs_mount("flash0", "/", "elm", 0, 0) == 0)
     {
