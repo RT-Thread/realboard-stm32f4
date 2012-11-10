@@ -205,8 +205,9 @@ static rt_size_t stm32_i2c_write(struct rt_i2c_bus_device * device,
 static rt_size_t stm32_i2c_recv_bytes(I2C_TypeDef* I2Cx, struct rt_i2c_msg *msg)
 {
     rt_size_t bytes = 0;
+    rt_size_t len = msg->len;
 
-    while (msg->len--)
+    while (len--)
     {
         while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_RECEIVED));
 
@@ -220,8 +221,9 @@ static rt_size_t stm32_i2c_recv_bytes(I2C_TypeDef* I2Cx, struct rt_i2c_msg *msg)
 static rt_size_t stm32_i2c_send_bytes(I2C_TypeDef* I2Cx, struct rt_i2c_msg *msg)
 {
     rt_size_t bytes = 0;
+    rt_size_t len = msg->len;
 
-    while (msg->len--)
+    while (len--)
     {
         I2Cx->DR = msg->buf[bytes++];
         while(! I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
