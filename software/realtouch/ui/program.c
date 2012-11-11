@@ -17,7 +17,7 @@
 #define PATH_SEPARATOR      '/'
 #endif
 
-#define APP_PATH            "/programs"
+#define APP_PATH            "/SD/programs"
 #define ITEM_MAX            10
 
 static struct rtgui_list_item *items = RT_NULL;
@@ -137,7 +137,7 @@ static void scan_app_dir(const char* path)
 {
     DIR* dir;
     struct dirent* entry;
-    char fn[32];
+    char fn[64];
 
     dir = opendir(path);
     if (dir == RT_NULL)
