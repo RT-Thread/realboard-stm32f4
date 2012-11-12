@@ -46,8 +46,7 @@ void rt_init_thread_entry(void *parameter)
 
     /* Filesystem Initialization */
 #ifdef RT_USING_DFS
-#if 1 /* 0:root is SD card, 1:root is spi flash. */
-    /* mount sd card fat partition 1 as root directory */
+    /* 0:root is SD card, 1:root is spi flash. */
     if (dfs_mount("flash0", "/", "elm", 0, 0) == 0)
     {
         rt_kprintf("flash0 mount to / \n");
@@ -74,16 +73,6 @@ void rt_init_thread_entry(void *parameter)
         }
     }
     else rt_kprintf("flash0 mount to / failed!\n");
-#else
-    if (dfs_mount("sd0", "/", "elm", 0, 0) == 0)
-    {
-        rt_kprintf("sd0 mount to / \n");
-    }
-    else
-    {
-        rt_kprintf("sd0 mount to / failed!\n");
-    }
-#endif
 #endif /* RT_USING_DFS */
 
 #ifdef RT_USING_USB_DEVICE

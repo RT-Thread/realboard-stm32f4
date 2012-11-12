@@ -63,6 +63,12 @@
 #define RT_USING_SPI
 // <integer name="RT_UART_RX_BUFFER_SIZE" description="The buffer size for UART reception" default="64" />
 #define RT_UART_RX_BUFFER_SIZE	64
+// <bool name="RT_USING_I2C" description="Using I2C Device Driver Framework" default="true" />
+#define RT_USING_I2C
+// <bool name="RT_USING_SDIO" description="Using SDIO Device Driver Framework" default="true" />
+#define RT_USING_SDIO
+// <integer name="RT_MMCSD_THREAD_PREORITY" description="The prority of mmcsd thread" default="15" />
+#define RT_MMCSD_THREAD_PREORITY	15
 // </section>
 
 // <section name="RT_USING_USB_HOST" description="USB Host stack" default="true" >
@@ -141,10 +147,6 @@
 // <bool name="RT_USING_DFS_ROMFS" description="Using ROMFS" default="false" />
 //#define RT_USING_DFS_ROMFS
 // </section>
-
-#define RT_USING_I2C
-#define RT_USING_SDIO
-#define RT_MMCSD_THREAD_PREORITY	15
 
 // <section name="RT_USING_RTGUI" description="RTGUI, a graphic user interface" default="true" >
 #define RT_USING_RTGUI
