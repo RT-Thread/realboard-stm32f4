@@ -7,13 +7,13 @@ CROSS_TOOL='keil'
 # EXEC_PATH is the compiler execute path, for example, CodeSourcery, Keil MDK, IAR
 if  CROSS_TOOL == 'gcc':
 	PLATFORM 	= 'gcc'
-	EXEC_PATH 	= 'E:/Program Files/CodeSourcery/arm-none-eabi/bin'
+	EXEC_PATH 	= r'C:/Program Files/CodeSourcery/arm-none-eabi/bin'
 elif CROSS_TOOL == 'keil':
 	PLATFORM 	= 'armcc'
-	EXEC_PATH 	= 'D:/Keil'
+	EXEC_PATH 	= r'C:/Keil'
 elif CROSS_TOOL == 'iar':
 	PLATFORM 	= 'iar'
-	IAR_PATH 	= 'E:/Program Files/IAR Systems/Embedded Workbench 6.0'
+	IAR_PATH 	= r'C:/Program Files/IAR Systems/Embedded Workbench 6.0'
 
 #
 BUILD = 'debug'

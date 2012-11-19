@@ -5,17 +5,17 @@ ARCH='arm'
 CPU='cortex-m4'
 CROSS_TOOL='gcc'
 
-#if os.getenv('RTT_CC'):
-#	CROSS_TOOL = os.getenv('RTT_CC')
+if os.getenv('RTT_CC'):
+	CROSS_TOOL = os.getenv('RTT_CC')
 
 # cross_tool provides the cross compiler
 # EXEC_PATH is the compiler execute path, for example, CodeSourcery, Keil MDK, IAR
 if  CROSS_TOOL == 'gcc':
 	PLATFORM 	= 'gcc'
-	EXEC_PATH 	= 'D:/Program Files/TOOLs/codesourcery/bin'
+	EXEC_PATH 	= r'C:/Program Files/CodeSourcery/Sourcery G++ Lite/bin'
 elif CROSS_TOOL == 'keil':
 	PLATFORM 	= 'armcc'
-	EXEC_PATH 	= 'F:/keil/mdk'
+	EXEC_PATH 	= r'C:/Keil'
 elif CROSS_TOOL == 'iar':
     print '================ERROR============================'
     print 'Not support iar yet!'

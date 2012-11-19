@@ -6,7 +6,7 @@ CPU='cortex-m4'
 CROSS_TOOL='gcc'
 
 PLATFORM 	= 'gcc'
-EXEC_PATH 	= 'C:/Program Files/CodeSourcery/Sourcery G++ Lite/bin'
+EXEC_PATH 	= r'C:/Program Files/CodeSourcery/Sourcery G++ Lite/bin'
 
 if os.getenv('RTT_EXEC_PATH'):
     EXEC_PATH = os.getenv('RTT_EXEC_PATH')
