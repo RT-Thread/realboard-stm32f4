@@ -4,6 +4,7 @@
 #include <rtgui/widgets/window.h>
 #include <rtgui/rtgui_app.h>
 
+
 #include "touch.h"
 #include "setup.h"
 
@@ -136,7 +137,7 @@ static void calibration_data_post(rt_uint16_t x, rt_uint16_t y)
 rt_bool_t calibration_event_handler(struct rtgui_object* object, struct rtgui_event* event)
 {
     struct rtgui_widget *widget = RTGUI_WIDGET(object);
-    
+     rtgui_rect_t label_rect={120,250,680,270};
     switch (event->type)
     {
     case RTGUI_EVENT_PAINT:
@@ -163,6 +164,7 @@ rt_bool_t calibration_event_handler(struct rtgui_object* object, struct rtgui_ev
             case CALIBRATION_STEP_LEFTTOP:
                 rtgui_dc_draw_hline(dc, 0, 2 * CALIBRATION_WIDTH, CALIBRATION_HEIGHT);
                 rtgui_dc_draw_vline(dc, CALIBRATION_WIDTH, 0, 2 * CALIBRATION_HEIGHT);
+						    rtgui_dc_draw_text(dc,"Please touch the sight bead on the lift top to finish Calibration!",&label_rect);
                 RTGUI_WIDGET_FOREGROUND(widget) = red;
                 rtgui_dc_fill_circle(dc, CALIBRATION_WIDTH, CALIBRATION_HEIGHT, 4);
                 break;
@@ -171,6 +173,7 @@ rt_bool_t calibration_event_handler(struct rtgui_object* object, struct rtgui_ev
                 rtgui_dc_draw_hline(dc, calibration_ptr->width - 2 * CALIBRATION_WIDTH,
                     calibration_ptr->width, CALIBRATION_HEIGHT);
                 rtgui_dc_draw_vline(dc, calibration_ptr->width - CALIBRATION_WIDTH, 0, 2 * CALIBRATION_HEIGHT);
+						    rtgui_dc_draw_text(dc,"Please touch the sight bead on the right top to finish Calibration!",&label_rect);
                 RTGUI_WIDGET_FOREGROUND(widget) = red;
                 rtgui_dc_fill_circle(dc, calibration_ptr->width - CALIBRATION_WIDTH, CALIBRATION_HEIGHT, 4);
                 break;
@@ -178,6 +181,7 @@ rt_bool_t calibration_event_handler(struct rtgui_object* object, struct rtgui_ev
             case CALIBRATION_STEP_LEFTBOTTOM:
                 rtgui_dc_draw_hline(dc, 0, 2 * CALIBRATION_WIDTH, calibration_ptr->height - CALIBRATION_HEIGHT);
                 rtgui_dc_draw_vline(dc, CALIBRATION_WIDTH, calibration_ptr->height - 2 * CALIBRATION_HEIGHT, calibration_ptr->height);
+						    rtgui_dc_draw_text(dc,"Please touch the sight bead on the left bottom to finish Calibration!",&label_rect);
                 RTGUI_WIDGET_FOREGROUND(widget) = red;
                 rtgui_dc_fill_circle(dc, CALIBRATION_WIDTH, calibration_ptr->height - CALIBRATION_HEIGHT, 4);
                 break;
@@ -186,14 +190,16 @@ rt_bool_t calibration_event_handler(struct rtgui_object* object, struct rtgui_ev
                 rtgui_dc_draw_hline(dc, calibration_ptr->width - 2 * CALIBRATION_WIDTH,
                     calibration_ptr->width, calibration_ptr->height - CALIBRATION_HEIGHT);
                 rtgui_dc_draw_vline(dc, calibration_ptr->width - CALIBRATION_WIDTH, calibration_ptr->height - 2 * CALIBRATION_HEIGHT, calibration_ptr->height);
-                RTGUI_WIDGET_FOREGROUND(widget) = red;
+                rtgui_dc_draw_text(dc,"Please touch the sight bead on the right bottom to finish Calibration!",&label_rect);
+						    RTGUI_WIDGET_FOREGROUND(widget) = red;
                 rtgui_dc_fill_circle(dc, calibration_ptr->width - CALIBRATION_WIDTH, calibration_ptr->height - CALIBRATION_HEIGHT, 4);
                 break;
 
             case CALIBRATION_STEP_CENTER:
                 rtgui_dc_draw_hline(dc, calibration_ptr->width/2 - CALIBRATION_WIDTH, calibration_ptr->width/2 + CALIBRATION_WIDTH, calibration_ptr->height/2);
                 rtgui_dc_draw_vline(dc, calibration_ptr->width/2, calibration_ptr->height/2 - CALIBRATION_HEIGHT, calibration_ptr->height/2 + CALIBRATION_HEIGHT);
-                RTGUI_WIDGET_FOREGROUND(widget) = red;
+                rtgui_dc_draw_text(dc,"Please touch the sight bead on the center to finish Calibration!",&label_rect);
+						    RTGUI_WIDGET_FOREGROUND(widget) = red;
                 rtgui_dc_fill_circle(dc, calibration_ptr->width/2, calibration_ptr->height/2, 4);
                 break;
         }
@@ -258,7 +264,7 @@ void calibration_entry(void* parameter)
             RTGUI_WIN_STYLE_NO_TITLE | RTGUI_WIN_STYLE_NO_BORDER | 
             RTGUI_WIN_STYLE_ONTOP | RTGUI_WIN_STYLE_DESTROY_ON_CLOSE);
         if (calibration_ptr->win != RT_NULL)
-        {    
+        {   			
             rtgui_object_set_event_handler(RTGUI_OBJECT(calibration_ptr->win),
                 calibration_event_handler);
             rtgui_win_show(calibration_ptr->win, RT_TRUE);
