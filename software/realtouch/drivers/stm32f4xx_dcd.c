@@ -1,5 +1,5 @@
 /**
- * USB device controller for RT-Thread RTOS
+ * USB device controller driver for RT-Thread RTOS
  *
  */
 #include <rtthread.h>
@@ -8,12 +8,10 @@
 #include "usb_core.h"
 #include "usb_dcd.h"
 #include "usb_dcd_int.h"
+#include "usbd_ioreq.h"
+#include "usb_bsp.h"
 
-typedef enum {
-  USBD_OK   = 0,
-  USBD_BUSY,
-  USBD_FAIL,
-}USBD_Status;
+#ifdef RT_USING_USB_DEVICE
 
 static struct udcd stm32_dcd;
 ALIGN(4) static USB_OTG_CORE_HANDLE USB_OTG_Core;
@@ -184,7 +182,6 @@ static rt_uint8_t USBD_DataInStage(USB_OTG_CORE_HANDLE *pdev , uint8_t epnum)
     }
     else
     {
-        rt_uint16_t size;
         struct udev_msg msg;
         
         msg.type = USB_MSG_DATA_NOTIFY;
@@ -251,8 +248,6 @@ USBD_DCD_INT_cb_TypeDef  *USBD_DCD_INT_fops = &USBD_DCD_INT_cb;
 
 static rt_err_t ep_stall(uep_t ep)
 {
-    RT_ASSERT(ep != RT_NULL);
-
     if(ep == 0)
     {
         DCD_EP_Stall(&USB_OTG_Core, 0);    
@@ -275,12 +270,12 @@ static rt_err_t set_address(rt_uint8_t address)
 
 static rt_err_t clear_feature(rt_uint8_t value)
 {
-
+    return RT_EOK;
 }
 
 static rt_err_t set_feature(rt_uint8_t value)
 {
-
+    return RT_EOK;
 }
 
 static rt_uint8_t ep_in_num = 1;
@@ -416,6 +411,8 @@ void rt_hw_usbd_init(void)
     stm32_dcd.ops = &stm32_dcd_ops;
     rt_completion_init(&stm32_dcd.completion);
     
-    rt_device_register(&stm32_dcd.parent, "usbd", 0);    
+    rt_device_register(&stm32_dcd.parent, "usbd", 0);
 }
+
+#endif
 
