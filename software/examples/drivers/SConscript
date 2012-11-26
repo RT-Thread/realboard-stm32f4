@@ -44,9 +44,14 @@ if GetDepend('RT_USING_RTGUI') == True:
 	src += ['key.c']
 	src += ['touch.c']
 
-# add USB driver.
+# add USB Host driver.
 if GetDepend('RT_USING_USB_HOST') == True:
 	src+= ['stm32f4xx_hcd.c']
+	src+= ['usb_bsp.c']
+	
+# add USB Device driver
+if GetDepend('RT_USING_USB_DEVICE') == True:
+	src+= ['stm32f4xx_dcd.c']
 	src+= ['usb_bsp.c']
 
 # add RTC driver.
