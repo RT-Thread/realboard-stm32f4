@@ -27,6 +27,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 
+#include <rtthread.h>
 #include "usb_bsp.h"
 
 /** @addtogroup USBH_USER
@@ -443,7 +444,10 @@ void USB_OTG_BSP_uDelay (const uint32_t usec)
   */
 void USB_OTG_BSP_mDelay (const uint32_t msec)
 {
-  	rt_thread_delay(msec / 10 + 2);
+    if(msec >= 10)
+        rt_thread_delay(msec / 10);
+    else
+        rt_thread_delay(msec / 1);
 }
 
 /**

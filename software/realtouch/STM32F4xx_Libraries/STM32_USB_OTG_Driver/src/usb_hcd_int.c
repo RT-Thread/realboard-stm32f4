@@ -444,7 +444,7 @@ static uint32_t USB_OTG_USBH_handle_port_ISR (USB_OTG_CORE_HANDLE *pdev)
   }
   if (do_reset)
   {
-    USB_OTG_ResetPort(pdev);
+    //USB_OTG_ResetPort(pdev);
   }
   /* Clear Port Interrupts */
   USB_OTG_WRITE_REG32(pdev->regs.HPRT0, hprt0_dup.d32);

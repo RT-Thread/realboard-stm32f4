@@ -37,7 +37,7 @@ path = [cwd + '/STM32F4xx_StdPeriph_Driver/inc',
     cwd + '/STM32_USB_OTG_Driver/inc']
 
 # source files for USB device library
-if GetDepend('RT_USING_USB_HOST') == True:
+if GetDepend('RT_USING_USB_DEVICE') == True:
     usb_src = Split('''
         STM32_USB_Device_Library/Core/src/usbd_ioreq.c
         STM32_USB_OTG_Driver/src/usb_core.c
