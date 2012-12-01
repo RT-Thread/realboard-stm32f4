@@ -27,11 +27,11 @@
 #include <netif/ethernetif.h>
 #endif
 
-#include "fsmc_nand.h"
+#ifdef RT_USING_MTD_NAND
+#include "k9f2g08u0b.h"
+#endif    
 
 #define RT_NFS_HOST_EXPORT	"10.0.0.104:/"
-
-NAND_IDTypeDef NAND_ID;
 
 void rt_init_thread_entry(void* parameter)
 {
@@ -47,6 +47,10 @@ void rt_init_thread_entry(void* parameter)
 
     rt_platform_init();
 
+#ifdef RT_USING_MTD_NAND
+    rt_hw_mtd_nand_init();
+#endif    
+
     /* do some thing here. */
 #if defined(RT_USING_DFS) && defined(RT_USING_LWIP) && defined(RT_USING_DFS_NFS)
 	{
@@ -58,16 +62,6 @@ void rt_init_thread_entry(void* parameter)
 			rt_kprintf("NFSv3 File System initialzation failed!\n");
 	}
 #endif
-
-    k9f2g08_nand_init();
-    FSMC_NAND_Init();
-    FSMC_NAND_ReadID(&NAND_ID);
-
-    rt_kprintf("\tMaker = %02x\n", NAND_ID.Maker_ID);
-    rt_kprintf("\tdevice = %02x\n", NAND_ID.Device_ID);
-    rt_kprintf("\tThird = %02x\n", NAND_ID.Third_ID);
-    rt_kprintf("\tFourth = %02x\n", NAND_ID.Fourth_ID);
-    nand_test();
 
 }
 

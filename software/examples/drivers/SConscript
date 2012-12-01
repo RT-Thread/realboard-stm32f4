@@ -31,7 +31,7 @@ if GetDepend('RT_USING_SPI') == True:
 
 # add nand driver.
 if GetDepend('RT_USING_MTD_NAND') == True:
-	src += ['K9F2G08U0B.c']
+	src += ['k9f2g08u0b.c']
 
 # add i2c driver.
 if GetDepend('RT_USING_I2C') == True:
