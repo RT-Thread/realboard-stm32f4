@@ -1,3 +1,5 @@
+/* RT-Thread config file */
+#ifndef __RTTHREAD_CFG_H__
 #define __RTTHREAD_CFG_H__
 
 //#define RT_USING_NEWLIB
