@@ -282,11 +282,19 @@ static rt_err_t ep_alloc(uep_t ep)
     uep_desc_t ep_desc = ep->ep_desc;
     
     RT_ASSERT(ep != RT_NULL);
-
+    
     if(ep_desc->bEndpointAddress & USB_DIR_IN)
+    {
+        if (ep_in_num > 3)
+            return RT_ERROR;
         ep_desc->bEndpointAddress |= ep_in_num++;
+    }
     else
-        ep_desc->bEndpointAddress |= ep_out_num++;            
+    {
+        if (ep_out_num > 3)
+            return RT_ERROR;
+        ep_desc->bEndpointAddress |= ep_out_num++; 
+    }        
 
     return RT_EOK;
 }
