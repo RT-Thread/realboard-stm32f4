@@ -308,8 +308,8 @@ _exit:
 }
 
 static rt_err_t nandflash_writepage(struct rt_mtd_nand_device* device, rt_off_t page,
-                                    rt_uint8_t *data, rt_uint32_t data_len,
-                                    rt_uint8_t *spare, rt_uint32_t spare_len)
+                                    const rt_uint8_t *data, rt_uint32_t data_len,
+                                    const rt_uint8_t *spare, rt_uint32_t spare_len)
 {
     rt_uint32_t index;
     rt_err_t result;
