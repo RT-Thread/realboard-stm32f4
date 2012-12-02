@@ -46,23 +46,20 @@ void rt_init_thread_entry(void* parameter)
 #endif
 
     rt_platform_init();
-
 #ifdef RT_USING_MTD_NAND
     rt_hw_mtd_nand_init();
+
+#ifdef RT_USING_DFS_UFFS
+	/* mount nand flash partition 0 as root directory */
+	if (dfs_mount("nand0", "/", "uffs", 0, 0) == 0)
+		rt_kprintf("uffs initialized!\n");
+	else
+		rt_kprintf("uffs initialzation failed!\n");
+#endif
+
 #endif    
 
     /* do some thing here. */
-#if defined(RT_USING_DFS) && defined(RT_USING_LWIP) && defined(RT_USING_DFS_NFS)
-	{
-		/* NFSv3 Initialization */
-		rt_kprintf("begin init NFSv3 File System ...\n");
-		if (dfs_mount(RT_NULL, "/", "nfs", 0, RT_NFS_HOST_EXPORT) == 0)
-			rt_kprintf("NFSv3 File System initialized!\n");
-		else
-			rt_kprintf("NFSv3 File System initialzation failed!\n");
-	}
-#endif
-
 }
 
 int rt_application_init()

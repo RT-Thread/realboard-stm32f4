@@ -85,8 +85,8 @@
 #define FINSH_USING_DESCRIPTION
 
 /* SECTION: device filesystem */
-//#define RT_USING_DFS
-//#define RT_USING_DFS_ELMFAT
+#define RT_USING_DFS
+#define RT_USING_DFS_ELMFAT
 #define RT_DFS_ELM_WORD_ACCESS
 /* Reentrancy (thread safe) of the FatFs module.  */
 #define RT_DFS_ELM_REENTRANT
@@ -96,6 +96,13 @@
 #define RT_DFS_ELM_MAX_LFN			255
 /* Maximum sector size to be handled. */
 #define RT_DFS_ELM_MAX_SECTOR_SIZE  512
+
+/* configration for uffs, more to see dfs_uffs.h and uffs_config.h */
+#define RT_USING_DFS_UFFS
+/* use ecc none, cause driver already do ecc. */
+#define RT_CONFIG_UFFS_ECC_MODE  UFFS_ECC_NONE
+/* enable this ,you need provide a mark_badblock/check_block funciton */
+//#define RT_UFFS_USE_CHECK_MARK_FUNCITON
 
 //#define RT_USING_DFS_NFS
 

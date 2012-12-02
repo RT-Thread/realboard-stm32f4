@@ -439,8 +439,13 @@ static struct rt_mtd_nand_driver_ops ops =
     nandflash_writepage,
     nandflash_pagecopy,
     nandflash_eraseblock,
+#if defined(RT_USING_DFS_UFFS) && !defined(RT_UFFS_USE_CHECK_MARK_FUNCITON)
+	RT_NULL,
+	RT_NULL,
+#else
     nandflash_checkblock,
     nandflash_markbad
+#endif
 };
 
 static struct rt_mtd_nand_device _partition[2];
