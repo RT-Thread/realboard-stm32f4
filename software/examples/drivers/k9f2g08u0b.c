@@ -121,53 +121,16 @@ static void gpio_nandflash_init(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
 
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_GPIOE | \
-                           RCC_AHB1Periph_GPIOG, ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOG, ENABLE);
 
-    /* D2 D3 */
-    GPIO_PinAFConfig(GPIOD, GPIO_PinSource0, GPIO_AF_FSMC);
-    GPIO_PinAFConfig(GPIOD, GPIO_PinSource1, GPIO_AF_FSMC);
-    /* NOE, NWE */
-    GPIO_PinAFConfig(GPIOD, GPIO_PinSource4, GPIO_AF_FSMC);
-    GPIO_PinAFConfig(GPIOD, GPIO_PinSource5, GPIO_AF_FSMC);
-    /* NE1 */
-    GPIO_PinAFConfig(GPIOD, GPIO_PinSource7, GPIO_AF_FSMC);
+    /* FSMC GPIO config in board.c */
 
-    /* A16,A17 config as fsmc */
-    GPIO_PinAFConfig(GPIOD, GPIO_PinSource11, GPIO_AF_FSMC);
-    GPIO_PinAFConfig(GPIOD, GPIO_PinSource12, GPIO_AF_FSMC);
-    /* D0 D1 */
-    GPIO_PinAFConfig(GPIOD, GPIO_PinSource14, GPIO_AF_FSMC);
-    GPIO_PinAFConfig(GPIOD, GPIO_PinSource15, GPIO_AF_FSMC);
-
-    /* D4 D5 D6 D7 */
-    GPIO_PinAFConfig(GPIOE, GPIO_PinSource7 , GPIO_AF_FSMC);
-    GPIO_PinAFConfig(GPIOE, GPIO_PinSource8 , GPIO_AF_FSMC);
-    GPIO_PinAFConfig(GPIOE, GPIO_PinSource9 , GPIO_AF_FSMC);
-    GPIO_PinAFConfig(GPIOE, GPIO_PinSource10 , GPIO_AF_FSMC);
-
-    /* 6. FSMC_INT2 configuration */
-    GPIO_PinAFConfig(GPIOG, GPIO_PinSource6, GPIO_AF_FSMC);
-    /* NandFlash CS,NE2 */
-    GPIO_PinAFConfig(GPIOG, GPIO_PinSource9 , GPIO_AF_FSMC);
-
-    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_AF;
+    /* NAND_R/B: PG6 */
+    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_IN;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
     GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-    GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_NOPULL;
-
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_4 | \
-                                  GPIO_Pin_5 | GPIO_Pin_7 | GPIO_Pin_9 | \
-                                  GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12 | \
-                                  GPIO_Pin_14 | GPIO_Pin_15;
-    GPIO_Init(GPIOD, &GPIO_InitStructure);
-
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7 | GPIO_Pin_8 | \
-                                  GPIO_Pin_9 | GPIO_Pin_10;
-    GPIO_Init(GPIOE, &GPIO_InitStructure);
-
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-    GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_6 | GPIO_Pin_9;
+    GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_UP;
+    GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_6;
     GPIO_Init(GPIOG, &GPIO_InitStructure);
 }
 
