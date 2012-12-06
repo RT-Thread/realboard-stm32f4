@@ -46,33 +46,57 @@ void rt_init_thread_entry(void *parameter)
 
     /* Filesystem Initialization */
 #ifdef RT_USING_DFS
-    /* 0:root is SD card, 1:root is spi flash. */
-    if (dfs_mount("flash0", "/", "elm", 0, 0) == 0)
     {
-        rt_kprintf("flash0 mount to / \n");
+        rt_bool_t mount_flag = RT_FALSE;
 
-        /* download resource from www.rt-thread.org */
+        if (dfs_mount("flash0", "/", "elm", 0, 0) == 0)
         {
-            resource_download();
-        }
-
-#if (RT_DFS_ELM_USE_LFN != 0) && (defined RT_DFS_ELM_CODE_PAGE_FILE)
-        {
-            extern void ff_convert_init(void);
-            ff_convert_init();
-        }
-#endif
-
-        if (dfs_mount("sd0", "/SD", "elm", 0, 0) == 0)
-        {
-            rt_kprintf("sd0 mount to /SD \n");
+            mount_flag = RT_TRUE;
         }
         else
         {
-            rt_kprintf("sd0 mount to /SD failed!\n");
+            rt_kprintf("flash0 mount to / failed!, fatmat and try again!\n");
+
+            /* fatmat filesystem. */
+            dfs_mkfs("elm", "flash0");
+
+            /* re-try mount. */
+            if (dfs_mount("flash0", "/", "elm", 0, 0) == 0)
+            {
+                mount_flag = RT_TRUE;
+            }
+        }
+
+        if(mount_flag == RT_TRUE)
+        {
+            rt_kprintf("flash0 mount to / \n");
+
+            /* download resource from www.rt-thread.org */
+            {
+                resource_download();
+            }
+
+#if (RT_DFS_ELM_USE_LFN != 0) && (defined RT_DFS_ELM_CODE_PAGE_FILE)
+            {
+                extern void ff_convert_init(void);
+                ff_convert_init();
+            }
+#endif
+
+            if (dfs_mount("sd0", "/SD", "elm", 0, 0) == 0)
+            {
+                rt_kprintf("sd0 mount to /SD \n");
+            }
+            else
+            {
+                rt_kprintf("sd0 mount to /SD failed!\n");
+            }
+        }
+        else
+        {
+            rt_kprintf("flash0 mount to / failed!\n");
         }
     }
-    else rt_kprintf("flash0 mount to / failed!\n");
 #endif /* RT_USING_DFS */
 
 #ifdef RT_USING_USB_DEVICE
