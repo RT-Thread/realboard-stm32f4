@@ -617,6 +617,15 @@ int wlan_cmd_802_11_associate_cfg(WlanCard *cardinfo, WlanConfig* cfg)
 	TmpCap &= CAPINFO_MASK;
 
 	rt_memcpy(&pAsso->CapInfo, &TmpCap, sizeof(pAsso->CapInfo));
+	if(cfg->security == NoSecurity)
+    {
+        CmdPtr->params.associate.CapInfo.Privacy = 0;
+    }
+    else
+    {
+        CmdPtr->params.associate.CapInfo.Privacy = 1;
+    }
+
 	ret = WlanExecuteCommand(card, CmdPtr);
 
 	if (ret)
