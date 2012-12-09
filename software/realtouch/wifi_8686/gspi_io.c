@@ -1,3 +1,4 @@
+#include <string.h>
 #include "stm32f4xx.h"
 #include "rtthread.h"
 #include "gspi_io.h"
