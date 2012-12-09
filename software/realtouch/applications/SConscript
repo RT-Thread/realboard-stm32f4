@@ -6,6 +6,10 @@ cwd = GetCurrentDir()
 src	= Glob('*.c')
 CPPPATH = [cwd, str(Dir('#'))]
 
+# remove no need file.
+if (GetDepend('RT_USING_LWIP') == False) or (GetDepend('RT_USING_WIFI') == False):
+	SrcRemove(src, 'libwifi.c')
+
 if rtconfig.PLATFORM == 'gcc':
 	SrcRemove(src, 'mp3.c')
 
