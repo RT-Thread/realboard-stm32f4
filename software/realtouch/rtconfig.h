@@ -202,6 +202,7 @@
 
 // <section name="RT_USING_LWIP" description="lwip, a lightweight TCP/IP protocol stack" default="true" >
 #define RT_USING_LWIP
+#define RT_USING_WIFI
 // <bool name="RT_LWIP_ICMP" description="Enable ICMP protocol" default="true" />
 #define RT_LWIP_ICMP
 // <bool name="RT_LWIP_IGMP" description="Enable IGMP protocol" default="false" />
@@ -237,7 +238,7 @@
 // <integer name="RT_LWIP_ETHTHREAD_MBOX_SIZE" description="the mail box size of ethnetif thread to wait for" default="8" />
 #define RT_LWIP_ETHTHREAD_MBOX_SIZE	8
 // <integer name="RT_LWIP_ETHTHREAD_STACKSIZE" description="the stack size of ethnetif thread" default="512" />
-#define RT_LWIP_ETHTHREAD_STACKSIZE	512
+#define RT_LWIP_ETHTHREAD_STACKSIZE	2048
 // <ipaddr name="RT_LWIP_IPADDR" description="IP address of device" default="192.168.1.30" />
 #define RT_LWIP_IPADDR0 192
 #define RT_LWIP_IPADDR1 168
