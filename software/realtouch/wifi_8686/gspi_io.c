@@ -6,8 +6,8 @@
 struct rt_spi_device *rt_spi_device;
 
 /*
-RESET: PD7
-INT:   PD4
+RESET: PB0
+INT:   PB1
 */
 
 int g_dummy_clk_reg = 0;
@@ -20,19 +20,19 @@ static void gpio_init(void)
     GPIO_InitTypeDef  GPIO_InitStructure;
 
     /* GPIO Periph clock enable */
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
 
     /* Configure PA1 */
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
     GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-    GPIO_Init(GPIOD, &GPIO_InitStructure);
+    GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-	GPIO_ResetBits(GPIOD, GPIO_Pin_7);
+	GPIO_ResetBits(GPIOB, GPIO_Pin_0);
 	rt_thread_delay(1);
-	GPIO_SetBits(GPIOD, GPIO_Pin_7);
+	GPIO_SetBits(GPIOB, GPIO_Pin_0);
 	rt_thread_delay(1);
 }
 
@@ -104,7 +104,7 @@ int gspi_read_data_direct(u8 * data, u16 reg, u16 n)
 int gspi_read_reg(u16 reg, u16 * val)
 {
 	u16 value[8];
-	
+
 	gspi_read_data_direct((u8 *) value, reg, 2);
 	memcpy(val, value, 2);
 
@@ -113,35 +113,36 @@ int gspi_read_reg(u16 reg, u16 * val)
 
 extern void sbi_interrupt(int vector);
 /*config GPIO as wlan interrupt */
-void EXTI0_Config(void)
+void EXTI1_Config(void)
 {
 	EXTI_InitTypeDef EXTI_InitStructure;
 	GPIO_InitTypeDef GPIO_InitStructure;
 	NVIC_InitTypeDef NVIC_InitStructure;
 
-	/* Enable GPIOA clock */
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+	/* Enable GPIOB clock */
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
 	/* Enable SYSCFG clock */
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 
-	/* Configure PA0 pin as input floating */
+	/* Configure PB1 pin as input floating */
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
-	GPIO_Init(GPIOD, &GPIO_InitStructure);
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-	/* Connect EXTI Line0 to PA0 pin */
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOD, EXTI_PinSource4);
+	/* Connect EXTI Line1 to PB1 pin */
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB, EXTI_PinSource1);
 
 	/* Configure EXTI Line0 */
-	EXTI_InitStructure.EXTI_Line = EXTI_Line4;
+	EXTI_InitStructure.EXTI_Line = EXTI_Line1;
 	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
 	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
 	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
 	EXTI_Init(&EXTI_InitStructure);
 
 	/* Enable and set EXTI Line0 Interrupt to the lowest priority */
-	NVIC_InitStructure.NVIC_IRQChannel = EXTI4_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannel = EXTI1_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0F;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x0F;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
@@ -150,37 +151,37 @@ void EXTI0_Config(void)
 
 void disable_wlan_interrupt(void)
 {
-	NVIC_DisableIRQ(EXTI4_IRQn);
+	NVIC_DisableIRQ(EXTI1_IRQn);
 }
 
 void enable_wlan_interrupt(void)
 {
-	NVIC_EnableIRQ(EXTI4_IRQn);
+	NVIC_EnableIRQ(EXTI1_IRQn);
 }
 
 extern void wlan_interrupt(void);
-void EXTI4_IRQHandler(void)
+void EXTI1_IRQHandler(void)
 {
 	/* perform wlan interrupt */
 	wlan_interrupt();
 	disable_wlan_interrupt();
 
 	/* Clear the EXTI0 line pending bit */
-	EXTI_ClearITPendingBit(EXTI_Line4);
+	EXTI_ClearITPendingBit(EXTI_Line1);
 }
 
 int gspi_register_irq(int * irqnum)
 {
-	NVIC_DisableIRQ(EXTI4_IRQn);
-	EXTI0_Config();
-	EXTI_ClearITPendingBit(EXTI_Line4);
-	*irqnum = EXTI4_IRQn;
+	NVIC_DisableIRQ(EXTI1_IRQn);
+	EXTI1_Config();
+	EXTI_ClearITPendingBit(EXTI_Line1);
+	*irqnum = EXTI1_IRQn;
 	return GSPI_OK;
 }
 
 void gspi_irq_clear(void)
 {
-	EXTI_ClearITPendingBit(EXTI_Line4);
+	EXTI_ClearITPendingBit(EXTI_Line1);
 }
 
 int gspihost_init(const char* spi_device)
