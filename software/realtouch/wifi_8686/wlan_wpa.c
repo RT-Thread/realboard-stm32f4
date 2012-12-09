@@ -2,9 +2,7 @@
 #include "wlan_wpa.h"
 #include <dfs_posix.h>
 #include <rtm.h>
-
-#define FW_PATH         "/sd/firmware"
-#define WPA_BIN_FILE	FW_PATH"/wpa.mo"
+#include "wlan_8686_config.h"
 
 static const struct wlan_wpa_context* _ctx = RT_NULL;
 void wlan_wpa_context_register(const struct wlan_wpa_context* ctx)
@@ -44,51 +42,7 @@ int wlan_wpa_eapol_input(rt_uint8_t* ptr, rt_uint32_t len, rt_uint8_t *hwaddr)
 
 int wlan_wpa_init(void)
 {
-    int fd, length;
-    char *buffer, *offset_ptr;
-    struct stat s;
-
-	if (_ctx != RT_NULL) return 0;
-
-    if (stat(WPA_BIN_FILE, &s) !=0)
-    {
-        rt_kprintf("Access %s failed\n", WPA_BIN_FILE);
-        return -1;
-    }
-
-    fd = open(WPA_BIN_FILE, O_RDONLY, 0);
-    if (fd < 0)
-    {
-		/* open failed, return */
-		rt_kprintf("Open WPA failed.\n");
-        return -1;
-    }
-
-	length = s.st_size;
-
-	// buffer = (char*)rt_malloc (length);
-	buffer = (char*) 0x10000000;
-	if (buffer == RT_NULL)
-	{
-		close(fd);
-		return -1;
-	}
-
-	offset_ptr = buffer;
-    do
-    {
-        length = read(fd, offset_ptr, 4096);
-        if (length > 0)
-        {
-            offset_ptr += length;
-        }
-    }while (length > 0);
-
-    /* close fd */
-    close(fd);
-
-    rt_module_load("wpa", (void *)buffer);
-    // rt_free(buffer);
+    rt_module_open(WPA_BIN_FILE);
 
     return 0;
 }
@@ -105,7 +59,7 @@ int wlan_wpa_done(void)
             _ctx = RT_NULL;
         }
     }
-	
+
 	return 0;
 }
 
