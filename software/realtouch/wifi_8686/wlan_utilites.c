@@ -4,9 +4,9 @@
 #include "wlan_types.h"
 #include "stdio.h"
 
-// unsigned int WlanDebugLevel=WlanErr;
-// unsigned int WlanDebugLevel=WlanMsg|WlanCmd|WlanData|WlanErr|WlanEncy|WlanDump;
-unsigned int WlanDebugLevel=WlanMsg|WlanCmd|WlanErr|WlanEncy;
+unsigned int WlanDebugLevel=WlanErr;
+//unsigned int WlanDebugLevel=WlanMsg|WlanCmd|WlanData|WlanErr|WlanEncy|WlanDump;
+//unsigned int WlanDebugLevel=WlanMsg|WlanCmd|WlanErr;
 
 /**
  * memmove - Copy one area of memory to another
