@@ -18,7 +18,7 @@
 #endif
 
 #define APP_PATH            "/SD/programs"
-#define ITEM_MAX            10
+#define ITEM_MAX            (32)
 
 static struct rtgui_list_item *items = RT_NULL;
 static rtgui_list_view_t* _view = RT_NULL;
@@ -53,7 +53,7 @@ static int xml_event_handler(rt_uint8_t event, const char* text, rt_size_t len, 
     {
         switch(status)
         {
-        case READ_NAME:    
+        case READ_NAME:
             items[++pos].name = rt_strdup(text);
             items[pos].parameter = items[pos].name;
             break;
@@ -69,12 +69,12 @@ static int xml_event_handler(rt_uint8_t event, const char* text, rt_size_t len, 
         }
         status = IDLE;
     }
-        
-    return 1;    
+
+    return 1;
 }
 
 static int xml_load_items(const char* filename)
-{    
+{
     struct rtgui_filerw* filerw;
     char buffer[512];
     rtgui_xml_t *xml;
@@ -82,7 +82,7 @@ static int xml_load_items(const char* filename)
 
     /* create filerw context */
     filerw = rtgui_filerw_create_file(filename, "rb");
-    if (filerw == RT_NULL) 
+    if (filerw == RT_NULL)
     {
         rt_kprintf("read file fail %s\n", filename);
         return 0;
@@ -92,18 +92,18 @@ static int xml_load_items(const char* filename)
     if(length <= 0)
     {
         rt_kprintf("read fail\n");
-        rtgui_filerw_close(filerw);        
+        rtgui_filerw_close(filerw);
         return 0;
     }
-    
+
     xml = rtgui_xml_create(512, xml_event_handler, RT_NULL);
-    if (xml != RT_NULL)    
-    {        
+    if (xml != RT_NULL)
+    {
         rtgui_xml_parse(xml, buffer, length);
-        rtgui_xml_destroy(xml);    
+        rtgui_xml_destroy(xml);
     }
 
-    rtgui_filerw_close(filerw);        
+    rtgui_filerw_close(filerw);
     return 0;
 }
 
@@ -114,9 +114,9 @@ static void exec_app(rtgui_widget_t* widget, void* parameter)
 
     RT_ASSERT(parameter != RT_NULL);
 
-    rt_snprintf(path, sizeof(path), "%s/%s/%s.mo", APP_PATH, 
+    rt_snprintf(path, sizeof(path), "%s/%s/%s.mo", APP_PATH,
         (char*)parameter, (char*)parameter);
-    
+
 #ifndef _WIN32
     module = rt_module_find((const char*)parameter);
     if(module == RT_NULL)
@@ -126,7 +126,7 @@ static void exec_app(rtgui_widget_t* widget, void* parameter)
         struct rtgui_app* app;
         RT_ASSERT(module->module_thread);
         app = (struct rtgui_app*)(module->module_thread->user_data);
-        
+
         if(app != RT_NULL) rtgui_app_activate(app);
         else rt_kprintf("application is null\n");
     }
@@ -176,11 +176,11 @@ struct rtgui_panel* program_create(struct rtgui_panel* panel)
     rtgui_rect_inflate(&rect, -15);
 
     scan_app_dir(APP_PATH);
-    if(pos >= 0) 
+    if(pos >= 0)
     {
         _view = rtgui_list_view_create(items, pos + 1, &rect, RTGUI_LIST_VIEW_ICON);
         rtgui_container_add_child(RTGUI_CONTAINER(panel), RTGUI_WIDGET(_view));
-    }        
+    }
 
     return RTGUI_PANEL(panel);
 }
