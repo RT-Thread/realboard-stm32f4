@@ -1554,7 +1554,10 @@ USB_OTG_STS USB_OTG_EPDeactivate(USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep)
   depctl.b.usbactep = 0;
   USB_OTG_WRITE_REG32(addr, depctl.d32);
   /* Disable the Interrupt for this EP */
-  
+  if (ep->is_in)
+  {
+      USB_OTG_MODIFY_REG32(&pdev->regs.DREGS->DIEPEMPMSK, (1 << ep->num), 0);
+  }
 #ifdef USB_OTG_HS_DEDICATED_EP1_ENABLED
   if((ep->num == 1)&&(pdev->cfg.coreID == USB_OTG_HS_CORE_ID))
   {
