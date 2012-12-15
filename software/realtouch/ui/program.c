@@ -138,6 +138,7 @@ static void scan_app_dir(const char* path)
     DIR* dir;
     struct dirent* entry;
     char fn[64];
+    struct stat stat;
 
     dir = opendir(path);
     if (dir == RT_NULL)
@@ -149,12 +150,22 @@ static void scan_app_dir(const char* path)
     do
     {
         entry = readdir(dir);
-        if (entry != RT_NULL)
-        {
-            if(entry->d_type == DFS_DT_REG) break;
-            rt_sprintf(fn, "%s/%s/%s.xml", path, entry->d_name, entry->d_name);
-            xml_load_items(fn);
-        }
+        if (entry == RT_NULL)
+            break;
+
+        if (strcmp(entry->d_name, ".") == 0 
+             || strcmp(entry->d_name, "..") == 0)
+            continue;
+        
+        rt_sprintf(fn, "%s/%s", path, entry->d_name);
+        if (dfs_file_stat(fn, &stat) != 0) 
+            break;
+        if(! DFS_S_ISDIR(stat.st_mode))
+            continue;
+        
+        rt_sprintf(fn, "%s/%s/%s.xml", path, entry->d_name, entry->d_name);
+
+        xml_load_items(fn);
     } while(entry != RT_NULL);
 
     /* close directory */
