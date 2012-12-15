@@ -3,10 +3,19 @@ import os
 # toolchains options
 ARCH='arm'
 CPU='cortex-m4'
-CROSS_TOOL='gcc'
+CROSS_TOOL='keil'
 
-PLATFORM 	= 'gcc'
-EXEC_PATH 	= r'C:/Program Files/CodeSourcery/Sourcery G++ Lite/bin'
+if CROSS_TOOL == 'gcc':
+    PLATFORM 	= 'gcc'
+    EXEC_PATH 	= r'D:/Program Files/CodeSourcery/Sourcery G++ Lite/bin'
+elif CROSS_TOOL == 'keil':
+	PLATFORM 	= 'armcc'
+	EXEC_PATH 	= r'D:/Keil'
+elif CROSS_TOOL == 'iar':
+    print '================ERROR============================'
+    print 'Not support iar yet!'
+    print '================================================='
+    exit(0)
 
 if os.getenv('RTT_EXEC_PATH'):
     EXEC_PATH = os.getenv('RTT_EXEC_PATH')
