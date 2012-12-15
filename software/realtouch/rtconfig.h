@@ -177,7 +177,7 @@
 // <bool name="RTGUI_USING_FONT12" description="Support 12 weight font" default="false" />
 //#define RTGUI_USING_FONT12
 // <bool name="RTGUI_USING_FONTHZ" description="Support Chinese font" default="false" />
-//#define RTGUI_USING_FONTHZ
+#define RTGUI_USING_FONTHZ
 // <bool name="RTGUI_USING_DFS_FILERW" description="Using DFS as file interface " default="true" />
 #define RTGUI_USING_DFS_FILERW
 // <bool name="RTGUI_USING_HZ_FILE" description="Using font file as Chinese font" default="false" />
@@ -193,7 +193,7 @@
 // <bool name="RTGUI_IMAGE_JPEG" description="Using jpeg image in RTGUI" default="true" />
 #define RTGUI_IMAGE_JPEG
 // <bool name="RTGUI_IMAGE_PNG" description="Using png image in RTGUI" default="false" />
-//#define RTGUI_IMAGE_PNG
+#define RTGUI_IMAGE_PNG
 // <bool name="RTGUI_IMAGE_BMP" description="Using bmp image in RTGUI" default="true" />
 #define RTGUI_IMAGE_BMP
 // <bool name="RTGUI_USING_NOTEBOOK_IMAGE" description="Using notebook image in RTGUI" default="true" />
