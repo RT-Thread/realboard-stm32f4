@@ -1,4 +1,5 @@
-#include "rtthread.h"
+#include <rtthread.h>
+#include <rtgui/driver.h>
 #include "ra8875.h"
 
 /********* control ***********/
@@ -249,6 +250,43 @@ static void _set_draw_end_cursor(uint32_t X, uint32_t Y)
     LCD_write_reg(DLVER0, Y);
 }
 
+static void _set_draw_point2_cursor(uint32_t X, uint32_t Y)
+{
+    LCD_write_reg(DTPH1, X>>8);
+    LCD_write_reg(DTPH0, X);
+    LCD_write_reg(DTPV1, Y>>8);
+    LCD_write_reg(DTPV0, Y);
+}
+
+static void _set_draw_center_cursor(uint32_t X, uint32_t Y)
+{
+    LCD_write_reg(DCHR1, X>>8);
+    LCD_write_reg(DCHR0, X);
+    LCD_write_reg(DCVR1, Y>>8);
+    LCD_write_reg(DCVR0, Y);
+}
+
+static void _set_draw_radius(uint32_t radius)
+{
+    LCD_write_reg(DCRR, radius);
+}
+
+static void _set_draw_center_ellipse_cursor(uint32_t X, uint32_t Y)
+{
+    LCD_write_reg(DEHR1, X>>8);
+    LCD_write_reg(DEHR0, X);
+    LCD_write_reg(DEVR1, Y>>8);
+    LCD_write_reg(DEVR0, Y);
+}
+
+static void _set_draw_radius_ellipse(uint32_t X, uint32_t Y)
+{
+    LCD_write_reg(ELL_A1, X >> 8);
+    LCD_write_reg(ELL_A0, X);
+    LCD_write_reg(ELL_B1, Y >> 8);
+    LCD_write_reg(ELL_B0, Y);
+}
+
 static void _set_fore_color(uint16_t pixel)
 {
     /* REG 565 */
@@ -314,6 +352,248 @@ static void pwm_setting(int pwm_duty_cycle)
     LCD_DataWrite(value);
 }
 
+#ifdef RTGUI_USING_HW_CURSOR
+static const uint8_t cursor_arrow[256] =
+{
+    0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xa5,
+    0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0x91,
+    0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0x41,
+    0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xa9, 0x01,
+    0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xa4, 0x01,
+    0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0x90, 0x01,
+    0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0x40, 0x01,
+    0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xa9, 0x00, 0x01,
+    0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xa4, 0x00, 0x01,
+    0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0x90, 0x00, 0x01,
+    0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0x40, 0x00, 0x01,
+    0xaa, 0xaa, 0xaa, 0xaa, 0xa9, 0x00, 0x00, 0x01,
+    0xaa, 0xaa, 0xaa, 0xaa, 0xa4, 0x00, 0x00, 0x01,
+    0xaa, 0xaa, 0xaa, 0xaa, 0x90, 0x00, 0x00, 0x01,
+    0xaa, 0xaa, 0xaa, 0xaa, 0x40, 0x00, 0x00, 0x01,
+    0xaa, 0xaa, 0xaa, 0xa9, 0x00, 0x00, 0x00, 0x01,
+    0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x00, 0x00, 0x01,
+    0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0x40, 0x00, 0x01,
+    0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0x90, 0x00, 0x01,
+    0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0x40, 0x00, 0x01,
+    0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0x40, 0x15, 0x01,
+    0xaa, 0xaa, 0xaa, 0xaa, 0xa9, 0x00, 0x1a, 0x41,
+    0xaa, 0xaa, 0xaa, 0xaa, 0xa9, 0x00, 0x6a, 0x91,
+    0xaa, 0xaa, 0xaa, 0xaa, 0xa4, 0x00, 0x6a, 0xa5,
+    0xaa, 0xaa, 0xaa, 0xaa, 0xa4, 0x01, 0xaa, 0xa9,
+    0xaa, 0xaa, 0xaa, 0xaa, 0xa0, 0x01, 0xaa, 0xaa,
+    0xaa, 0xaa, 0xaa, 0xaa, 0x90, 0x06, 0xaa, 0xaa,
+    0xaa, 0xaa, 0xaa, 0xaa, 0x90, 0x06, 0xaa, 0xaa,
+    0xaa, 0xaa, 0xaa, 0xaa, 0x90, 0x0a, 0xaa, 0xaa,
+    0xaa, 0xaa, 0xaa, 0xaa, 0x90, 0x1a, 0xaa, 0xaa,
+    0xaa, 0xaa, 0xaa, 0xaa, 0xa5, 0x6a, 0xaa, 0xaa,
+    0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa
+};
+
+static void _set_mouse_image(const uint8_t *mouse_img)
+{
+    uint32_t i, j;
+    LCD_write_reg(GCC0, 0xFF);
+    LCD_write_reg(GCC1, 0x00);
+    LCD_write_reg(MWCR1,  2 << 2);
+
+    _set_write_cursor(0, 0);
+    LCD_CmdWrite(MRWC);
+    for (i = 0; i < 32; i++)
+    {
+        for (j = 0; j < 8; j++)
+        {
+            LCD_DataWrite(*mouse_img++);
+        }
+    }
+
+    LCD_write_reg(MWCR1, (1 << 7) | (0 << 2));
+}
+
+static void _set_mouse_position(uint16_t X, uint16_t Y)
+{
+    LCD_CmdWrite(GCHP1);
+    LCD_DataWrite(X >> 8);
+    LCD_CmdWrite(GCHP0);
+    LCD_DataWrite(X);
+
+    LCD_CmdWrite(GCVP1);
+    LCD_DataWrite(Y >> 8);
+    LCD_CmdWrite(GCVP0);
+    LCD_DataWrite(Y);
+}
+#endif /* RTGUI_USING_HW_CURSOR */
+
+#ifdef  USE_DRAW_FUNCTION
+static struct rt_semaphore draw_sem;
+
+static void draw_line(rtgui_color_t *c, int x1, int y1, int x2, int y2)
+{
+    rt_uint16_t pixel;
+    rt_err_t result;
+
+    /* get pixel from color */
+    pixel = rtgui_color_to_565p(*c);
+
+    result = rt_sem_take(&draw_sem, RT_WAITING_FOREVER);
+    if (result != RT_EOK)
+    {
+        return;
+    }
+
+    _set_draw_start_cursor(x1, y1);
+    _set_draw_end_cursor(x2, y2);
+    _set_fore_color(pixel);
+
+    LCD_write_reg(LCD_DCR, DCR_DRAW0_LINE_SQUARE | DCR_DRAW1_LINE
+                  | DCR_DRAW2_NO_FILL | DCR_DRAW3_LINE_SQUARE_TRIANGLE);
+}
+
+static void draw_rect(rtgui_color_t *c, int x1, int y1, int x2, int y2)
+{
+    rt_uint16_t pixel;
+    rt_err_t result;
+
+    /* get pixel from color */
+    pixel = rtgui_color_to_565p(*c);
+
+    result = rt_sem_take(&draw_sem, RT_WAITING_FOREVER);
+    if (result != RT_EOK)
+    {
+        return;
+    }
+
+    _set_draw_start_cursor(x1, y1);
+    _set_draw_end_cursor(x2, y2);
+    _set_fore_color(pixel);
+
+    LCD_write_reg(LCD_DCR, DCR_DRAW0_LINE_SQUARE | DCR_DRAW1_SQUARE
+                  | DCR_DRAW2_NO_FILL | DCR_DRAW3_LINE_SQUARE_TRIANGLE);
+}
+
+static void fill_rect(rtgui_color_t *c, int x1, int y1, int x2, int y2)
+{
+    rt_uint16_t pixel;
+    rt_err_t result;
+
+    /* get pixel from color */
+    pixel = rtgui_color_to_565p(*c);
+
+    result = rt_sem_take(&draw_sem, RT_WAITING_FOREVER);
+    if (result != RT_EOK)
+    {
+        return;
+    }
+
+    _set_draw_start_cursor(x1, y1);
+    _set_draw_end_cursor(x2, y2);
+    _set_fore_color(pixel);
+
+    LCD_write_reg(LCD_DCR, DCR_DRAW0_LINE_SQUARE | DCR_DRAW1_SQUARE
+                  | DCR_DRAW2_FILL | DCR_DRAW3_LINE_SQUARE_TRIANGLE);
+}
+
+static void draw_circle(rtgui_color_t *c, int x, int y, int r)
+{
+    rt_uint16_t pixel;
+    rt_err_t result;
+
+    /* get pixel from color */
+    pixel = rtgui_color_to_565p(*c);
+
+    result = rt_sem_take(&draw_sem, RT_WAITING_FOREVER);
+    if (result != RT_EOK)
+    {
+        return;
+    }
+
+    _set_draw_center_cursor(x, y);
+    _set_draw_radius(r);
+    _set_fore_color(pixel);
+
+    LCD_write_reg(LCD_DCR, DCR_DRAW2_NO_FILL | DCR_DRAW3_CIRCLE);
+}
+
+static void fill_circle(rtgui_color_t *c, int x, int y, int r)
+{
+    rt_uint16_t pixel;
+    rt_err_t result;
+
+    /* get pixel from color */
+    pixel = rtgui_color_to_565p(*c);
+
+    result = rt_sem_take(&draw_sem, RT_WAITING_FOREVER);
+    if (result != RT_EOK)
+    {
+        return;
+    }
+
+    _set_draw_center_cursor(x, y);
+    _set_draw_radius(r);
+    _set_fore_color(pixel);
+
+    LCD_write_reg(LCD_DCR, DCR_DRAW2_FILL | DCR_DRAW3_CIRCLE);
+}
+
+static void draw_ellipse(rtgui_color_t *c, int x, int y, int rx, int ry)
+{
+    rt_uint16_t pixel;
+    rt_err_t result;
+
+    /* get pixel from color */
+    pixel = rtgui_color_to_565p(*c);
+
+    result = rt_sem_take(&draw_sem, RT_WAITING_FOREVER);
+    if (result != RT_EOK)
+    {
+        return;
+    }
+
+    _set_draw_center_ellipse_cursor(x, y);
+    _set_draw_radius_ellipse(rx, ry);
+    _set_fore_color(pixel);
+    LCD_write_reg(DECR, DECR_DRAW0_ALL
+                  | DECR_DRAW1_ELLIPSE | DECR_DRAW2_ELLIPSE
+                  | DECR_DRAW3_NO_FILL | DECR_DRAW4_ELLIPSE_CIRCLE_SQUARE);
+}
+
+static void fill_ellipse(rtgui_color_t *c, int x, int y, int rx, int ry)
+{
+    rt_uint16_t pixel;
+    rt_err_t result;
+
+    /* get pixel from color */
+    pixel = rtgui_color_to_565p(*c);
+
+    result = rt_sem_take(&draw_sem, RT_WAITING_FOREVER);
+    if (result != RT_EOK)
+    {
+        return;
+    }
+
+    _set_draw_center_ellipse_cursor(x, y);
+    _set_draw_radius_ellipse(rx, ry);
+    _set_fore_color(pixel);
+    LCD_write_reg(DECR, DECR_DRAW0_ALL
+                  | DECR_DRAW1_ELLIPSE | DECR_DRAW2_ELLIPSE
+                  | DECR_DRAW3_FILL | DECR_DRAW4_ELLIPSE_CIRCLE_SQUARE);
+}
+
+/* graphic extension operations */
+static struct rtgui_graphic_ext_ops ra8875_ext_ops =
+{
+    draw_line,
+
+    draw_rect,
+    fill_rect,
+
+    draw_circle,
+    fill_circle,
+
+    draw_ellipse,
+    fill_ellipse,
+};
+#endif /* USE_DRAW_FUNCTION */
+
 static rt_err_t lcd_init(rt_device_t dev)
 {
     return RT_EOK;
@@ -331,6 +611,8 @@ static rt_err_t lcd_close(rt_device_t dev)
 
 static rt_err_t lcd_control(rt_device_t dev, rt_uint8_t cmd, void *args)
 {
+    rt_err_t result = -RT_EIO;
+
     switch (cmd)
     {
     case RTGRAPHIC_CTRL_GET_INFO:
@@ -345,8 +627,52 @@ static rt_err_t lcd_control(rt_device_t dev, rt_uint8_t cmd, void *args)
         info->framebuffer = RT_NULL;
         info->width = 800;
         info->height = 480;
+
+        result = RT_EOK;
     }
     break;
+
+#ifdef USE_DRAW_FUNCTION
+    case RTGRAPHIC_CTRL_GET_EXT:
+    {
+        struct rtgui_graphic_ext_ops *ext_ops;
+
+        ext_ops = (struct rtgui_graphic_ext_ops*) args;
+        *ext_ops = ra8875_ext_ops;
+
+        result = RT_EOK;
+    }
+    break;
+#endif /* USE_DRAW_FUNCTION */
+
+#ifdef RTGUI_USING_HW_CURSOR
+    case RT_DEVICE_CTRL_CURSOR_SET_TYPE:
+    {
+        rt_uint32_t type = *(rt_uint32_t *)args;
+
+        if(type == RTGUI_CURSOR_ARROW)
+        {
+            _set_mouse_image(cursor_arrow);
+        }
+
+        result = RT_EOK;
+    }
+    break;
+
+    case RT_DEVICE_CTRL_CURSOR_SET_POSITION:
+    {
+        rt_uint32_t value;
+        rt_uint16_t x, y;
+
+        value = *(rt_uint32_t *)args;
+        x = (value >> 16) & 0xFFFF;
+        y = value & 0xFFFF;
+
+        _set_mouse_position(x, y);
+        result = RT_EOK;
+    }
+    break;
+#endif /* RTGUI_USING_HW_CURSOR */
 
     case RTGRAPHIC_CTRL_RECT_UPDATE:
         /* nothong to be done */
@@ -356,7 +682,7 @@ static rt_err_t lcd_control(rt_device_t dev, rt_uint8_t cmd, void *args)
         break;
     }
 
-    return RT_EOK;
+    return result;
 }
 
 static void ra8875_lcd_set_pixel(const char* pixel, int x, int y)
@@ -384,9 +710,13 @@ static void ra8875_lcd_draw_hline(const char* pixel, int x1, int x2, int y)
 #ifdef USE_DRAW_FUNCTION
     if(x2 > (x1 + 25))
     {
-        /* wait draw complete. */
-        while(LCD_read_reg(LCD_DCR) &
-                (DCR_DRAW3_CIRCLE | DCR_DRAW3_LINE_SQUARE_TRIANGLE));
+        rt_err_t result;
+
+        result = rt_sem_take(&draw_sem, RT_WAITING_FOREVER);
+        if (result != RT_EOK)
+        {
+            return;
+        }
 
         _set_draw_start_cursor(x1, y);
         _set_draw_end_cursor(x2, y);
@@ -415,9 +745,13 @@ static void ra8875_lcd_draw_vline(const char* pixel, int x, int y1, int y2)
 #ifdef USE_DRAW_FUNCTION
     if(y2 > (y1 + 25))
     {
-        /* wait draw complete. */
-        while(LCD_read_reg(LCD_DCR) &
-                (DCR_DRAW3_CIRCLE | DCR_DRAW3_LINE_SQUARE_TRIANGLE));
+        rt_err_t result;
+
+        result = rt_sem_take(&draw_sem, RT_WAITING_FOREVER);
+        if (result != RT_EOK)
+        {
+            return;
+        }
 
         _set_draw_start_cursor(x, y1);
         _set_draw_end_cursor(x, y2);
@@ -459,7 +793,7 @@ static void ra8875_lcd_blit_line(const char* pixels, int x, int y, rt_size_t siz
     }
 }
 
-static struct rt_device_graphic_ops ra8875_ops =
+static const struct rt_device_graphic_ops ra8875_ops =
 {
     ra8875_lcd_set_pixel,
     ra8875_lcd_get_pixel,
@@ -585,6 +919,10 @@ void ra8875_init(void)
     } /* data bus test. */
 #endif /* USE_GRAM_TEST */
 
+#ifdef USE_DRAW_FUNCTION
+    rt_sem_init(&draw_sem, "draw", 1, RT_IPC_FLAG_FIFO);
+#endif /* USE_DRAW_FUNCTION */
+
     /* register lcd device */
     _lcd_device.type  = RT_Device_Class_Graphic;
     _lcd_device.init  = lcd_init;
@@ -594,7 +932,7 @@ void ra8875_init(void)
     _lcd_device.read  = RT_NULL;
     _lcd_device.write = RT_NULL;
 
-    _lcd_device.user_data = &ra8875_ops;
+    _lcd_device.user_data = (void *)&ra8875_ops;
 
     /* register graphic device driver */
     rt_device_register(&_lcd_device, "lcd",

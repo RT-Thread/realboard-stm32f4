@@ -177,7 +177,7 @@
 // <bool name="RTGUI_USING_FONT12" description="Support 12 weight font" default="false" />
 //#define RTGUI_USING_FONT12
 // <bool name="RTGUI_USING_FONTHZ" description="Support Chinese font" default="false" />
-//#define RTGUI_USING_FONTHZ
+#define RTGUI_USING_FONTHZ
 // <bool name="RTGUI_USING_DFS_FILERW" description="Using DFS as file interface " default="true" />
 #define RTGUI_USING_DFS_FILERW
 // <bool name="RTGUI_USING_HZ_FILE" description="Using font file as Chinese font" default="false" />
@@ -193,7 +193,7 @@
 // <bool name="RTGUI_IMAGE_JPEG" description="Using jpeg image in RTGUI" default="true" />
 #define RTGUI_IMAGE_JPEG
 // <bool name="RTGUI_IMAGE_PNG" description="Using png image in RTGUI" default="false" />
-//#define RTGUI_IMAGE_PNG
+#define RTGUI_IMAGE_PNG
 // <bool name="RTGUI_IMAGE_BMP" description="Using bmp image in RTGUI" default="true" />
 #define RTGUI_IMAGE_BMP
 // <bool name="RTGUI_USING_NOTEBOOK_IMAGE" description="Using notebook image in RTGUI" default="true" />
@@ -202,6 +202,7 @@
 
 // <section name="RT_USING_LWIP" description="lwip, a lightweight TCP/IP protocol stack" default="true" >
 #define RT_USING_LWIP
+#define RT_USING_WIFI
 // <bool name="RT_LWIP_ICMP" description="Enable ICMP protocol" default="true" />
 #define RT_LWIP_ICMP
 // <bool name="RT_LWIP_IGMP" description="Enable IGMP protocol" default="false" />
@@ -237,7 +238,7 @@
 // <integer name="RT_LWIP_ETHTHREAD_MBOX_SIZE" description="the mail box size of ethnetif thread to wait for" default="8" />
 #define RT_LWIP_ETHTHREAD_MBOX_SIZE	8
 // <integer name="RT_LWIP_ETHTHREAD_STACKSIZE" description="the stack size of ethnetif thread" default="512" />
-#define RT_LWIP_ETHTHREAD_STACKSIZE	512
+#define RT_LWIP_ETHTHREAD_STACKSIZE	2048
 // <ipaddr name="RT_LWIP_IPADDR" description="IP address of device" default="192.168.1.30" />
 #define RT_LWIP_IPADDR0 192
 #define RT_LWIP_IPADDR1 168

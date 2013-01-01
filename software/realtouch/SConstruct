@@ -18,6 +18,12 @@ env = Environment(tools = ['mingw'],
 	AR = rtconfig.AR, ARFLAGS = '-rc',
 	LINK = rtconfig.LINK, LINKFLAGS = rtconfig.LFLAGS)
 
+if rtconfig.PLATFORM == 'armcc':
+    env["TEMPFILE"] = SCons.Platform.TempFileMunge
+    # env["LINKCOM"] = "${TEMPFILE('$LINK -o $TARGET $SOURCES')}"
+    env["LINKCOM"] = "$LINK -o $TARGET $LINKFLAGS ${TEMPFILE('--via $SOURCES')}"
+    env["TEMPFILEPREFIX"] = ' '      # arm tool chain
+
 Export('RTT_ROOT')
 Export('rtconfig')
 

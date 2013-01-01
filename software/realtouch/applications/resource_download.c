@@ -40,6 +40,28 @@ static const struct resource_item resource_table[] =
     },
 };
 
+#ifdef RT_USING_WIFI
+#define WIFI_FIRMWARE_DIR       "/firmware"
+static const struct resource_item wifi_firmware_table[] =
+{
+    {
+        "/firmware/helper.bin",
+        2140,
+        "http://www.rt-thread.org/realtouch/firmware/helper.bin"
+    },
+    {
+        "/firmware/fw.bin",
+        119696,
+        "http://www.rt-thread.org/realtouch/firmware/fw.bin"
+    },
+    {
+        "/firmware/wpa.mo",
+        29652,
+        "http://www.rt-thread.org/realtouch/firmware/wpa.mo"
+    },
+};
+#endif /* RT_USING_WIFI */
+
 #define ARRAY_SIZE(array)  (sizeof(array) / sizeof(array[0]))
 
 const char _get[] = "GET %s HTTP/1.0\r\nHost: %s:%d\r\nUser-Agent: RT-Thread HTTP Agent\r\nConnection: close\r\n\r\n";
@@ -317,6 +339,45 @@ rt_err_t resource_download(void)
             http_down(resource_table[i].name, resource_table[i].url);
         }
     }
+
+#ifdef RT_USING_WIFI
+    /* check WIFI FIRMWARE DIR */
+    {
+        int fd;
+
+        fd = open(WIFI_FIRMWARE_DIR, DFS_O_DIRECTORY, 0);
+        if(fd < 0)
+        {
+            rt_kprintf("[INFO] %s is not exits, create it!\r\n", WIFI_FIRMWARE_DIR);
+            fd = open(WIFI_FIRMWARE_DIR, DFS_O_DIRECTORY | DFS_O_CREAT, 0);
+            if(fd >= 0)
+            {
+                close(fd);
+            }
+            else
+            {
+                rt_kprintf("[ERR] %s create failed!\r\n", WIFI_FIRMWARE_DIR);
+            }
+        }
+        else
+        {
+            close(fd);
+        }
+    } /* check WIFI FIRMWARE DIR */
+
+    for(i=0; i<ARRAY_SIZE(wifi_firmware_table); i++)
+    {
+        int result;
+
+        result = stat(wifi_firmware_table[i].name, &file_stat);
+
+        if((result != 0) || (file_stat.st_size != wifi_firmware_table[i].size))
+        {
+            rt_kprintf("[INFO] download %s\r\n", wifi_firmware_table[i].name);
+            http_down(wifi_firmware_table[i].name, wifi_firmware_table[i].url);
+        }
+    }
+#endif /* RT_USING_WIFI */
 
     return RT_EOK;
 }

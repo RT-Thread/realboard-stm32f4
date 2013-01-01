@@ -2,9 +2,6 @@
 #ifndef __RTTHREAD_CFG_H__
 #define __RTTHREAD_CFG_H__
 
-//#define RT_USING_NEWLIB
-//#define RT_USING_MINILIBC
-
 /* RT_NAME_MAX*/
 #define RT_NAME_MAX	   8
 
@@ -63,11 +60,9 @@
 /* SECTION: Device System */
 /* Using Device System */
 #define RT_USING_DEVICE
-// <bool name=RT_USING_DEVICE_IPC description="Using IPC in Device Driver Framework" default="true" />
 #define RT_USING_DEVICE_IPC
-// <bool name="RT_USING_SERIAL" description="Using Serial Device Driver Framework" default="true" />
 #define RT_USING_SERIAL
-#define RT_USING_MTD_NAND
+#define RT_USING_SPI
 
 /* SECTION: Console options */
 #define RT_USING_CONSOLE
@@ -84,6 +79,10 @@
 #define FINSH_USING_SYMTAB
 #define FINSH_USING_DESCRIPTION
 
+/* SECITON: LIBC */
+/* #define RT_USING_NEWLIB */
+/* #define RT_USING_MINILIBC */
+
 /* SECTION: device filesystem */
 #define RT_USING_DFS
 #define RT_USING_DFS_ELMFAT
@@ -95,23 +94,15 @@
 /* #define RT_DFS_ELM_USE_LFN			1 */
 #define RT_DFS_ELM_MAX_LFN			255
 /* Maximum sector size to be handled. */
-#define RT_DFS_ELM_MAX_SECTOR_SIZE  512
-
-/* configration for uffs, more to see dfs_uffs.h and uffs_config.h */
-#define RT_USING_DFS_UFFS
-#define RT_CONFIG_UFFS_ECC_MODE  UFFS_ECC_HW_AUTO
-/* enable this ,you need provide a mark_badblock/check_block funciton */
-/* #define RT_UFFS_USE_CHECK_MARK_FUNCITON */
-
-//#define RT_USING_DFS_NFS
+#define RT_DFS_ELM_MAX_SECTOR_SIZE  4096
 
 /* the max number of mounted filesystem */
-#define DFS_FILESYSTEMS_MAX			2
+#define DFS_FILESYSTEMS_MAX			4
 /* the max number of opened files 		*/
 #define DFS_FD_MAX					4
 
 /* SECTION: lwip, a lighwight TCP/IP protocol stack */
-//#define RT_USING_LWIP
+#define RT_USING_LWIP
 /* LwIP uses RT-Thread Memory Management */
 #define RT_LWIP_USING_RT_MEM
 /* Enable ICMP protocol*/
@@ -123,8 +114,14 @@
 /* Enable DNS */
 #define RT_LWIP_DNS
 
+/* depended for ftp server */
+#define SO_REUSE  1
+
 /* the number of simulatenously active TCP connections*/
 #define RT_LWIP_TCP_PCB_NUM	5
+
+/* use DHCP */
+#define RT_LWIP_DHCP
 
 /* ip address of target*/
 #define RT_LWIP_IPADDR0	10
@@ -146,13 +143,13 @@
 
 /* tcp thread options */
 #define RT_LWIP_TCPTHREAD_PRIORITY		12
-#define RT_LWIP_TCPTHREAD_MBOX_SIZE		4
-#define RT_LWIP_TCPTHREAD_STACKSIZE		1024
+#define RT_LWIP_TCPTHREAD_MBOX_SIZE		8
+#define RT_LWIP_TCPTHREAD_STACKSIZE		4096
 
 /* ethernet if thread options */
 #define RT_LWIP_ETHTHREAD_PRIORITY		15
-#define RT_LWIP_ETHTHREAD_MBOX_SIZE		4
-#define RT_LWIP_ETHTHREAD_STACKSIZE		512
+#define RT_LWIP_ETHTHREAD_MBOX_SIZE		8
+#define RT_LWIP_ETHTHREAD_STACKSIZE		2048
 
 /* TCP sender buffer space */
 #define RT_LWIP_TCP_SND_BUF	8192

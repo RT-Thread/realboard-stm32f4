@@ -40,7 +40,7 @@ static void _handle_app_create(struct rtgui_event_application* event)
 	else
 		app_items = (struct rtgui_application_item*) rtgui_realloc(app_items, sizeof(struct rtgui_application_item) * app_count);
 
-	if (app_items == RT_NULL) 
+	if (app_items == RT_NULL)
 	{
 		status = RTGUI_STATUS_ERROR;
 		goto __exit;
@@ -49,7 +49,7 @@ static void _handle_app_create(struct rtgui_event_application* event)
 	app = event->app;
 
 	app_items[app_count - 1].app = app;
-	rtgui_listctrl_set_items(app_list, (rt_uint32_t)app_items, app_count);
+	rtgui_listctrl_set_items(app_list, app_items, app_count);
 
 __exit:
 	/* send ack to the application */
@@ -69,7 +69,7 @@ static void _handle_app_destroy(struct rtgui_event_application* event)
 		{
 			/* remove this application */
 			app_count --;
-			if (app_count == 0) 
+			if (app_count == 0)
 			{
 				rtgui_free(app_items);
 				app_items = RT_NULL;
@@ -87,7 +87,7 @@ static void _handle_app_destroy(struct rtgui_event_application* event)
 				}
 				app_items = rtgui_realloc(app_items, app_count * sizeof(struct rtgui_application_item));
 			}
-			rtgui_listctrl_set_items(app_list, (rt_uint32_t)app_items, app_count);
+			rtgui_listctrl_set_items(app_list, app_items, app_count);
 			rtgui_ack(RTGUI_EVENT(event), RTGUI_STATUS_OK);
 			return ;
 		}
@@ -238,7 +238,7 @@ struct rtgui_panel* apps_list_create(struct rtgui_panel* panel)
 	/* create application list */
 	rtgui_rect_inflate(&rect, -15);
 
-	app_list = rtgui_listctrl_create((rt_uint32_t)app_items, app_count, &rect, _app_info_draw);
+	app_list = rtgui_listctrl_create(app_items, app_count, &rect, _app_info_draw);
 	rtgui_listctrl_set_itemheight(app_list, app_default_icon->h + 2);
 	rtgui_listctrl_set_onitem(app_list, _handle_app_activate);
 	rtgui_object_set_event_handler(RTGUI_OBJECT(app_list), apps_listctrl_event_handler);
