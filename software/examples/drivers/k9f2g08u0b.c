@@ -16,10 +16,13 @@
 #include "k9f2g08u0b.h"
 
 
-#define NAND_DEBUG    rt_kprintf
+//#define NAND_DEBUG(...)    rt_kprintf(...)
+#define NAND_DEBUG(...)    
+
 #define NAND_BANK     ((rt_uint32_t)0x80000000)
 static struct stm32f4_nand _device;
 
+#define ECC_SIZE     4
 
 rt_inline void nand_cmd(rt_uint8_t cmd)
 {
@@ -189,12 +192,7 @@ static rt_err_t nandflash_readpage(struct rt_mtd_nand_device* device, rt_off_t p
     rt_uint8_t tmp[8];
     rt_err_t result;
 
-    if (spare_len > 60)
-        spare_len = 60;
-    RT_ASSERT(data_len < 2049);
-    RT_ASSERT(spare_len < 61);
-
-    //NAND_DEBUG("nand read[%d,%d,%d]\n",page,data_len,spare_len);
+    NAND_DEBUG("nand read[%d,%d,%d]\n",page,data_len,spare_len);
     result = -RT_MTD_EIO;
     rt_mutex_take(&_device.lock, RT_WAITING_FOREVER);
 
@@ -220,19 +218,21 @@ static rt_err_t nandflash_readpage(struct rt_mtd_nand_device* device, rt_off_t p
 
         if (data_len == 2048)
         {
-            for (index = 0; index < 4; index ++)
+            for (index = 0; index < ECC_SIZE; index ++)
                 tmp[index] = nand_read8();
             if (spare && spare_len)
             {
-                for (index = 0; index < spare_len; index ++)
-                    spare[index] = nand_read8();
+                for (index = 0; index < spare_len-ECC_SIZE; index ++)
+                    spare[ECC_SIZE + index] = nand_read8();
 
                 spare_len = 0;
+
+				memcpy(spare, tmp , ECC_SIZE);
             }
 
             recc   = (tmp[3] << 24) | (tmp[2] << 16) | (tmp[1] << 8) | tmp[0];
 
-            //NAND_DEBUG("<gecc %X,recc %X>",gecc,recc);
+            NAND_DEBUG("<gecc %X,recc %X>",gecc,recc);
             if (nand_datacorrect(gecc, recc, data) != RT_EOK)
                 result = -RT_MTD_EECC;
             else
@@ -248,7 +248,7 @@ static rt_err_t nandflash_readpage(struct rt_mtd_nand_device* device, rt_off_t p
     {
         nand_cmd(NAND_CMD_READ_1);
 
-        nand_addr(4);
+        nand_addr(0);
         nand_addr(8);
         nand_addr(page);
         nand_addr(page >> 8);
@@ -277,13 +277,9 @@ static rt_err_t nandflash_writepage(struct rt_mtd_nand_device* device, rt_off_t 
     rt_uint32_t index;
     rt_err_t result;
     rt_uint32_t gecc;
-    if (spare_len > 60)
-        spare_len = 60;
-    RT_ASSERT(data_len < 2049);
-    RT_ASSERT(spare_len < 61);
 
     result = -RT_MTD_EIO;
-    //NAND_DEBUG("nand write[%d,%d]\n",page,data_len);
+    NAND_DEBUG("nand write[%d,%d]\n",page,data_len);
     rt_mutex_take(&_device.lock, RT_WAITING_FOREVER);
 
     if (data && data_len)
@@ -304,7 +300,7 @@ static rt_err_t nandflash_writepage(struct rt_mtd_nand_device* device, rt_off_t 
         gecc = FSMC_GetECC(FSMC_Bank3_NAND);
         FSMC_NANDECCCmd(FSMC_Bank3_NAND,DISABLE);
 
-        //NAND_DEBUG("<wecc %X>",gecc);
+        NAND_DEBUG("<wecc %X>",gecc);
         if (data_len == 2048)
         {
             nand_write8((uint8_t)gecc);
@@ -331,15 +327,15 @@ static rt_err_t nandflash_writepage(struct rt_mtd_nand_device* device, rt_off_t 
     {
         nand_cmd(NAND_CMD_PAGEPROGRAM);
 
-        nand_addr(4);
+        nand_addr(ECC_SIZE);
         nand_addr(0x08);
         nand_addr(page);
         nand_addr(page >> 8);
         nand_addr(page >> 16);
 
-        for (index = 0; index < spare_len; index ++)
+        for (index = 0; index < spare_len-ECC_SIZE; index ++)
         {
-            nand_write8(spare[index]);
+            nand_write8(spare[ECC_SIZE+index]);
         }
 
         nand_cmd(NAND_CMD_PAGEPROGRAM_TRUE);
@@ -496,7 +492,7 @@ void ntest(void)
     for (i = 0; i < 256; i ++)
     {
 
-        if (nandflash_eraseblock(0,i) != RT_MTD_EOK)
+        if (nandflash_eraseblock(RT_NULL, i) != RT_MTD_EOK)
         {
             RT_ASSERT(0);
         }
@@ -515,12 +511,12 @@ void ntest(void)
         memset(RxBuffer, 0, sizeof(RxBuffer));
         memset(spare, 0x0, 64);
 
-        if (nandflash_writepage(0,n,TxBuffer,2048, Spare, 60) != RT_EOK)
+        if (nandflash_writepage(RT_NULL,n,TxBuffer,2048, Spare, 60) != RT_EOK)
         {
             RT_ASSERT(0);
         }
         /* Read back the written data */
-        nandflash_readpage(0,n,RxBuffer, 2048,spare,60);
+        nandflash_readpage(RT_NULL,n,RxBuffer, 2048,spare,60);
 
         if( memcmp( (char*)TxBuffer, (char*)RxBuffer, NAND_PAGE_SIZE ) != 0 )
         {
@@ -543,27 +539,30 @@ void nread(int page)
     rt_memset(RxBuffer, 0, 2048);
     rt_memset(Spare, 0, 64);
 
-    if (nandflash_readpage(0,page,RxBuffer, 2048,Spare,60) != RT_MTD_EOK)
+    if (nandflash_readpage(RT_NULL,page,RxBuffer, 2048,Spare,64) != RT_MTD_EOK)
     {
         rt_kprintf("read fail\n");
-        return;
     }
+	rt_kprintf("data:\n");
     for (index = 0; index < 2048; index ++)
     {
         rt_kprintf("0x%X,",RxBuffer[index]);
+		if ((index+1) % 16 == 0)
+			rt_kprintf("\n");
     }
-    rt_kprintf("spare\n");
-    for (index = 0; index < 60; index ++)
+	rt_kprintf("\nspare:\n");
+    for (index = 0; index < 64; index ++)
     {
         rt_kprintf("[%X]", Spare[index]);
+		if ((index+1) % 16 == 0)
+			rt_kprintf("\n");
     }
     rt_kprintf("\n\n");
 }
 
 void nerase(int block)
 {
-
-    nandflash_eraseblock(0,block);
+    nandflash_eraseblock(RT_NULL,block);
 }
 
 void nwrite(int page)
@@ -577,15 +576,25 @@ void nwrite(int page)
             TxBuffer[i] = i/5 - i;
     }
 #endif
-    nandflash_writepage(0,page,TxBuffer,2048, Spare, 60);
+    nandflash_writepage(RT_NULL,page,TxBuffer,2048, Spare, 60);
 }
 
 void ncopy(int s, int d)
 {
 
-    if (nandflash_pagecopy(0,s,d) != RT_MTD_EOK)
+    if (nandflash_pagecopy(RT_NULL,s,d) != RT_MTD_EOK)
         rt_kprintf("copy fail\n");
 }
+
+void nand_eraseall()
+{
+	int index;
+	for (index = 0; index < _partition[0].block_total; index ++)
+	{
+		nandflash_eraseblock(RT_NULL, index);
+	}
+}
+FINSH_FUNCTION_EXPORT(nand_eraseall, erase all of block in the nand flash);
 FINSH_FUNCTION_EXPORT(ncopy, nand copy);
 FINSH_FUNCTION_EXPORT(nwrite, nand write);
 FINSH_FUNCTION_EXPORT(nerase, nand erase);

@@ -99,10 +99,9 @@
 
 /* configration for uffs, more to see dfs_uffs.h and uffs_config.h */
 #define RT_USING_DFS_UFFS
-/* use ecc none, cause driver already do ecc. */
-#define RT_CONFIG_UFFS_ECC_MODE  UFFS_ECC_NONE
+#define RT_CONFIG_UFFS_ECC_MODE  UFFS_ECC_HW_AUTO
 /* enable this ,you need provide a mark_badblock/check_block funciton */
-//#define RT_UFFS_USE_CHECK_MARK_FUNCITON
+/* #define RT_UFFS_USE_CHECK_MARK_FUNCITON */
 
 //#define RT_USING_DFS_NFS
 
