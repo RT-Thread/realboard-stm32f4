@@ -4,7 +4,7 @@
 #include <rtthread.h>
 #include <dfs_posix.h>
 #include <lwip/sockets.h>
-#include <time.h>
+//#include <time.h>
 
 #define FTP_PORT			21
 #define FTP_SRV_ROOT		"/"
@@ -90,7 +90,7 @@ int ftp_get_filesize(char * filename)
 
 rt_bool_t is_absolute_path(char* path)
 {
-#ifdef _WIN32
+#ifdef WIN32_NATIVE
 	if (path[0] == '\\' ||
 		(path[1] == ':' && path[2] == '\\'))
 		return RT_TRUE;
@@ -228,7 +228,7 @@ int do_list(char* directory, int sockfd)
 	DIR* dirp;
 	struct dirent* entry;
 	char line_buffer[256], line_length;
-#ifdef _WIN32
+#ifdef WIN32_NATIVE
 	struct _stat s;
 #else
 	struct stat s;
@@ -248,7 +248,7 @@ int do_list(char* directory, int sockfd)
 		if (entry == NULL) break;
 
 		rt_sprintf(line_buffer, "%s/%s", directory, entry->d_name);
-#ifdef _WIN32
+#ifdef WIN32_NATIVE
 		if (_stat(line_buffer, &s) ==0)
 #else
 		if (stat(line_buffer, &s) == 0)

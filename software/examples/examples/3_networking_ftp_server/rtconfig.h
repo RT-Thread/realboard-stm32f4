@@ -114,6 +114,9 @@
 /* Enable DNS */
 #define RT_LWIP_DNS
 
+/* depended for ftp server */
+#define SO_REUSE  1
+
 /* the number of simulatenously active TCP connections*/
 #define RT_LWIP_TCP_PCB_NUM	5
 
