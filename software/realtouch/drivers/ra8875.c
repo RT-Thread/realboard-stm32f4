@@ -429,7 +429,7 @@ static void _set_mouse_position(uint16_t X, uint16_t Y)
 #endif /* RTGUI_USING_HW_CURSOR */
 
 #ifdef  USE_DRAW_FUNCTION
-static struct rt_semaphore draw_sem;
+
 static struct rt_event ra8875_event;
 #define RA8875_EVENT_READY      (1<<0)
 
@@ -460,8 +460,7 @@ static void ra8875_nwait_isr_int_cmd(FunctionalState NewState)
 
 void ra8875_nwait_isr(void)
 {
-//    rt_kprintf("ra8875_nwait_isr\r\n");
-//    rt_sem_release(&draw_sem);
+    ra8875_nwait_isr_int_cmd(DISABLE);
     rt_event_send(&ra8875_event, RA8875_EVENT_READY);
 }
 
@@ -469,19 +468,39 @@ static void draw_line(rtgui_color_t *c, int x1, int y1, int x2, int y2)
 {
     rt_uint16_t pixel;
     rt_err_t result;
+    rt_uint32_t e;
 
     /* get pixel from color */
     pixel = rtgui_color_to_565p(*c);
-    result = rt_sem_take(&draw_sem, RT_WAITING_FOREVER);
-    if (result != RT_EOK)
+
+    if(ra8875_is_ready())
     {
-        return;
+        /* if RA8875 is ready, clear ready flag. */
+        rt_event_recv(&ra8875_event,
+                      RA8875_EVENT_READY,
+                      RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                      RT_WAITING_NO,
+                      &e);
+    }
+    else
+    {
+        /* if RA8875 is busy, wait it. */
+        result = rt_event_recv(&ra8875_event,
+                               RA8875_EVENT_READY,
+                               RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                               2,
+                               &e);
+        if (result != RT_EOK)
+        {
+            return;
+        }
     }
 
     _set_draw_start_cursor(x1, y1);
     _set_draw_end_cursor(x2, y2);
     _set_fore_color(pixel);
 
+    ra8875_nwait_isr_int_cmd(ENABLE);
     LCD_write_reg(LCD_DCR, DCR_DRAW0_LINE_SQUARE | DCR_DRAW1_LINE
                   | DCR_DRAW2_NO_FILL | DCR_DRAW3_LINE_SQUARE_TRIANGLE);
 }
@@ -490,20 +509,39 @@ static void draw_rect(rtgui_color_t *c, int x1, int y1, int x2, int y2)
 {
     rt_uint16_t pixel;
     rt_err_t result;
+    rt_uint32_t e;
 
     /* get pixel from color */
     pixel = rtgui_color_to_565p(*c);
 
-    result = rt_sem_take(&draw_sem, RT_WAITING_FOREVER);
-    if (result != RT_EOK)
+    if(ra8875_is_ready())
     {
-        return;
+        /* if RA8875 is ready, clear ready flag. */
+        rt_event_recv(&ra8875_event,
+                      RA8875_EVENT_READY,
+                      RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                      RT_WAITING_NO,
+                      &e);
+    }
+    else
+    {
+        /* if RA8875 is busy, wait it. */
+        result = rt_event_recv(&ra8875_event,
+                               RA8875_EVENT_READY,
+                               RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                               2,
+                               &e);
+        if (result != RT_EOK)
+        {
+            return;
+        }
     }
 
     _set_draw_start_cursor(x1, y1);
     _set_draw_end_cursor(x2, y2);
     _set_fore_color(pixel);
 
+    ra8875_nwait_isr_int_cmd(ENABLE);
     LCD_write_reg(LCD_DCR, DCR_DRAW0_LINE_SQUARE | DCR_DRAW1_SQUARE
                   | DCR_DRAW2_NO_FILL | DCR_DRAW3_LINE_SQUARE_TRIANGLE);
 }
@@ -512,20 +550,39 @@ static void fill_rect(rtgui_color_t *c, int x1, int y1, int x2, int y2)
 {
     rt_uint16_t pixel;
     rt_err_t result;
+    rt_uint32_t e;
 
     /* get pixel from color */
     pixel = rtgui_color_to_565p(*c);
 
-    result = rt_sem_take(&draw_sem, RT_WAITING_FOREVER);
-    if (result != RT_EOK)
+    if(ra8875_is_ready())
     {
-        return;
+        /* if RA8875 is ready, clear ready flag. */
+        rt_event_recv(&ra8875_event,
+                      RA8875_EVENT_READY,
+                      RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                      RT_WAITING_NO,
+                      &e);
+    }
+    else
+    {
+        /* if RA8875 is busy, wait it. */
+        result = rt_event_recv(&ra8875_event,
+                               RA8875_EVENT_READY,
+                               RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                               2,
+                               &e);
+        if (result != RT_EOK)
+        {
+            return;
+        }
     }
 
     _set_draw_start_cursor(x1, y1);
     _set_draw_end_cursor(x2, y2);
     _set_fore_color(pixel);
 
+    ra8875_nwait_isr_int_cmd(ENABLE);
     LCD_write_reg(LCD_DCR, DCR_DRAW0_LINE_SQUARE | DCR_DRAW1_SQUARE
                   | DCR_DRAW2_FILL | DCR_DRAW3_LINE_SQUARE_TRIANGLE);
 }
@@ -534,20 +591,39 @@ static void draw_circle(rtgui_color_t *c, int x, int y, int r)
 {
     rt_uint16_t pixel;
     rt_err_t result;
+    rt_uint32_t e;
 
     /* get pixel from color */
     pixel = rtgui_color_to_565p(*c);
 
-    result = rt_sem_take(&draw_sem, RT_WAITING_FOREVER);
-    if (result != RT_EOK)
+    if(ra8875_is_ready())
     {
-        return;
+        /* if RA8875 is ready, clear ready flag. */
+        rt_event_recv(&ra8875_event,
+                      RA8875_EVENT_READY,
+                      RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                      RT_WAITING_NO,
+                      &e);
+    }
+    else
+    {
+        /* if RA8875 is busy, wait it. */
+        result = rt_event_recv(&ra8875_event,
+                               RA8875_EVENT_READY,
+                               RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                               2,
+                               &e);
+        if (result != RT_EOK)
+        {
+            return;
+        }
     }
 
     _set_draw_center_cursor(x, y);
     _set_draw_radius(r);
     _set_fore_color(pixel);
 
+    ra8875_nwait_isr_int_cmd(ENABLE);
     LCD_write_reg(LCD_DCR, DCR_DRAW2_NO_FILL | DCR_DRAW3_CIRCLE);
 }
 
@@ -555,20 +631,39 @@ static void fill_circle(rtgui_color_t *c, int x, int y, int r)
 {
     rt_uint16_t pixel;
     rt_err_t result;
+    rt_uint32_t e;
 
     /* get pixel from color */
     pixel = rtgui_color_to_565p(*c);
 
-    result = rt_sem_take(&draw_sem, RT_WAITING_FOREVER);
-    if (result != RT_EOK)
+    if(ra8875_is_ready())
     {
-        return;
+        /* if RA8875 is ready, clear ready flag. */
+        rt_event_recv(&ra8875_event,
+                      RA8875_EVENT_READY,
+                      RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                      RT_WAITING_NO,
+                      &e);
+    }
+    else
+    {
+        /* if RA8875 is busy, wait it. */
+        result = rt_event_recv(&ra8875_event,
+                               RA8875_EVENT_READY,
+                               RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                               2,
+                               &e);
+        if (result != RT_EOK)
+        {
+            return;
+        }
     }
 
     _set_draw_center_cursor(x, y);
     _set_draw_radius(r);
     _set_fore_color(pixel);
 
+    ra8875_nwait_isr_int_cmd(ENABLE);
     LCD_write_reg(LCD_DCR, DCR_DRAW2_FILL | DCR_DRAW3_CIRCLE);
 }
 
@@ -576,19 +671,39 @@ static void draw_ellipse(rtgui_color_t *c, int x, int y, int rx, int ry)
 {
     rt_uint16_t pixel;
     rt_err_t result;
+    rt_uint32_t e;
 
     /* get pixel from color */
     pixel = rtgui_color_to_565p(*c);
 
-    result = rt_sem_take(&draw_sem, RT_WAITING_FOREVER);
-    if (result != RT_EOK)
+    if(ra8875_is_ready())
     {
-        return;
+        /* if RA8875 is ready, clear ready flag. */
+        rt_event_recv(&ra8875_event,
+                      RA8875_EVENT_READY,
+                      RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                      RT_WAITING_NO,
+                      &e);
+    }
+    else
+    {
+        /* if RA8875 is busy, wait it. */
+        result = rt_event_recv(&ra8875_event,
+                               RA8875_EVENT_READY,
+                               RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                               2,
+                               &e);
+        if (result != RT_EOK)
+        {
+            return;
+        }
     }
 
     _set_draw_center_ellipse_cursor(x, y);
     _set_draw_radius_ellipse(rx, ry);
     _set_fore_color(pixel);
+
+    ra8875_nwait_isr_int_cmd(ENABLE);
     LCD_write_reg(DECR, DECR_DRAW0_ALL
                   | DECR_DRAW1_ELLIPSE | DECR_DRAW2_ELLIPSE
                   | DECR_DRAW3_NO_FILL | DECR_DRAW4_ELLIPSE_CIRCLE_SQUARE);
@@ -598,19 +713,39 @@ static void fill_ellipse(rtgui_color_t *c, int x, int y, int rx, int ry)
 {
     rt_uint16_t pixel;
     rt_err_t result;
+    rt_uint32_t e;
 
     /* get pixel from color */
     pixel = rtgui_color_to_565p(*c);
 
-    result = rt_sem_take(&draw_sem, RT_WAITING_FOREVER);
-    if (result != RT_EOK)
+    if(ra8875_is_ready())
     {
-        return;
+        /* if RA8875 is ready, clear ready flag. */
+        rt_event_recv(&ra8875_event,
+                      RA8875_EVENT_READY,
+                      RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                      RT_WAITING_NO,
+                      &e);
+    }
+    else
+    {
+        /* if RA8875 is busy, wait it. */
+        result = rt_event_recv(&ra8875_event,
+                               RA8875_EVENT_READY,
+                               RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                               2,
+                               &e);
+        if (result != RT_EOK)
+        {
+            return;
+        }
     }
 
     _set_draw_center_ellipse_cursor(x, y);
     _set_draw_radius_ellipse(rx, ry);
     _set_fore_color(pixel);
+
+    ra8875_nwait_isr_int_cmd(ENABLE);
     LCD_write_reg(DECR, DECR_DRAW0_ALL
                   | DECR_DRAW1_ELLIPSE | DECR_DRAW2_ELLIPSE
                   | DECR_DRAW3_FILL | DECR_DRAW4_ELLIPSE_CIRCLE_SQUARE);
@@ -757,7 +892,7 @@ static void ra8875_lcd_draw_hline(const char* pixel, int x1, int x2, int y)
             rt_event_recv(&ra8875_event,
                           RA8875_EVENT_READY,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
-                          0,
+                          RT_WAITING_NO,
                           &e);
         }
         else
@@ -1008,13 +1143,14 @@ void ra8875_init(void)
 #endif /* USE_GRAM_TEST */
 
 #ifdef USE_DRAW_FUNCTION
-    rt_sem_init(&draw_sem, "draw", 1, RT_IPC_FLAG_FIFO);
     rt_event_init(&ra8875_event, "ra8875", RT_IPC_FLAG_FIFO);
     rt_event_send(&ra8875_event, RA8875_EVENT_READY);
+
     SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOD, EXTI_PinSource6);
     ra8875_nwait_isr_int_cmd(DISABLE);
     NVIC_Configuration();
 #endif /* USE_DRAW_FUNCTION */
+
     /* register lcd device */
     _lcd_device.type  = RT_Device_Class_Graphic;
     _lcd_device.init  = lcd_init;
