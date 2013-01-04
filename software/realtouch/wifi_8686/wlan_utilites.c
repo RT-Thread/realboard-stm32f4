@@ -16,7 +16,7 @@ unsigned int WlanDebugLevel=WlanErr;
  *
  * Unlike memcpy(), memmove() copes with overlapping areas.
  */
-void *memmove(void *dest, const void *src, unsigned int count)
+static void *memmove(void *dest, const void *src, unsigned int count)
 {
 	char *tmp;
 	const char *s;

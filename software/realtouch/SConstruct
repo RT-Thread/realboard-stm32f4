@@ -28,7 +28,7 @@ Export('RTT_ROOT')
 Export('rtconfig')
 
 # prepare building environment
-RTT_RTGUI = os.getenv('RTT_RTGUI')
+RTT_RTGUI = r'C:\work\rt-thread\RTGUI_git\components\rtgui'
 if RTT_RTGUI:
 	# if GUI dir is set to other place, don't use the one in RTT_ROOT
     objs = PrepareBuilding(env, RTT_ROOT, has_libcpu=False, remove_components=['rtgui'])
