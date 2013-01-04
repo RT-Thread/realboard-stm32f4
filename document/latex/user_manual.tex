@@ -52,8 +52,8 @@ RealTouch是RT-Thread OS的一个评估演示板，板子使用意法半导体�
  \begin{itemize}
  \item 支持两个DC电源输入
     \begin{itemize}
-    \item[-] 一个标准DC电源插座
-    \item[-] 一个mini USB A/B或者USB-A型
+    \item[-] 一个标准DC电源插座(Φ3.5mm)
+    \item[-] 一个mini USB A接口
     \end{itemize}
  \item 7寸800*480的LCD面板
  \item 4线电阻触摸屏
@@ -65,17 +65,17 @@ RealTouch是RT-Thread OS的一个评估演示板，板子使用意法半导体�
  \item 标准4线SD卡接口(使用SDIO)
  \item 16Mbit串行Flash
  \item 512Kbitx16 SRAM
- \item 512Mbit或者1Gbit NAND Flash
+ \item 2Gbit NAND Flash(K9F2G08U0B)
  \item 一个双向红外通讯接口
  \item USB OTG全速接口
  \item USB Bus ESD保护
- \item SWD调试接口
+ \item SWD调试接口(接口兼容20pin ARM JTAG接口)
  \item RTC
  \end{itemize}
 
   \subsection{软件支持}
   \subsubsection{关注 RealTouch}
- 作为一个RT-Thread的评估板，所有例程皆是在RT-Thread下运行的，RT-Thread RTOS 是一款来自中国的开源实时操作系统，
+ 作为一个RT-Thread的评估板，所有例程皆是在RT-Thread下运行的，RT-Thread RTOS是一款来自中国的开源实时操作系统，
  由国内一些专业开发人员开发、维护。它不仅仅是一款高效、稳定的实时核心，也是一套面向嵌入式系统的软件平台，覆盖了全抢占的实时操作系统内核，
  小巧而与底层具体实现无关的文件系统，轻型的TCP/IP协议栈以及轻型的多窗口多线程图形用户界面。RT-Thread实时操作系统0.3.x/1.0.x系列版本遵循GPLv2许可证。
 
@@ -106,8 +106,10 @@ RealTouch是RT-Thread OS的一个评估演示板，板子使用意法半导体�
  \includegraphics[width=15cm]{power.png}
  \caption{电源}
  \end{figure}
-RealTouch仅支持DC5V标准适配器输入，另外支持一个标准的USB-miniA/B输入，直流输入使用一个低压差线性稳压器
-AMS1117，输入连接到DC Jack的+5V，提供一个稳定的3.3V主电源。
+RealTouch输入电源电压为DC5V,800mA。请确保输入电压不得超过5V，否则可能会主板。同时也可以使用USB供电，因USB输出电流有限，所以当使用USB供电时只能做不需要开启LCD背光和音频输出的实验，不然有可能引起USB电流过载。
+
+RealTouch 电源输入部分使用一个低压差线性稳压器
+AMS1117，输入连接到来自外部电源和USB的+5V，提供一个稳定的3.3V主电源。
  \subsection{LCD偏压、背光}
   \begin{figure}[h]
   \centering
