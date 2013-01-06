@@ -22,7 +22,7 @@
 /* whether use board external SRAM memory */
 // <e>Use external SRAM memory on the board
 // 	<i>Enable External SRAM memory
-#define STM32_EXT_SRAM          1
+#define STM32_EXT_SRAM          0
 //	<o>Begin Address of External SRAM
 //		<i>Default: 0x60000000
 #define STM32_EXT_SRAM_BEGIN    0x60000000 /* the begining address of external SRAM */

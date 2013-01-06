@@ -1,0 +1,8 @@
+*~
+*.bak
+*.aux
+*.log
+*.out
+*.toc
+
+user_manual.pdf

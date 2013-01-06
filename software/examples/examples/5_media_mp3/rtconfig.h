@@ -68,6 +68,8 @@
 #define RT_USING_SERIAL
 #define RT_USING_I2C
 #define RT_USING_I2C_BITOPS
+#define RT_USING_SDIO
+
 
 /* SECTION: Console options */
 #define RT_USING_CONSOLE

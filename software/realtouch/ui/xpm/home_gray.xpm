@@ -1,5 +1,5 @@
 /* XPM */
-static const char *home_gray_xpm[] = {
+static const char * const home_gray_xpm[] = {
 /* columns rows colors chars-per-pixel */
 "48 48 170 2",
 "   c gray18",

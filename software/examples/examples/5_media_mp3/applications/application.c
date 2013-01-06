@@ -44,15 +44,15 @@ void rt_init_thread_entry(void* parameter)
 
     /* initialization RT-Thread Components
 	 *  finsh
-	 *  filesystems, such as fatfs, yaffs, uffs 
+	 *  filesystems, such as fatfs, yaffs, uffs
 	 *  GUI
 	 *  Lwip
 	 */
     rt_components_init();
-    
+rt_platform_init();
     /* Filesystem Initialization */
 #ifdef RT_USING_DFS
-    rt_hw_sdcard_init();
+//    rt_hw_sdcard_init();
 
     {
         /* init the device filesystem */
@@ -77,6 +77,10 @@ void rt_init_thread_entry(void* parameter)
     rt_kprintf("codec init begin...\n");
     codec_hw_init("i2c1");
     rt_kprintf("codec init over\n");
+
+    {
+        printf("printf test\r\n");
+    }
 }
 
 int rt_application_init()

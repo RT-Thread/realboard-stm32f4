@@ -244,4 +244,13 @@ void rt_hw_board_init()
     mco_config();
 }
 
+#ifdef RT_USING_FINSH
+#include <finsh.h>
+static void reset(void)
+{
+    NVIC_SystemReset();
+}
+FINSH_FUNCTION_EXPORT(reset, reset);
+#endif /* RT_USING_FINSH */
+
 /*@}*/

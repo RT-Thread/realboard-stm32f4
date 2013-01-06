@@ -198,6 +198,8 @@
 #define RTGUI_IMAGE_BMP
 // <bool name="RTGUI_USING_NOTEBOOK_IMAGE" description="Using notebook image in RTGUI" default="true" />
 #define RTGUI_USING_NOTEBOOK_IMAGE
+// <bool name="RTGUI_USING_HW_CURSOR" description="Using hardware cursor in RTGUI" default="true" />
+#define RTGUI_USING_HW_CURSOR
 // </section>
 
 // <section name="RT_USING_LWIP" description="lwip, a lightweight TCP/IP protocol stack" default="true" >

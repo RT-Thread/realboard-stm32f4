@@ -140,7 +140,14 @@ void rt_platform_init(void)
 
 #ifdef RT_USING_DFS
     /* initilize sd card */
+#ifdef RT_USING_SDIO
+    rt_mmcsd_core_init();
+    rt_mmcsd_blk_init();
+    stm32f4xx_sdio_init();
+    rt_thread_delay(RT_TICK_PER_SECOND);
+#else
     rt_hw_sdcard_init();
+#endif
 #endif /* RT_USING_DFS */
 
 #ifdef RT_USING_RTGUI

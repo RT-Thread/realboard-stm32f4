@@ -10,9 +10,6 @@ CPPPATH = [cwd, str(Dir('#'))]
 if (GetDepend('RT_USING_LWIP') == False) or (GetDepend('RT_USING_WIFI') == False):
 	SrcRemove(src, 'libwifi.c')
 
-if rtconfig.PLATFORM == 'gcc':
-	SrcRemove(src, 'mp3.c')
-
 group = DefineGroup('Applications', src, depend = [''], CPPPATH = CPPPATH)
 
 Return('group')

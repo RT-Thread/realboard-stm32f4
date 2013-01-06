@@ -89,18 +89,18 @@ void app_mgr_win_init(void)
     rtgui_win_show(win, RT_FALSE);
 
     /* set as main window */
-    rtgui_app_set_main_win(win);
+	rtgui_app_set_main_win(rtgui_app_self(), win);
 }
 
 void app_mgr_entry(void* parameter)
 {
     struct rtgui_app* application;
 
-    application = rtgui_app_create(rt_thread_self(), "AppMgr");
+    application = rtgui_app_create("AppMgr");
     if (application != RT_NULL)
     {
         /* set as window manager */
-        rtgui_app_set_as_wm();
+        rtgui_app_set_as_wm(application);
 
         /* initialize status bar */
         statusbar_init();

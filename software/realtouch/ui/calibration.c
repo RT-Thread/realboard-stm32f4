@@ -255,7 +255,7 @@ void calibration_entry(void* parameter)
     calibration_ptr->width = rect.x2;
     calibration_ptr->height = rect.y2;
 
-    application = rtgui_app_create(rt_thread_self(), "calibration");
+    application = rtgui_app_create("calibration");
     if (application != RT_NULL)
     {
         /* create calibration window */
