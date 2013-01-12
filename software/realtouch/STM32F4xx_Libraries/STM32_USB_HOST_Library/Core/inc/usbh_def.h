@@ -101,11 +101,11 @@
 #define  USB_REQ_SYNCH_FRAME                            0x0C
 
 /* Table 9-5. Descriptor Types of USB Specifications */
-#define  USB_DESC_TYPE_DEVICE                              1
-#define  USB_DESC_TYPE_CONFIGURATION                       2
-#define  USB_DESC_TYPE_STRING                              3
-#define  USB_DESC_TYPE_INTERFACE                           4
-#define  USB_DESC_TYPE_ENDPOINT                            5
+//#define  USB_DESC_TYPE_DEVICE                              1
+//#define  USB_DESC_TYPE_CONFIGURATION                       2
+//#define  USB_DESC_TYPE_STRING                              3
+//#define  USB_DESC_TYPE_INTERFACE                           4
+//#define  USB_DESC_TYPE_ENDPOINT                            5
 #define  USB_DESC_TYPE_DEVICE_QUALIFIER                    6
 #define  USB_DESC_TYPE_OTHER_SPEED_CONFIGURATION           7
 #define  USB_DESC_TYPE_INTERFACE_POWER                     8
