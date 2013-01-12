@@ -25,6 +25,30 @@
 #include <dfs_fs.h>
 #endif
 
+#ifdef RT_USING_USB_HOST
+extern void rt_hw_susb_init(void);
+#endif
+
+#ifdef RT_USING_LWIP
+extern rt_hw_stm32_eth_init(void);
+#endif
+
+#ifdef RT_USING_I2C
+extern rt_i2c_core_init(void);
+extern rt_hw_i2c_init(void);
+#endif
+
+#ifdef RT_USING_COMPONENTS_INIT
+extern rt_components_init(void);
+#endif
+
+#ifdef RT_USING_RTGUI
+extern realtouch_ui_init(void);
+#endif
+
+extern rt_platform_init(void);
+extern rt_err_t codec_hw_init(const char *bus_name);
+
 void rt_init_thread_entry(void *parameter)
 {
 #ifdef RT_USING_LWIP
@@ -115,6 +139,10 @@ void rt_init_thread_entry(void *parameter)
 
 #ifdef RT_USING_RTGUI
     realtouch_ui_init();
+#endif
+
+#ifdef RT_USING_USB_HOST
+    rt_hw_susb_init();
 #endif
 }
 
