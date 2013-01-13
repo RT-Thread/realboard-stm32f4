@@ -71,6 +71,8 @@
 #define RT_USB_DEVICE_CDC
 #define RT_USB_DEVICE_MSTORAGE
 #define RT_USB_MSTORAGE_DISK_NAME "ramdisk"
+#define USB_VENDOR_ID 0x0483
+#define USB_PRODUCT_ID 0xbacf
 
 /* SECTION: Console options */
 #define RT_USING_CONSOLE
