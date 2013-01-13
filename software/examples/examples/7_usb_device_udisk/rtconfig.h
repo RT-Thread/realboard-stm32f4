@@ -69,6 +69,8 @@
 #define RT_USING_USB_DEVICE
 #define RT_USB_DEVICE_MSTORAGE
 #define RT_USB_MSTORAGE_DISK_NAME "ramdisk"
+#define USB_VENDOR_ID 0x0483
+#define USB_PRODUCT_ID 0x1000
 
 /* SECTION: Console options */
 #define RT_USING_CONSOLE
