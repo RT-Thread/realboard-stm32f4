@@ -60,7 +60,7 @@ typedef struct _USBH_HCD_INT
   uint8_t (* SOF) (USB_OTG_CORE_HANDLE *pdev);
   uint8_t (* DevConnected) (USB_OTG_CORE_HANDLE *pdev);
   uint8_t (* DevDisconnected) (USB_OTG_CORE_HANDLE *pdev);   
-  
+  void    (* UrbDone) (USB_OTG_CORE_HANDLE *pdev, uint8_t hc);
 }USBH_HCD_INT_cb_TypeDef;
 
 extern USBH_HCD_INT_cb_TypeDef *USBH_HCD_INT_fops;

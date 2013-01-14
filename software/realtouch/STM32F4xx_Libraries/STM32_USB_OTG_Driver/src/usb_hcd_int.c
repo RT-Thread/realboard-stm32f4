@@ -555,6 +555,7 @@ uint32_t USB_OTG_USBH_handle_hc_n_Out_ISR (USB_OTG_CORE_HANDLE *pdev , uint32_t 
       {
         pdev->host.hc[num].toggle_out ^= 1; 
       }
+      USBH_HCD_INT_fops->UrbDone(pdev, num);
     }
     else if(pdev->host.HC_Status[num] == HC_NAK)
     {
@@ -677,7 +678,8 @@ uint32_t USB_OTG_USBH_handle_hc_n_In_ISR (USB_OTG_CORE_HANDLE *pdev , uint32_t n
     {
       hcchar.b.oddfrm  = 1;
       USB_OTG_WRITE_REG32(&pdev->regs.HC_REGS[num]->HCCHAR, hcchar.d32); 
-      pdev->host.URB_State[num] = URB_DONE;  
+      pdev->host.URB_State[num] = URB_DONE;
+      USBH_HCD_INT_fops->UrbDone(pdev, num);      
     }
     
   }
@@ -687,7 +689,8 @@ uint32_t USB_OTG_USBH_handle_hc_n_In_ISR (USB_OTG_CORE_HANDLE *pdev , uint32_t n
     
     if(pdev->host.HC_Status[num] == HC_XFRC)
     {
-      pdev->host.URB_State[num] = URB_DONE;      
+      pdev->host.URB_State[num] = URB_DONE; 
+      USBH_HCD_INT_fops->UrbDone(pdev, num);      
     }
     
     else if (pdev->host.HC_Status[num] == HC_STALL) 
