@@ -140,10 +140,6 @@ void rt_init_thread_entry(void *parameter)
 #ifdef RT_USING_RTGUI
     realtouch_ui_init();
 #endif
-
-#ifdef RT_USING_USB_HOST
-    rt_hw_susb_init();
-#endif
 }
 
 int rt_application_init(void)
