@@ -9,7 +9,8 @@
  *
  * Change Logs:
  * Date           Author       Notes
- * 2012-05-16     Yi Qiu      first version
+ * 2012-05-16     Yi Qiu       first version
+ * 2012-12-05     heyuanjie87  add interrupt transfer
  */
 
 #include <rtthread.h>
@@ -22,7 +23,18 @@
 #include "usb_bsp.h"
 
 #ifdef RT_USING_USB_HOST
+struct usbh_xfer
+{
+    uint16_t fnum;
+    uint16_t size;
+    uint8_t  *buffer;
+    upipe_t  pipe;
+    uint8_t  flag;
+};
 
+#define MAX_HC 8
+#define PXFER_FLAG_READY 0x01
+static struct usbh_xfer _xfer[MAX_HC];
 static struct uhcd susb_hcd;
 static struct uhubinst root_hub;
 static rt_bool_t ignore_disconnect = RT_FALSE;
@@ -300,7 +312,8 @@ USBH_Status USBH_HandleControl (USB_OTG_CORE_HANDLE *pdev, USBH_HOST *phost)
 USBH_Status USBH_DeInit(USB_OTG_CORE_HANDLE *pdev, USBH_HOST *phost)
 {
     /* Software Init */
-
+    
+    rt_memset(_xfer, 0, sizeof(_xfer));
     phost->gState = HOST_IDLE;
     phost->gStateBkp = HOST_IDLE;
     phost->EnumState = ENUM_IDLE;
@@ -314,6 +327,7 @@ USBH_Status USBH_DeInit(USB_OTG_CORE_HANDLE *pdev, USBH_HOST *phost)
 
     USBH_Free_Channel  (pdev, phost->Control.hc_num_in);
     USBH_Free_Channel  (pdev, phost->Control.hc_num_out);
+    rt_memset(_xfer, 0, sizeof(_xfer));
     return USBH_OK;
 }
 
@@ -336,6 +350,7 @@ rt_uint8_t susb_connect (USB_OTG_CORE_HANDLE *pdev)
 
     USB_Host.Control.hc_num_out = USBH_Alloc_Channel(&USB_OTG_Core, 0x00);
     USB_Host.Control.hc_num_in = USBH_Alloc_Channel(&USB_OTG_Core, 0x80);
+    USB_Host.device_prop.speed = HCD_GetCurrentSpeed(&USB_OTG_Core);
 
     /* Open Control pipes */
     USBH_Open_Channel(&USB_OTG_Core, USB_Host.Control.hc_num_in,
@@ -385,14 +400,62 @@ rt_uint8_t susb_disconnect (USB_OTG_CORE_HANDLE *pdev)
 rt_uint8_t susb_sof (USB_OTG_CORE_HANDLE *pdev)
 {
     /* This callback could be used to implement a scheduler process */
+    uint16_t i;
+    static uint16_t sofcnt = 0;
+    uep_desc_t ep;
+    
+    sofcnt ++;
+    for (i = 2; i < MAX_HC; i ++)
+    {
+        if ((_xfer[i].flag & PXFER_FLAG_READY) && (_xfer[i].pipe != RT_NULL))
+        {
+            ep = &_xfer[i].pipe->ep;
+            if ((sofcnt > _xfer[i].fnum))
+            {
+                if ((_xfer[i].buffer != RT_NULL) && (_xfer[i].size != 0))
+                {
+                    if (ep->bEndpointAddress & USB_DIR_IN)
+                        USBH_InterruptReceiveData(&USB_OTG_Core, _xfer[i].buffer, _xfer[i].size, i);
+                    else
+                        USBH_InterruptSendData(&USB_OTG_Core, _xfer[i].buffer, _xfer[i].size, i);
+                    _xfer[i].fnum = sofcnt + ep->bInterval + 30;
+                }
+            }
+        }
+    }
+
     return 0;
 }
 
+void susb_urb_done (USB_OTG_CORE_HANDLE *pdev, uint32_t hc)
+{
+    struct uhost_msg msg;
+    if (_xfer[hc].pipe != RT_NULL)
+    {
+        switch(_xfer[hc].pipe->ep.bmAttributes & USB_EP_ATTR_TYPE_MASK)
+        {
+        case USB_EP_ATTR_CONTROL:
+            return;
+        case USB_EP_ATTR_BULK:
+            return;
+        case USB_EP_ATTR_INT:
+            _xfer[hc].flag = 0;
+            break;
+        default:
+            return;
+        }
+        msg.content.cb.function = _xfer[hc].pipe->callback;
+        msg.content.cb.context = (void*)_xfer[hc].pipe;
+        msg.type = USB_MSG_CALLBACK;
+        rt_usb_post_event(&msg, sizeof(struct uhost_msg));
+    }
+}
 static USBH_HCD_INT_cb_TypeDef USBH_HCD_INT_cb =
 {
     susb_sof,
     susb_connect,
     susb_disconnect,
+    susb_urb_done,
 };
 USBH_HCD_INT_cb_TypeDef  *USBH_HCD_INT_fops = &USBH_HCD_INT_cb;
 
@@ -459,7 +522,7 @@ static int susb_control_xfer(uinst_t uinst, ureq_t setup, void* buffer,
  */
 static int susb_int_xfer(upipe_t pipe, void* buffer, int nbytes, int timeout)
 {
-    int size;
+    rt_uint8_t hc;
 
     RT_ASSERT(pipe != RT_NULL);
     RT_ASSERT(buffer != RT_NULL);
@@ -468,12 +531,13 @@ static int susb_int_xfer(upipe_t pipe, void* buffer, int nbytes, int timeout)
             (root_hub.port_status[0] & PORT_CCSC)) return -1;
 
     rt_sem_take(&sem_lock, RT_WAITING_FOREVER);
-
-    rt_kprintf("susb_int_xfer\n");
-
+    hc = (rt_uint32_t)pipe->user_data & 0xFF;
+    _xfer[hc].buffer = buffer;
+    _xfer[hc].size   = nbytes;
+    _xfer[hc].flag   = PXFER_FLAG_READY;
     rt_sem_release(&sem_lock);
 
-    return size;
+    return 0;
 }
 
 /**
@@ -626,6 +690,7 @@ static rt_err_t susb_alloc_pipe(upipe_t* pipe, uifinst_t ifinst, uep_desc_t ep,
 
     p->user_data = (void*)channel;
     *pipe = p;
+    _xfer[channel].pipe = p;
 
     return RT_EOK;
 }
@@ -649,6 +714,7 @@ static rt_err_t susb_free_pipe(upipe_t pipe)
     channel = (rt_uint32_t)pipe->user_data & 0xFF;
     USBH_Free_Channel(&USB_OTG_Core, channel);
 
+    rt_memset(&_xfer[channel], 0, sizeof(struct usbh_xfer));
     rt_free(pipe);
 
     return RT_EOK;
