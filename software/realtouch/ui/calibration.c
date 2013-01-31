@@ -31,7 +31,8 @@ struct calibration_session
     rtgui_win_t* win;
 
     rt_device_t device;
-    rt_thread_t tid;
+
+    struct rtgui_app* app;
 };
 static struct calibration_session* calibration_ptr = RT_NULL;
 
@@ -115,7 +116,7 @@ static void calibration_data_post(rt_uint16_t x, rt_uint16_t y)
                     calibration_ptr->data.max_x,
                     calibration_ptr->data.min_y,
                     calibration_ptr->data.max_y);
-                rtgui_send(calibration_ptr->tid, &ecmd.parent, sizeof(struct rtgui_event_command));
+                rtgui_send(calibration_ptr->app, &ecmd.parent, sizeof(struct rtgui_event_command));
             }
             return;
         }
@@ -129,7 +130,7 @@ static void calibration_data_post(rt_uint16_t x, rt_uint16_t y)
             ecmd.wid = calibration_ptr->win;
             ecmd.command_id = TOUCH_WIN_UPDATE;
 
-            rtgui_send(calibration_ptr->tid, &ecmd.parent, sizeof(struct rtgui_event_command));
+            rtgui_send(calibration_ptr->app, &ecmd.parent, sizeof(struct rtgui_event_command));
         }
     }
 }
@@ -234,7 +235,6 @@ void calibration_entry(void* parameter)
 {
     rt_device_t device;
     struct rtgui_rect rect;
-    struct rtgui_app* application;
     struct setup_items setup;
 
     device = rt_device_find("touch");
@@ -244,7 +244,6 @@ void calibration_entry(void* parameter)
         rt_malloc(sizeof(struct calibration_session));
     rt_memset(calibration_ptr, 0, sizeof(struct calibration_data));
     calibration_ptr->device = device;
-    calibration_ptr->tid = rt_thread_self();
     
     rt_device_control(calibration_ptr->device, RT_TOUCH_CALIBRATION, 
         (void*)calibration_data_post);
@@ -255,8 +254,8 @@ void calibration_entry(void* parameter)
     calibration_ptr->width = rect.x2;
     calibration_ptr->height = rect.y2;
 
-    application = rtgui_app_create("calibration");
-    if (application != RT_NULL)
+    calibration_ptr->app = rtgui_app_create("calibration");
+    if (calibration_ptr->app != RT_NULL)
     {
         /* create calibration window */
         calibration_ptr->win = rtgui_win_create(RT_NULL,
@@ -270,7 +269,7 @@ void calibration_entry(void* parameter)
             rtgui_win_show(calibration_ptr->win, RT_TRUE);
         }
         
-        rtgui_app_destroy(application);
+        rtgui_app_destroy(calibration_ptr->app);
     }
 
     /* set calibration data */

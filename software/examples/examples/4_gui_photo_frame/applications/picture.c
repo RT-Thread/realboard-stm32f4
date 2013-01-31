@@ -211,7 +211,7 @@ void picture_show(void)
     struct rtgui_win *win_main;
     rtgui_timer_t *timer;
 
-    app = rtgui_app_create(rt_thread_self(), "gui_app");
+    app = rtgui_app_create("gui_app");
     if (app == RT_NULL)
     {
         rt_kprintf("Create application \"gui_app\" failed!\n");
