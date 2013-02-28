@@ -17,7 +17,7 @@
 
 
 //#define NAND_DEBUG(...)    rt_kprintf(...)
-#define NAND_DEBUG(...)    
+#define NAND_DEBUG(...)
 
 #define NAND_BANK     ((rt_uint32_t)0x80000000)
 static struct stm32f4_nand _device;
@@ -227,7 +227,7 @@ static rt_err_t nandflash_readpage(struct rt_mtd_nand_device* device, rt_off_t p
 
                 spare_len = 0;
 
-				memcpy(spare, tmp , ECC_SIZE);
+                rt_memcpy(spare, tmp , ECC_SIZE);
             }
 
             recc   = (tmp[3] << 24) | (tmp[2] << 16) | (tmp[1] << 8) | tmp[0];
@@ -436,8 +436,8 @@ static struct rt_mtd_nand_driver_ops ops =
     nandflash_pagecopy,
     nandflash_eraseblock,
 #if defined(RT_USING_DFS_UFFS) && !defined(RT_UFFS_USE_CHECK_MARK_FUNCITON)
-	RT_NULL,
-	RT_NULL,
+    RT_NULL,
+    RT_NULL,
 #else
     nandflash_checkblock,
     nandflash_markbad
@@ -543,19 +543,19 @@ void nread(int page)
     {
         rt_kprintf("read fail\n");
     }
-	rt_kprintf("data:\n");
+    rt_kprintf("data:\n");
     for (index = 0; index < 2048; index ++)
     {
         rt_kprintf("0x%X,",RxBuffer[index]);
-		if ((index+1) % 16 == 0)
-			rt_kprintf("\n");
+        if ((index+1) % 16 == 0)
+            rt_kprintf("\n");
     }
-	rt_kprintf("\nspare:\n");
+    rt_kprintf("\nspare:\n");
     for (index = 0; index < 64; index ++)
     {
         rt_kprintf("[%X]", Spare[index]);
-		if ((index+1) % 16 == 0)
-			rt_kprintf("\n");
+        if ((index+1) % 16 == 0)
+            rt_kprintf("\n");
     }
     rt_kprintf("\n\n");
 }
@@ -588,11 +588,11 @@ void ncopy(int s, int d)
 
 void nand_eraseall()
 {
-	int index;
-	for (index = 0; index < _partition[0].block_total; index ++)
-	{
-		nandflash_eraseblock(RT_NULL, index);
-	}
+    int index;
+    for (index = 0; index < _partition[0].block_total; index ++)
+    {
+        nandflash_eraseblock(RT_NULL, index);
+    }
 }
 FINSH_FUNCTION_EXPORT(nand_eraseall, erase all of block in the nand flash);
 FINSH_FUNCTION_EXPORT(ncopy, nand copy);
