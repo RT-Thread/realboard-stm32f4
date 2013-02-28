@@ -10,6 +10,7 @@
  * Change Logs:
  * Date           Author           Notes
  * 2012-11-24     heyuanjie87      first implementation
+ * 2013-02-28     heyuanjie87      use dma transfer
  */
 #include <rtdevice.h>
 #include "board.h"
@@ -271,6 +272,12 @@ static rt_err_t nandflash_readpage(struct rt_mtd_nand_device* device, rt_off_t p
     rt_uint8_t tmp[4];
     rt_err_t result;
 
+    page = page + device->block_start * device->pages_per_block;
+    if (page/device->pages_per_block > device->block_end)
+    {
+        return -RT_MTD_EIO;
+    }
+
     result = RT_MTD_EOK;
     rt_mutex_take(&_device.lock, RT_WAITING_FOREVER);
 
@@ -337,9 +344,14 @@ static rt_err_t nandflash_writepage(struct rt_mtd_nand_device* device, rt_off_t 
                                     const rt_uint8_t *data, rt_uint32_t data_len,
                                     const rt_uint8_t *spare, rt_uint32_t spare_len)
 {
-    rt_uint32_t index;
     rt_err_t result;
     rt_uint32_t gecc;
+
+    page = page + device->block_start * device->pages_per_block;
+    if (page/device->pages_per_block > device->block_end)
+    {
+        return -RT_MTD_EIO;
+    }
 
     result = RT_MTD_EOK;
     rt_mutex_take(&_device.lock, RT_WAITING_FOREVER);
@@ -409,7 +421,9 @@ rt_err_t nandflash_eraseblock(struct rt_mtd_nand_device* device, rt_uint32_t blo
     rt_uint32_t page;
     rt_err_t result;
 
-    result = RT_EOK;
+    block = block + device->block_start;
+
+    result = RT_MTD_EOK;
     page = block * 64;
 
     rt_mutex_take(&_device.lock, RT_WAITING_FOREVER);
@@ -434,6 +448,9 @@ rt_err_t nandflash_eraseblock(struct rt_mtd_nand_device* device, rt_uint32_t blo
 static rt_err_t nandflash_pagecopy(struct rt_mtd_nand_device *device, rt_off_t src_page, rt_off_t dst_page)
 {
     rt_err_t result;
+
+    src_page = src_page + device->block_start * device->pages_per_block;
+    dst_page = dst_page + device->block_start * device->pages_per_block;
 
     result = RT_MTD_EOK;
     rt_mutex_take(&_device.lock, RT_WAITING_FOREVER);
@@ -535,76 +552,113 @@ void rt_hw_mtd_nand_init(void)
 
     rt_mtd_nand_register_device("nand1", &_partition[1]);
 }
-#include <math.h>
+
 #include <finsh.h>
-static uint8_t TxBuffer[NAND_PAGE_SIZE];
-static uint8_t RxBuffer[NAND_PAGE_SIZE];
-static rt_uint8_t Spare[64];
-
-void nread(int page)
+void nread(rt_uint32_t partion, rt_uint32_t page)
 {
-    int index;
+    int i;
+    rt_uint8_t spare[64];
+    rt_uint8_t *data_ptr;
+    struct rt_mtd_nand_device *device;
 
-    rt_memset(RxBuffer, 0, 2048);
-    rt_memset(Spare, 0, 64);
+    if (partion >= 3)
+        return;
+    device = &_partition[partion];
+    data_ptr = (rt_uint8_t*) rt_malloc(PAGE_DATA_SIZE);
+    if (data_ptr == RT_NULL)
+    {
+        rt_kprintf("no memory\n");
+        return;
+    }
 
-    if (nandflash_readpage(RT_NULL,page,RxBuffer, 2048,Spare,64) != RT_MTD_EOK)
+    rt_memset(spare, 0, sizeof(spare));
+    rt_memset(data_ptr, 0, PAGE_DATA_SIZE);
+    nandflash_readpage(device, page, data_ptr, PAGE_DATA_SIZE, spare, sizeof(spare));
+    for (i = 0; i < 512; i ++)
     {
-        rt_kprintf("read fail\n");
+        rt_kprintf("0x%X,",data_ptr[i]);
     }
-    rt_kprintf("data:\n");
-    for (index = 0; index < 2048; index ++)
+
+    rt_kprintf("\n spare\n");
+    for (i = 0; i < sizeof(spare); i ++)
     {
-        rt_kprintf("0x%X,",RxBuffer[index]);
-        if ((index+1) % 16 == 0)
-            rt_kprintf("\n");
-    }
-    rt_kprintf("\nspare:\n");
-    for (index = 0; index < 64; index ++)
-    {
-        rt_kprintf("[%X]", Spare[index]);
-        if ((index+1) % 16 == 0)
-            rt_kprintf("\n");
+        rt_kprintf("0x%X,",spare[i]);
     }
     rt_kprintf("\n\n");
+
+    /* release memory */
+    rt_free(data_ptr);
 }
 
-void nerase(int block)
+void nwrite(rt_uint32_t partion, int page)
 {
-    nandflash_eraseblock(RT_NULL,block);
-}
+    int i;
+    rt_uint8_t spare[64];
+    rt_uint8_t *data_ptr;
+    struct rt_mtd_nand_device *device;
 
-void nwrite(int page)
-{
-    memset(TxBuffer, 0xAA, 2048);
-    memset(Spare, 0x55, 64);
-#if 1
+    if (partion >= 3)
+        return;
+    device = &_partition[partion];
+
+    data_ptr = (rt_uint8_t*) rt_malloc (PAGE_DATA_SIZE);
+    if (data_ptr == RT_NULL)
     {
-        int i;
-        for (i = 0; i < 2048; i ++)
-            TxBuffer[i] = i/5 - i;
+        rt_kprintf("no memory.\n");
+        return;
     }
-#endif
-    nandflash_writepage(RT_NULL,page,TxBuffer,2048, Spare, 64);
+
+    /* Need random data to test ECC */
+    for (i = 0; i < PAGE_DATA_SIZE; i ++)
+        data_ptr[i] = i/5 -i;
+    rt_memset(spare, 0xdd, sizeof(spare));
+    nandflash_writepage(device, page, data_ptr, PAGE_DATA_SIZE, spare, sizeof(spare));
+
+    rt_free(data_ptr);
 }
 
-void ncopy(int s, int d)
+void ncopy(rt_uint32_t partion, int src, int dst)
 {
+    struct rt_mtd_nand_device *device;
 
-    if (nandflash_pagecopy(RT_NULL,s,d) != RT_MTD_EOK)
-        rt_kprintf("copy fail\n");
+    if (partion >= 3)
+        return;
+    device = &_partition[partion];
+    nandflash_pagecopy(device, src, dst);
 }
 
-void nand_eraseall()
+void nerase(int partion, int block)
 {
-    int index;
-    for (index = 0; index < _partition[0].block_total; index ++)
+    struct rt_mtd_nand_device *device;
+
+    if (partion >= 3)
+        return;
+    device = &_partition[partion];
+    nandflash_eraseblock(device, block);
+}
+
+void nerase_all(rt_uint32_t partion)
+{
+    rt_uint32_t index;
+    struct rt_mtd_nand_device *device;
+
+    if (partion >= 3)
+        return;
+    device = &_partition[partion];
+    for (index = 0; index < device->block_total; index ++)
     {
-        nandflash_eraseblock(RT_NULL, index);
+        nandflash_eraseblock(device, index);
     }
 }
-FINSH_FUNCTION_EXPORT(nand_eraseall, erase all of block in the nand flash);
-FINSH_FUNCTION_EXPORT(ncopy, nand copy);
-FINSH_FUNCTION_EXPORT(nwrite, nand write);
-FINSH_FUNCTION_EXPORT(nerase, nand erase);
-FINSH_FUNCTION_EXPORT(nread, nand read);
+
+void nid(void)
+{
+    nandflash_readid(0);
+}
+
+FINSH_FUNCTION_EXPORT(nid, nand id);
+FINSH_FUNCTION_EXPORT(ncopy, nand copy page);
+FINSH_FUNCTION_EXPORT(nerase, nand erase a block of one partiton);
+FINSH_FUNCTION_EXPORT(nerase_all, erase all blocks of a partition);
+FINSH_FUNCTION_EXPORT(nwrite, nand write page);
+FINSH_FUNCTION_EXPORT(nread, nand read page);
