@@ -60,12 +60,12 @@
 
 #define NAND_PAGE_SIZE    (2048)
 
- 
- 
+
+
 struct stm32f4_nand
 {
     rt_uint8_t id[5];
-	struct rt_mutex lock;
+    struct rt_mutex lock;
     struct rt_completion comp;
 };
 

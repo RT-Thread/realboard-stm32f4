@@ -16,8 +16,15 @@
 #include "k9f2g08u0b.h"
 
 
-//#define NAND_DEBUG(...)    rt_kprintf(...)
-#define NAND_DEBUG(...)
+#define NAND_DEBUG    rt_kprintf
+//#define NAND_DEBUG(...)
+
+#define DMA_CHANNEL     DMA_Channel_0
+#define DMA_STREAM      DMA2_Stream0
+#define DMA_TCIF        DMA_FLAG_TCIF0
+#define DMA_IRQN        DMA2_Stream0_IRQn
+#define DMA_IRQ_HANDLER DMA2_Stream0_IRQHandler
+#define DMA_CLK         RCC_AHB1Periph_DMA2
 
 #define NAND_BANK     ((rt_uint32_t)0x80000000)
 static struct stm32f4_nand _device;
@@ -57,6 +64,51 @@ static rt_uint8_t nand_readstatus(void)
 {
     nand_cmd(NAND_CMD_STATUS);
     return (nand_read8());
+}
+
+static void dmaRead(rt_uint8_t *dst, rt_size_t size)
+{
+    DMA_InitTypeDef  DMA_InitStructure;
+
+    DMA_InitStructure.DMA_Channel = DMA_CHANNEL;
+    DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(NAND_BANK | DATA_AREA);
+    DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)dst;
+    DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToMemory;
+    DMA_InitStructure.DMA_BufferSize = size; /* assert_param(0~64K) */
+    DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+    DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+    DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+    DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+    DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
+    DMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;
+    DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Enable;
+    DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_Full;
+    DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
+    DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
+
+    DMA_Init(DMA_STREAM, &DMA_InitStructure);
+
+    DMA_ITConfig(DMA_STREAM, DMA_IT_TC, ENABLE);
+    DMA_ClearFlag(DMA_STREAM, DMA_TCIF);
+    rt_completion_init(&_device.comp);
+    DMA_Cmd(DMA_STREAM, ENABLE);
+
+    if (rt_completion_wait(&_device.comp, 100) != RT_EOK)
+    {
+        NAND_DEBUG("nand read timeout\n");
+    }
+}
+
+static void dmaWrite(const rt_uint8_t *src, rt_size_t size)
+{
+
+
+}
+
+void DMA_IRQ_HANDLER(void)
+{
+    DMA_ClearFlag(DMA_STREAM, DMA_TCIF);
+    rt_completion_done(&_device.comp);
 }
 
 static rt_err_t nand_datacorrect(uint32_t generatedEcc, uint32_t readEcc, uint8_t *data)
@@ -189,80 +241,64 @@ static rt_err_t nandflash_readpage(struct rt_mtd_nand_device* device, rt_off_t p
 {
     rt_uint32_t index;
     rt_uint32_t gecc, recc;
-    rt_uint8_t tmp[8];
+    rt_uint8_t tmp[4];
     rt_err_t result;
 
-    NAND_DEBUG("nand read[%d,%d,%d]\n",page,data_len,spare_len);
-    result = -RT_MTD_EIO;
+    result = RT_MTD_EOK;
     rt_mutex_take(&_device.lock, RT_WAITING_FOREVER);
 
     if (data && data_len)
     {
         nand_cmd(NAND_CMD_READ_1);
-
         nand_addr(0);
         nand_addr(0);
         nand_addr(page);
         nand_addr(page >> 8);
         nand_addr(page >> 16);
-
         nand_cmd(NAND_CMD_READ_TRUE);
+
         nand_waitready();
+
         FSMC_NANDECCCmd(FSMC_Bank3_NAND,ENABLE);
-        for (index = 0; index < data_len; index ++)
-        {
-            data[index] = nand_read8();
-        }
+        dmaRead(data, data_len);
         gecc = FSMC_GetECC(FSMC_Bank3_NAND);
         FSMC_NANDECCCmd(FSMC_Bank3_NAND,DISABLE);
 
-        if (data_len == 2048)
+        if (data_len == PAGE_DATA_SIZE)
         {
             for (index = 0; index < ECC_SIZE; index ++)
                 tmp[index] = nand_read8();
             if (spare && spare_len)
             {
-                for (index = 0; index < spare_len-ECC_SIZE; index ++)
-                    spare[ECC_SIZE + index] = nand_read8();
-
-                spare_len = 0;
-
+                dmaRead(&spare[ECC_SIZE], spare_len - ECC_SIZE);
                 rt_memcpy(spare, tmp , ECC_SIZE);
             }
 
             recc   = (tmp[3] << 24) | (tmp[2] << 16) | (tmp[1] << 8) | tmp[0];
 
-            NAND_DEBUG("<gecc %X,recc %X>",gecc,recc);
-            if (nand_datacorrect(gecc, recc, data) != RT_EOK)
-                result = -RT_MTD_EECC;
-            else
-                result = RT_MTD_EOK;
+            if (recc != 0xFFFFFFFF && gecc != 0)
+                result = nand_datacorrect(gecc, recc, data);
+
+            if (result != RT_MTD_EOK)
+                NAND_DEBUG("page: %d, gecc %X, recc %X>",page, gecc, recc);
 
             goto _exit;
         }
-
-        result = RT_MTD_EOK;
     }
 
     if (spare && spare_len)
     {
         nand_cmd(NAND_CMD_READ_1);
-
         nand_addr(0);
         nand_addr(8);
         nand_addr(page);
         nand_addr(page >> 8);
         nand_addr(page >> 16);
-
         nand_cmd(NAND_CMD_READ_TRUE);
+
         nand_waitready();
 
-        for (index = 0; index < spare_len; index ++)
-        {
-            spare[index] = nand_read8();
-        }
-
-        result = RT_MTD_EOK;
+        dmaRead(spare, spare_len);
     }
 _exit:
     rt_mutex_release(&_device.lock);
@@ -448,8 +484,17 @@ static struct rt_mtd_nand_device _partition[2];
 
 void rt_hw_mtd_nand_init(void)
 {
+    NVIC_InitTypeDef NVIC_InitStructure;
+
+    NVIC_InitStructure.NVIC_IRQChannel = DMA_IRQN;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+
     gpio_nandflash_init();
     fsmc_nandflash_init();
+    RCC_AHB1PeriphClockCmd(DMA_CLK, ENABLE);
+    NVIC_Init(&NVIC_InitStructure);
 
     rt_mutex_init(&_device.lock, "nand", RT_IPC_FLAG_FIFO);
 
