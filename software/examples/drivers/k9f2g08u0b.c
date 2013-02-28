@@ -101,8 +101,35 @@ static void dmaRead(rt_uint8_t *dst, rt_size_t size)
 
 static void dmaWrite(const rt_uint8_t *src, rt_size_t size)
 {
+    DMA_InitTypeDef  DMA_InitStructure;
 
+    DMA_InitStructure.DMA_Channel = DMA_CHANNEL;
+    DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)src;
+    DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)(NAND_BANK | DATA_AREA);
+    DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToMemory;
+    DMA_InitStructure.DMA_BufferSize = size; /* assert_param(0~64K) */
+    DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Enable;
+    DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Disable;
+    DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+    DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+    DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
+    DMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;
+    DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Enable;
+    DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_Full;
+    DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
+    DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
 
+    DMA_Init(DMA_STREAM, &DMA_InitStructure);
+
+    DMA_ITConfig(DMA_STREAM, DMA_IT_TC, ENABLE);
+    DMA_ClearFlag(DMA_STREAM, DMA_TCIF);
+    rt_completion_init(&_device.comp);
+    DMA_Cmd(DMA_STREAM, ENABLE);
+
+    if (rt_completion_wait(&_device.comp, 100) != RT_EOK)
+    {
+        NAND_DEBUG("nand write timeout\n");
+    }
 }
 
 void DMA_IRQ_HANDLER(void)
@@ -314,8 +341,7 @@ static rt_err_t nandflash_writepage(struct rt_mtd_nand_device* device, rt_off_t 
     rt_err_t result;
     rt_uint32_t gecc;
 
-    result = -RT_MTD_EIO;
-    NAND_DEBUG("nand write[%d,%d]\n",page,data_len);
+    result = RT_MTD_EOK;
     rt_mutex_take(&_device.lock, RT_WAITING_FOREVER);
 
     if (data && data_len)
@@ -329,34 +355,28 @@ static rt_err_t nandflash_writepage(struct rt_mtd_nand_device* device, rt_off_t 
         nand_addr(page >> 16);
 
         FSMC_NANDECCCmd(FSMC_Bank3_NAND,ENABLE);
-        for (index = 0; index < data_len; index ++)
-        {
-            nand_write8(data[index]);
-        }
+        dmaWrite(data, data_len);
         gecc = FSMC_GetECC(FSMC_Bank3_NAND);
         FSMC_NANDECCCmd(FSMC_Bank3_NAND,DISABLE);
 
-        NAND_DEBUG("<wecc %X>",gecc);
-        if (data_len == 2048)
+        if (data_len == PAGE_DATA_SIZE)
         {
             nand_write8((uint8_t)gecc);
             nand_write8((uint8_t)(gecc >> 8));
             nand_write8((uint8_t)(gecc >> 16));
             nand_write8((uint8_t)(gecc >> 24));
+
+            if (spare && spare_len)
+                dmaWrite(&spare[ECC_SIZE], spare_len - ECC_SIZE);
         }
 
         nand_cmd(NAND_CMD_PAGEPROGRAM_TRUE);
+
         nand_waitready();
 
         if (nand_readstatus() & 0x01 == 1)
-        {
             result = -RT_MTD_EIO;
-            goto _exit;
-        }
-        else
-        {
-            result = RT_MTD_EOK;
-        }
+        goto _exit;
     }
 
     if (spare && spare_len)
@@ -369,18 +389,13 @@ static rt_err_t nandflash_writepage(struct rt_mtd_nand_device* device, rt_off_t 
         nand_addr(page >> 8);
         nand_addr(page >> 16);
 
-        for (index = 0; index < spare_len-ECC_SIZE; index ++)
-        {
-            nand_write8(spare[ECC_SIZE+index]);
-        }
+        dmaWrite(&spare[ECC_SIZE], spare_len - ECC_SIZE);
 
         nand_cmd(NAND_CMD_PAGEPROGRAM_TRUE);
         nand_waitready();
 
         if (nand_readstatus() & 0x01 == 1)
             result = -RT_MTD_EIO;
-        else
-            result = RT_MTD_EOK;
     }
 
 _exit:
@@ -525,57 +540,6 @@ void rt_hw_mtd_nand_init(void)
 static uint8_t TxBuffer[NAND_PAGE_SIZE];
 static uint8_t RxBuffer[NAND_PAGE_SIZE];
 static rt_uint8_t Spare[64];
-void ntest(void)
-{
-    int i,n;
-    rt_uint8_t spare[64];
-
-    nandflash_readid(0);
-
-    /* Erase the Block */
-    rt_kprintf("start erase test\n");
-    for (i = 0; i < 256; i ++)
-    {
-
-        if (nandflash_eraseblock(RT_NULL, i) != RT_MTD_EOK)
-        {
-            RT_ASSERT(0);
-        }
-        else
-            rt_kprintf(".");
-    }
-#if 1
-    rt_kprintf("start read write test\n");
-    /* Clear the buffer */
-    for (i = 0; i < 2048; i++)
-        TxBuffer[i] = i / 5 -i;
-    memset(Spare, 0x33, 64);
-
-    for (n = 0; n < 64 * 256; n++)
-    {
-        memset(RxBuffer, 0, sizeof(RxBuffer));
-        memset(spare, 0x0, 64);
-
-        if (nandflash_writepage(RT_NULL,n,TxBuffer,2048, Spare, 60) != RT_EOK)
-        {
-            RT_ASSERT(0);
-        }
-        /* Read back the written data */
-        nandflash_readpage(RT_NULL,n,RxBuffer, 2048,spare,60);
-
-        if( memcmp( (char*)TxBuffer, (char*)RxBuffer, NAND_PAGE_SIZE ) != 0 )
-        {
-            RT_ASSERT(0);
-        }
-        if( memcmp( (char*)Spare, (char*)spare, 60 ) != 0 )
-        {
-            RT_ASSERT(0);
-        }
-
-    }
-    NAND_DEBUG("Nand Flash is OK \r\n");
-#endif
-}
 
 void nread(int page)
 {
@@ -613,7 +577,7 @@ void nerase(int block)
 void nwrite(int page)
 {
     memset(TxBuffer, 0xAA, 2048);
-    memset(Spare, 0x55, 60);
+    memset(Spare, 0x55, 64);
 #if 1
     {
         int i;
@@ -621,7 +585,7 @@ void nwrite(int page)
             TxBuffer[i] = i/5 - i;
     }
 #endif
-    nandflash_writepage(RT_NULL,page,TxBuffer,2048, Spare, 60);
+    nandflash_writepage(RT_NULL,page,TxBuffer,2048, Spare, 64);
 }
 
 void ncopy(int s, int d)
@@ -644,4 +608,3 @@ FINSH_FUNCTION_EXPORT(ncopy, nand copy);
 FINSH_FUNCTION_EXPORT(nwrite, nand write);
 FINSH_FUNCTION_EXPORT(nerase, nand erase);
 FINSH_FUNCTION_EXPORT(nread, nand read);
-FINSH_FUNCTION_EXPORT(ntest, nand test);
