@@ -22,6 +22,7 @@
 #include "stm32f4xx.h"
 #include <board.h>
 #include <rtthread.h>
+#include <rtgui/calibration.h>
 
 #ifdef RT_USING_DFS
 /* dfs init */
@@ -36,6 +37,21 @@
 #endif
 
 #endif
+
+rt_bool_t cali_setup(void)
+{
+    rt_kprintf("cali setup entered\n");
+    return RT_FALSE;
+}
+
+void cali_store(struct calibration_data *data)
+{
+    rt_kprintf("cali finished (%d, %d), (%d, %d)\n",
+            data->min_x,
+            data->max_x,
+            data->min_y,
+            data->max_y);
+}
 
 void rt_init_thread_entry(void* parameter)
 {
@@ -78,6 +94,9 @@ void rt_init_thread_entry(void* parameter)
 		/* re-set graphic device */
 		rtgui_graphic_set_device(device);
 
+        calibration_set_restore(cali_setup);
+        calibration_set_after(cali_store);
+        calibration_init();
 		application_init();
 	}
 #endif
