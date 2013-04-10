@@ -30,8 +30,6 @@ AddOption('--type',
   metavar='DIR',
   help='installation prefix')
 
-app = GetOption('app')
-
 if GetOption('type') == 'ext':
     linkflags = rtconfig.LFLAGS + ' -e 0'
 else:
@@ -55,8 +53,10 @@ env.PrependENVPath('PATH', rtconfig.EXEC_PATH)
 
 PrepareModuleBuilding(env, RTT_ROOT)
 
-objs = SConscript(os.path.join(app, 'Sconscript'))
-TARGET = os.path.join('programs/' + app , app + '.' + rtconfig.TARGET_EXT)
+app = GetOption('app')
+if app:
+    objs = SConscript(os.path.join(app, 'Sconscript'))
+    TARGET = os.path.join('programs/' + app , app + '.' + rtconfig.TARGET_EXT)
 
-# build program 
-env.Program(TARGET, objs)
+    # build program 
+    env.Program(TARGET, objs)
