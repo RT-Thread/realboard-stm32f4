@@ -263,16 +263,32 @@ static rt_err_t set_address(rt_uint8_t address)
     return RT_EOK;
 }
 
-static rt_err_t clear_feature(rt_uint8_t value)
+static rt_err_t clear_feature(rt_uint16_t value, rt_uint16_t index)
 {
-
-    return RT_ERROR;
+    if (value == USB_FEATURE_DEV_REMOTE_WAKEUP)
+	{
+        USB_OTG_Core.dev.DevRemoteWakeup = 0;
+    }
+	else if (value == USB_FEATURE_ENDPOINT_HALT)
+	{
+		DCD_EP_ClrStall(&USB_OTG_Core, (rt_uint8_t)(index & 0xFF));
+    }
+	
+    return RT_EOK;
 }
 
-static rt_err_t set_feature(rt_uint8_t value)
+static rt_err_t set_feature(rt_uint16_t value, rt_uint16_t index)
 {
+    if (value == USB_FEATURE_DEV_REMOTE_WAKEUP)
+	{
+        USB_OTG_Core.dev.DevRemoteWakeup = 1;
+    }
+	else if (value == USB_FEATURE_ENDPOINT_HALT)
+	{
+        DCD_EP_Stall(&USB_OTG_Core, (rt_uint8_t)(index & 0xFF));
+    }
 
-    return RT_ERROR;
+    return RT_EOK;
 }
 
 static rt_uint8_t ep_in_num = 1;
