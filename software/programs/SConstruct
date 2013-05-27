@@ -7,7 +7,15 @@ sconstruct = File('SConstruct')
 fn = sconstruct.rfile()
 name = fn.name
 building_dir = os.path.dirname(fn.abspath)
-RTT_ROOT = os.path.join(building_dir, '.', 'rt-thread')
+
+if os.getenv('RTT_ROOT'):
+    RTT_ROOT = os.getenv('RTT_ROOT')
+else:
+    RTT_ROOT = os.path.join(building_dir, '.', 'rt-thread')
+
+RTT_RTGUI = os.getenv('RTT_RTGUI')
+if not RTT_RTGUI:
+    RTT_RTGUI = RTT_ROOT + '/components/rtgui/'
 
 sys.path = sys.path + [os.path.join(RTT_ROOT, 'tools')]
 from building import *
@@ -30,8 +38,6 @@ AddOption('--type',
   metavar='DIR',
   help='installation prefix')
 
-app = GetOption('app')
-
 if GetOption('type') == 'ext':
     linkflags = rtconfig.LFLAGS + ' -e 0'
 else:
@@ -49,14 +55,16 @@ env = Environment(tools = ['mingw'],
                 RTT_ROOT + '/components/dfs', 
                 RTT_ROOT + '/components/dfs/include',
                 RTT_ROOT + '/components/libc/newlib',
-		RTT_ROOT + '/components/rtgui/include'
+                RTT_RTGUI + '/include'
                 ])
 env.PrependENVPath('PATH', rtconfig.EXEC_PATH)
 
 PrepareModuleBuilding(env, RTT_ROOT)
 
-objs = SConscript(os.path.join(app, 'Sconscript'))
-TARGET = os.path.join('programs/' + app , app + '.' + rtconfig.TARGET_EXT)
+app = GetOption('app')
+if app:
+    objs = SConscript(os.path.join(app, 'Sconscript'))
+    TARGET = os.path.join('programs/' + app , app + '.' + rtconfig.TARGET_EXT)
 
-# build program 
-env.Program(TARGET, objs)
+    # build program 
+    env.Program(TARGET, objs)
