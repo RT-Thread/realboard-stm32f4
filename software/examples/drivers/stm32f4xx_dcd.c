@@ -141,9 +141,9 @@ static rt_uint8_t USBD_DataInStage(USB_OTG_CORE_HANDLE *pdev , uint8_t epnum)
 {
     USB_OTG_EP *ep;
 
+    ep = &pdev->dev.in_ep[epnum];
     if(epnum == 0)
     {
-        ep = &pdev->dev.in_ep[0];
         if ( pdev->dev.device_state == USB_OTG_EP0_DATA_IN)
         {
             if(ep->rem_data_len > ep->maxpacket)
@@ -177,14 +177,21 @@ static rt_uint8_t USBD_DataInStage(USB_OTG_CORE_HANDLE *pdev , uint8_t epnum)
     }
     else
     {
-        struct udev_msg msg;
+        if((ep->xfer_len % ep->maxpacket == 0) && ep->xfer_len)    
+        {
+            DCD_EP_Tx(pdev, epnum, RT_NULL, 0);
+        }
+        else
+        {            
+            struct udev_msg msg;
 
-        msg.type = USB_MSG_DATA_NOTIFY;
-        msg.dcd = &stm32_dcd;
-        msg.content.ep_msg.ep_addr = epnum | USB_DIR_IN;
-        msg.content.ep_msg.size = 0;
+            msg.type = USB_MSG_DATA_NOTIFY;
+            msg.dcd = &stm32_dcd;
+            msg.content.ep_msg.ep_addr = epnum | USB_DIR_IN;
+            msg.content.ep_msg.size = 0;
 
-        rt_usbd_post_event(&msg, sizeof(struct udev_msg));
+            rt_usbd_post_event(&msg, sizeof(struct udev_msg));
+        }
     }
 
     return USBD_OK;
@@ -266,25 +273,25 @@ static rt_err_t set_address(rt_uint8_t address)
 static rt_err_t clear_feature(rt_uint16_t value, rt_uint16_t index)
 {
     if (value == USB_FEATURE_DEV_REMOTE_WAKEUP)
-	{
+    {
         USB_OTG_Core.dev.DevRemoteWakeup = 0;
     }
-	else if (value == USB_FEATURE_ENDPOINT_HALT)
-	{
-		DCD_EP_ClrStall(&USB_OTG_Core, (rt_uint8_t)(index & 0xFF));
+    else if (value == USB_FEATURE_ENDPOINT_HALT)
+    {
+        DCD_EP_ClrStall(&USB_OTG_Core, (rt_uint8_t)(index & 0xFF));
     }
-	
+    
     return RT_EOK;
 }
 
 static rt_err_t set_feature(rt_uint16_t value, rt_uint16_t index)
 {
     if (value == USB_FEATURE_DEV_REMOTE_WAKEUP)
-	{
+    {
         USB_OTG_Core.dev.DevRemoteWakeup = 1;
     }
-	else if (value == USB_FEATURE_ENDPOINT_HALT)
-	{
+    else if (value == USB_FEATURE_ENDPOINT_HALT)
+    {
         DCD_EP_Stall(&USB_OTG_Core, (rt_uint8_t)(index & 0xFF));
     }
 
