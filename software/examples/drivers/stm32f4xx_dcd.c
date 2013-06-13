@@ -176,22 +176,15 @@ static rt_uint8_t USBD_DataInStage(USB_OTG_CORE_HANDLE *pdev , uint8_t epnum)
         }
     }
     else
-    {
-        if((ep->xfer_len % ep->maxpacket == 0) && ep->xfer_len)    
-        {
-            DCD_EP_Tx(pdev, epnum, RT_NULL, 0);
-        }
-        else
-        {            
-            struct udev_msg msg;
+    {           
+        struct udev_msg msg;
 
-            msg.type = USB_MSG_DATA_NOTIFY;
-            msg.dcd = &stm32_dcd;
-            msg.content.ep_msg.ep_addr = epnum | USB_DIR_IN;
-            msg.content.ep_msg.size = 0;
+        msg.type = USB_MSG_DATA_NOTIFY;
+        msg.dcd = &stm32_dcd;
+        msg.content.ep_msg.ep_addr = epnum | USB_DIR_IN;
+        msg.content.ep_msg.size = 0;
 
-            rt_usbd_post_event(&msg, sizeof(struct udev_msg));
-        }
+        rt_usbd_post_event(&msg, sizeof(struct udev_msg));
     }
 
     return USBD_OK;
