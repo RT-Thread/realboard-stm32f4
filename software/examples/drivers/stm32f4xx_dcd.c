@@ -182,7 +182,7 @@ static rt_uint8_t USBD_DataInStage(USB_OTG_CORE_HANDLE *pdev , uint8_t epnum)
         msg.type = USB_MSG_DATA_NOTIFY;
         msg.dcd = &stm32_dcd;
         msg.content.ep_msg.ep_addr = epnum | USB_DIR_IN;
-        msg.content.ep_msg.size = 0;
+        msg.content.ep_msg.size = ep->xfer_len;
 
         rt_usbd_post_event(&msg, sizeof(struct udev_msg));
     }
