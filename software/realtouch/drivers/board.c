@@ -117,6 +117,11 @@ void fsmc_gpio_init(void)
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_GPIOE | RCC_AHB1Periph_GPIOF |
                            RCC_AHB1Periph_GPIOG, ENABLE);
 
+#if defined (STM32F427_437xx) || defined (STM32F429_439xx)
+#define GPIO_AF_FSMC		GPIO_AF_FMC
+#define RCC_AHB3Periph_FSMC	RCC_AHB3Periph_FMC
+#endif
+
     /* Enable FSMC clock */
     RCC_AHB3PeriphClockCmd(RCC_AHB3Periph_FSMC, ENABLE);
 

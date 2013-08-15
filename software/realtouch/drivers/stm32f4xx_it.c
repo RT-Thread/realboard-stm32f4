@@ -157,6 +157,7 @@ void DebugMon_Handler(void)
 {
 }*/
 
+#if 0	// XXX:
 void USART1_IRQHandler(void)
 {
 #ifdef RT_USING_UART1
@@ -188,6 +189,7 @@ void USART2_IRQHandler(void)
     rt_interrupt_leave();
 #endif
 }
+#endif
 
 /*
 EXTI5: LCD_INTQ  PE5

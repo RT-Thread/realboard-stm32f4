@@ -88,17 +88,17 @@
 // </section>
 
 // <section name="RT_USING_USB_DEVICE" description="USB Device stack" default="true" >
-//#define RT_USING_USB_DEVICE
+#define RT_USING_USB_DEVICE
 // <bool name="RT_USB_DEVICE_COMPOSITE" description="Using composit class" default="true" />
 //#define RT_USB_DEVICE_COMPOSITE
 // <bool name="RT_USB_DEVICE_CDC" description="Using cdc class" default="true" />
 //#define RT_USB_DEVICE_CDC
 // <bool name="RT_USB_DEVICE_MSTORAGE" description="Using mass storage class" default="true" />
-//#define RT_USB_DEVICE_MSTORAGE
+#define RT_USB_DEVICE_MSTORAGE
 // <bool name="RT_USB_MSTORAGE_DISK_NAME" description="Disk name used in mass storage class" default="true" />
-//#define RT_USB_MSTORAGE_DISK_NAME   "flash0"
+#define RT_USB_MSTORAGE_DISK_NAME   "flash0"
 // <bool name="RT_USB_MSTORAGE_BUFFER_SIZE" description="Buffer size used in mass storage class" default="true" />
-//#define RT_USB_MSTORAGE_BUFFER_SIZE 8 * 1024
+#define RT_USB_MSTORAGE_BUFFER_SIZE 8 * 1024
 // </section>
 
 // <section name="RT_USING_CONSOLE" description="Using console" default="true" >
@@ -220,7 +220,7 @@
 // <integer name="RT_LWIP_TCP_PCB_NUM" description="Maximal number of simultaneously active TCP connections" default="5" />
 #define RT_LWIP_TCP_PCB_NUM	3
 // <integer name="RT_LWIP_TCP_SND_BUF" description="TCP sender buffer size" default="8192" />
-#define RT_LWIP_TCP_SND_BUF	2048
+#define RT_LWIP_TCP_SND_BUF	4096
 // <integer name="RT_LWIP_TCP_WND" description="TCP receive window" default="8192" />
 #define RT_LWIP_TCP_WND	2048
 // <bool name="RT_LWIP_SNMP" description="Enable SNMP protocol" default="false" />
@@ -257,6 +257,8 @@
 #define RT_LWIP_MSKADDR2 255
 #define RT_LWIP_MSKADDR3 0
 // </section>
+
+#define RT_USING_RTC
 
 // </RDTConfigurator>
 

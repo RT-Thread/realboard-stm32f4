@@ -213,7 +213,7 @@ static rt_err_t codec_init(rt_device_t dev)
     // Digital inferface setup.
     codec_send(REG_AUDIO_INTERFACE | BCP_NORMAL | LRP_NORMAL | WL_16BITS | FMT_I2S);
 
-    // PLL setup. (MCLK: 12.2896 for 44.1K)
+    // PLL setup. (MCLK: 11.2896 for 44.1K)
     codec_send(REG_PLL_N  | PLL_N_112896);
     codec_send(REG_PLL_K1 | ((PLL_K_112896>>18) & 0x1F));
     codec_send(REG_PLL_K2 | ((PLL_K_112896>>9) & 0x1FF));
@@ -573,7 +573,15 @@ rt_err_t codec_hw_init(const char * i2c_bus_device_name)
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI3, ENABLE);
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
 
-    RCC_PLLI2SConfig(192, 3);
+#if defined (STM32F427_437xx) || defined (STM32F429_439xx)
+#define RCC_PLLI2SConfig(a, b)	RCC_PLLI2SConfig(a, b, b)
+#endif
+
+#if CODEC_MASTER_MODE
+    RCC_PLLI2SConfig(302, 2);
+#else// XXX: for 44.1K according data-sheet
+    RCC_PLLI2SConfig(271, 2);
+#endif
     RCC_I2SCLKConfig(RCC_I2S2CLKSource_PLLI2S);
     RCC_PLLI2SCmd(ENABLE);
 

@@ -155,7 +155,7 @@
 
 /****************** USB OTG MODE CONFIGURATION ********************************/
 #define USE_HOST_MODE
-//#define USE_DEVICE_MODE
+#define USE_DEVICE_MODE
 //#define USE_OTG_MODE
 
 #ifndef USB_OTG_FS_CORE
