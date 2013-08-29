@@ -26,6 +26,8 @@
 #define FLASH_TRACE(...)
 #endif /* #ifdef FLASH_DEBUG */
 
+#define PAGE_SIZE           4096
+
 /* JEDEC Manufacturer¡¯s ID */
 #define MF_ID           (0xEF)
 /* JEDEC Device ID: Memory type and Capacity */
@@ -106,53 +108,54 @@ static uint32_t w25qxx_read(uint32_t offset, uint8_t * buffer, uint32_t size)
 
 /** \brief write N page on [page]
  *
- * \param page uint32_t unit : byte (4096 * N,1 page = 4096byte)
+ * \param page_addr uint32_t unit : byte (4096 * N,1 page = 4096byte)
  * \param buffer const uint8_t*
- * \param size uint32_t unit : byte ( 4096*N )
  * \return uint32_t
  *
  */
-uint32_t w25qxx_page_write(uint32_t page, const uint8_t * buffer, uint32_t size)
+uint32_t w25qxx_page_write(uint32_t page_addr, const uint8_t* buffer)
 {
     uint32_t index;
     uint8_t send_buffer[4];
 
-    RT_ASSERT((page&0xFF) == 0);
+    RT_ASSERT((page_addr%256) == 0);
 
     send_buffer[0] = CMD_WREN;
     rt_spi_send(spi_flash_device.rt_spi_device, send_buffer, 1);
 
     send_buffer[0] = CMD_ERASE_4K;
-    send_buffer[1] = (page >> 16);
-    send_buffer[2] = (page >> 8);
-    send_buffer[3] = (page);
+    send_buffer[1] = (page_addr >> 16);
+    send_buffer[2] = (page_addr >> 8);
+    send_buffer[3] = (page_addr);
     rt_spi_send(spi_flash_device.rt_spi_device, send_buffer, 4);
 
     w25qxx_wait_busy(); // wait erase done.
 
-    for(index=0; index < (size/256); index++)
+    for(index=0; index < (PAGE_SIZE / 256); index++)
     {
         send_buffer[0] = CMD_WREN;
         rt_spi_send(spi_flash_device.rt_spi_device, send_buffer, 1);
 
         send_buffer[0] = CMD_PP;
-        send_buffer[1] = (uint8_t)(page >> 16);
-        send_buffer[2] = (uint8_t)(page >> 8);
-        send_buffer[3] = (uint8_t)(page);
+        send_buffer[1] = (uint8_t)(page_addr >> 16);
+        send_buffer[2] = (uint8_t)(page_addr >> 8);
+        send_buffer[3] = (uint8_t)(page_addr);
 
         rt_spi_send_then_send(spi_flash_device.rt_spi_device,
-                              send_buffer, 4,
-                              buffer, 256);
+                              send_buffer,
+                              4,
+                              buffer,
+                              256);
 
         buffer += 256;
-        page += 256;
+        page_addr += 256;
         w25qxx_wait_busy();
     }
 
     send_buffer[0] = CMD_WRDI;
     rt_spi_send(spi_flash_device.rt_spi_device, send_buffer, 1);
 
-    return size;
+    return PAGE_SIZE;
 }
 
 /* RT-Thread device interface */
@@ -227,11 +230,18 @@ static rt_size_t w25qxx_flash_write(rt_device_t dev,
                                     const void* buffer,
                                     rt_size_t size)
 {
+    const uint8_t * ptr = buffer;
+    RT_ASSERT(size%PAGE_SIZE == 0);
+
     flash_lock((struct spi_flash_device *)dev);
 
-    w25qxx_page_write(pos*spi_flash_device.geometry.bytes_per_sector,
-                      buffer,
-                      size*spi_flash_device.geometry.bytes_per_sector);
+    while(size)
+    {
+        w25qxx_page_write(pos*spi_flash_device.geometry.bytes_per_sector,
+                          ptr);
+        ptr += PAGE_SIZE;
+        size -= PAGE_SIZE;
+    }
 
     flash_unlock((struct spi_flash_device *)dev);
 
