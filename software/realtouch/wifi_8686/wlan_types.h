@@ -5,7 +5,7 @@
  */
 /*************************************************************
 Change log:
-	10/11/05: add Doxygen format comments 
+	10/11/05: add Doxygen format comments
 	01/11/06: Add IEEE Association response type. Add TSF TLV information.
 	01/31/06: Add support to selectively enabe the FW Scan channel filter
 	04/10/06: Add power_adapt_cfg_ext command
@@ -110,7 +110,7 @@ typedef enum _IEEEtypes_ElementId_e
     RSN_IE = 48,
 
     EXTRA_IE = 133,
-}IEEEtypes_ElementId_e;
+} IEEEtypes_ElementId_e;
 
 #define CAPINFO_MASK    (~( W_BIT_15 | W_BIT_14 |               \
                             W_BIT_12 | W_BIT_11 | W_BIT_9) )
@@ -132,13 +132,13 @@ typedef struct _IEEEtypes_CapInfo_t
     u8 Rsvrd2:1;
     u8 DSSSOFDM:1;
     u8 Rsrvd1:2;
-}IEEEtypes_CapInfo_t;
+} IEEEtypes_CapInfo_t;
 
 typedef struct
 {
     u8 ElementId;
     u8 Len;
-}IEEEtypes_Header_t;
+} IEEEtypes_Header_t;
 
 /** IEEEtypes_CfParamSet_t */
 typedef struct _IEEEtypes_CfParamSet_t
@@ -149,21 +149,21 @@ typedef struct _IEEEtypes_CfParamSet_t
     u8 CfpPeriod;
     u16 CfpMaxDuration;
     u16 CfpDurationRemaining;
-}IEEEtypes_CfParamSet_t;
+} IEEEtypes_CfParamSet_t;
 
 typedef struct IEEEtypes_IbssParamSet_t
 {
     u8 ElementId;
     u8 Len;
     u16 AtimWindow;
-}IEEEtypes_IbssParamSet_t;
+} IEEEtypes_IbssParamSet_t;
 
 /** IEEEtypes_SsParamSet_t */
 typedef union _IEEEtypes_SsParamSet_t
 {
     IEEEtypes_CfParamSet_t CfParamSet;
     IEEEtypes_IbssParamSet_t IbssParamSet;
-}IEEEtypes_SsParamSet_t;
+} IEEEtypes_SsParamSet_t;
 
 /** IEEEtypes_FhParamSet_t */
 typedef struct _IEEEtypes_FhParamSet_t
@@ -174,28 +174,28 @@ typedef struct _IEEEtypes_FhParamSet_t
     u8 HopSet;
     u8 HopPattern;
     u8 HopIndex;
-}IEEEtypes_FhParamSet_t;
+} IEEEtypes_FhParamSet_t;
 
 typedef struct _IEEEtypes_DsParamSet_t
 {
     u8 ElementId;
     u8 Len;
     u8 CurrentChan;
-}IEEEtypes_DsParamSet_t;
+} IEEEtypes_DsParamSet_t;
 
 /** IEEEtypes_DsParamSet_t */
 typedef union IEEEtypes_PhyParamSet_t
 {
     IEEEtypes_FhParamSet_t FhParamSet;
     IEEEtypes_DsParamSet_t DsParamSet;
-}IEEEtypes_PhyParamSet_t;
+} IEEEtypes_PhyParamSet_t;
 
 typedef struct _IEEEtypes_ERPInfo_t
 {
     u8 ElementId;
     u8 Len;
     u8 ERPFlags;
-}IEEEtypes_ERPInfo_t;
+} IEEEtypes_ERPInfo_t;
 
 typedef u16 IEEEtypes_AId_t;
 typedef u16 IEEEtypes_StatusCode_t;
@@ -206,7 +206,7 @@ typedef struct
     IEEEtypes_StatusCode_t StatusCode;
     IEEEtypes_AId_t AId;
     u8 IEBuffer[1];
-}IEEEtypes_AssocRsp_t;
+} IEEEtypes_AssocRsp_t;
 
 typedef struct
 {
@@ -216,7 +216,7 @@ typedef struct
     u8 OuiType;
     u8 OuiSubtype;
     u8 Version;
-}IEEEtypes_VendorHeader_t;
+} IEEEtypes_VendorHeader_t;
 
 typedef struct
 {
@@ -224,7 +224,7 @@ typedef struct
 
     /* IE Max - size of previous fields */
     u8 Data[IEEE_MAX_IE_SIZE - sizeof(IEEEtypes_VendorHeader_t)];
-}IEEEtypes_VendorSpecific_t;
+} IEEEtypes_VendorSpecific_t;
 
 typedef struct
 {
@@ -233,7 +233,7 @@ typedef struct
     /* IE Max - size of previous fields */
     u8 Data[IEEE_MAX_IE_SIZE - sizeof(IEEEtypes_Header_t)];
 
-}IEEEtypes_Generic_t;
+} IEEEtypes_Generic_t;
 
 /** TLV  type ID definition */
 #define PROPRIETARY_TLV_BASE_ID		0x0100
@@ -283,28 +283,28 @@ typedef struct _MrvlIEtypesHeader
 {
     u16 Type;
     u16 Len;
-}MrvlIEtypesHeader_t;
+} MrvlIEtypesHeader_t;
 
 /** MrvlIEtypes_Data_t */
 typedef struct _MrvlIEtypes_Data_t
 {
     MrvlIEtypesHeader_t Header;
     u8 Data[1];
-}MrvlIEtypes_Data_t;
+} MrvlIEtypes_Data_t;
 
 /** MrvlIEtypes_RatesParamSet_t */
 typedef struct _MrvlIEtypes_RatesParamSet_t
 {
     MrvlIEtypesHeader_t Header;
     u8 Rates[1];
-}MrvlIEtypes_RatesParamSet_t;
+} MrvlIEtypes_RatesParamSet_t;
 
 /** MrvlIEtypes_SsIdParamSet_t */
 typedef struct _MrvlIEtypes_SsIdParamSet_t
 {
     MrvlIEtypesHeader_t Header;
     u8 SsId[1];
-}MrvlIEtypes_SsIdParamSet_t;
+} MrvlIEtypes_SsIdParamSet_t;
 
 /** MrvlIEtypes_WildCardSsIdParamSet_t */
 typedef struct _MrvlIEtypes_WildCardSsIdParamSet_t
@@ -312,7 +312,19 @@ typedef struct _MrvlIEtypes_WildCardSsIdParamSet_t
     MrvlIEtypesHeader_t Header;
     u8 MaxSsidLength;
     u8 SsId[1];
-}MrvlIEtypes_WildCardSsIdParamSet_t;
+} MrvlIEtypes_WildCardSsIdParamSet_t;
+
+#ifndef PACK_STRUCT_STRUCT
+
+#if defined(__CC_ARM)                   /* ARMCC compiler */
+#   define  PACK_STRUCT_STRUCT      __attribute__ ((__packed__))
+#elif defined(__GNUC__)                 /* GNU GCC Compiler */
+#   define  PACK_STRUCT_STRUCT      __attribute__((packed))
+#elif defined(__IAR_SYSTEMS_ICC__)      /* IAR Compiler */
+#   define  PACK_STRUCT_STRUCT
+#endif /* compiler */
+
+#endif // PACK_STRUCT_STRUCT
 
 /** ChanScanMode_t */
 typedef struct
@@ -320,7 +332,7 @@ typedef struct
     u8 PassiveScan:1;
     u8 DisableChanFilt:1;
     u8 Reserved_2_7:6;
-} ChanScanMode_t;
+} PACK_STRUCT_STRUCT ChanScanMode_t;
 
 /** ChanScanParamSet_t */
 typedef struct _ChanScanParamSet_t
@@ -330,14 +342,14 @@ typedef struct _ChanScanParamSet_t
     ChanScanMode_t ChanScanMode;
     u16 MinScanTime;
     u16 MaxScanTime;
-}ChanScanParamSet_t;
+} PACK_STRUCT_STRUCT ChanScanParamSet_t;
 
 /** MrvlIEtypes_ChanListParamSet_t */
 typedef struct _MrvlIEtypes_ChanListParamSet_t
 {
     MrvlIEtypesHeader_t Header;
     ChanScanParamSet_t ChanScanParam[1];
-}MrvlIEtypes_ChanListParamSet_t;
+} MrvlIEtypes_ChanListParamSet_t;
 
 /** CfParamSet_t */
 typedef struct _CfParamSet_t
@@ -346,13 +358,13 @@ typedef struct _CfParamSet_t
     u8 CfpPeriod;
     u16 CfpMaxDuration;
     u16 CfpDurationRemaining;
-}CfParamSet_t;
+} CfParamSet_t;
 
 /** IbssParamSet_t */
 typedef struct _IbssParamSet_t
 {
     u16 AtimWindow;
-}IbssParamSet_t;
+} IbssParamSet_t;
 
 /** MrvlIEtypes_SsParamSet_t */
 typedef struct _MrvlIEtypes_SsParamSet_t
@@ -363,7 +375,7 @@ typedef struct _MrvlIEtypes_SsParamSet_t
         CfParamSet_t CfParamSet[1];
         IbssParamSet_t IbssParamSet[1];
     } cf_ibss;
-}MrvlIEtypes_SsParamSet_t;
+} MrvlIEtypes_SsParamSet_t;
 
 /** FhParamSet_t */
 typedef struct _FhParamSet_t
@@ -372,13 +384,13 @@ typedef struct _FhParamSet_t
     u8 HopSet;
     u8 HopPattern;
     u8 HopIndex;
-}FhParamSet_t;
+} FhParamSet_t;
 
 /** DsParamSet_t */
 typedef struct _DsParamSet_t
 {
     u8 CurrentChan;
-}DsParamSet_t;
+} DsParamSet_t;
 
 /** MrvlIEtypes_PhyParamSet_t */
 typedef struct _MrvlIEtypes_PhyParamSet_t
@@ -389,21 +401,21 @@ typedef struct _MrvlIEtypes_PhyParamSet_t
         FhParamSet_t FhParamSet[1];
         DsParamSet_t DsParamSet[1];
     } fh_ds;
-}MrvlIEtypes_PhyParamSet_t;
+} MrvlIEtypes_PhyParamSet_t;
 
 /** MrvlIEtypes_RsnParamSet_t */
 typedef struct _MrvlIEtypes_RsnParamSet_t
 {
     MrvlIEtypesHeader_t Header;
     u8 RsnIE[1];
-}MrvlIEtypes_RsnParamSet_t;
+} MrvlIEtypes_RsnParamSet_t;
 
 /** MrvlIEtypes_WmmParamSet_t */
 typedef struct _MrvlIEtypes_WmmParamSet_t
 {
     MrvlIEtypesHeader_t Header;
     u8 WmmIE[1];
-}MrvlIEtypes_WmmParamSet_t;
+} MrvlIEtypes_WmmParamSet_t;
 
 typedef struct
 {
@@ -415,14 +427,14 @@ typedef struct
     u8 FlowRequired;
     u8 FlowCreated;
     u32 Reserved3;
-}MrvlIEtypes_WmmQueueStatus_t;
+} MrvlIEtypes_WmmQueueStatus_t;
 
 /** Table of TSF values returned in the scan result */
 typedef struct
 {
     MrvlIEtypesHeader_t Header;
     u8 tsfTable[8];
-}MrvlIEtypes_TsfTimestamp_t;
+} MrvlIEtypes_TsfTimestamp_t;
 
 /**  Local Power Capability */
 typedef struct _MrvlIEtypes_PowerCapability_t
@@ -430,7 +442,7 @@ typedef struct _MrvlIEtypes_PowerCapability_t
     MrvlIEtypesHeader_t Header;
     s8 MinPower;
     s8 MaxPower;
-}MrvlIEtypes_PowerCapability_t;
+} MrvlIEtypes_PowerCapability_t;
 
 /** MrvlIEtypes_RssiParamSet_t */
 typedef struct _MrvlIEtypes_RssiThreshold_t
@@ -438,7 +450,7 @@ typedef struct _MrvlIEtypes_RssiThreshold_t
     MrvlIEtypesHeader_t Header;
     u8 RSSIValue;
     u8 RSSIFreq;
-}MrvlIEtypes_RssiParamSet_t;
+} MrvlIEtypes_RssiParamSet_t;
 
 /** MrvlIEtypes_SnrThreshold_t */
 typedef struct _MrvlIEtypes_SnrThreshold_t
@@ -446,7 +458,7 @@ typedef struct _MrvlIEtypes_SnrThreshold_t
     MrvlIEtypesHeader_t Header;
     u8 SNRValue;
     u8 SNRFreq;
-}MrvlIEtypes_SnrThreshold_t;
+} MrvlIEtypes_SnrThreshold_t;
 
 /** MrvlIEtypes_FailureCount_t */
 typedef struct _MrvlIEtypes_FailureCount_t
@@ -454,7 +466,7 @@ typedef struct _MrvlIEtypes_FailureCount_t
     MrvlIEtypesHeader_t Header;
     u8 FailValue;
     u8 FailFreq;
-}MrvlIEtypes_FailureCount_t;
+} MrvlIEtypes_FailureCount_t;
 
 /** MrvlIEtypes_BeaconsMissed_t */
 typedef struct _MrvlIEtypes_BeaconsMissed_t
@@ -462,34 +474,34 @@ typedef struct _MrvlIEtypes_BeaconsMissed_t
     MrvlIEtypesHeader_t Header;
     u8 BeaconMissed;
     u8 Reserved;
-}MrvlIEtypes_BeaconsMissed_t;
+} MrvlIEtypes_BeaconsMissed_t;
 
 /** MrvlIEtypes_NumProbes_t */
 typedef struct _MrvlIEtypes_NumProbes_t
 {
     MrvlIEtypesHeader_t Header;
     u16 NumProbes;
-}MrvlIEtypes_NumProbes_t;
+} MrvlIEtypes_NumProbes_t;
 
 /** MrvlIEtypes_StartBGScanLater_t */
 typedef struct _MrvlIEtypes_StartBGScanLater_t
 {
     MrvlIEtypesHeader_t Header;
     u16 StartLater;
-}MrvlIEtypes_StartBGScanLater_t;
+} MrvlIEtypes_StartBGScanLater_t;
 
 typedef struct _LedGpio_t
 {
     u8 LedNum;                  /* LED # mapped to GPIO pin # below */
     u8 GpioNum;                 /* GPIO pin # used to control LED # above */
-}LedGpio_t;
+} LedGpio_t;
 
 /** MrvlIEtypes_LedGpio_t */
 typedef struct _MrvlIEtypes_LedGpio_t
 {
     MrvlIEtypesHeader_t Header;
     LedGpio_t LedGpio[1];
-}MrvlIEtypes_LedGpio_t;
+} MrvlIEtypes_LedGpio_t;
 
 /** MrvlIEtypes_LedBehavior_t */
 typedef struct _MrvlIEtypes_LedBehavior_t
@@ -499,21 +511,21 @@ typedef struct _MrvlIEtypes_LedBehavior_t
     u8 LedNum;                  /* LED # */
     u8 LedState;                /* LED State corresponding to Firmware State */
     u8 LedArgs;                 /* Arguments for LED State */
-}MrvlIEtypes_LedBehavior_t;
+} MrvlIEtypes_LedBehavior_t;
 
 typedef struct _PA_Group_t
 {
     u16 PowerAdaptLevel;
     u16 RateBitmap;
     u32 Reserved;
-}PA_Group_t;
+} PA_Group_t;
 
 /** MrvlIEtypes_PA_Group_t */
 typedef struct _MrvlIEtypes_PowerAdapt_Group_t
 {
     MrvlIEtypesHeader_t Header;
     PA_Group_t PA_Group[MAX_POWER_ADAPT_GROUP];
-}MrvlIEtypes_PowerAdapt_Group_t;
+} MrvlIEtypes_PowerAdapt_Group_t;
 
 typedef struct _AutoTx_MacFrame_t
 {
@@ -524,14 +536,14 @@ typedef struct _AutoTx_MacFrame_t
     u8 DestMacAddr[ETH_ALEN];
     u8 SrcMacAddr[ETH_ALEN];
     u8 Payload[4];			    //changed by dennis
-}AutoTx_MacFrame_t;
+} AutoTx_MacFrame_t;
 
 /** MrvlIEtypes_AutoTx_t */
 typedef struct _MrvlIEtypes_AutoTx_t
 {
     MrvlIEtypesHeader_t Header;
     AutoTx_MacFrame_t AutoTx_MacFrame;
-}MrvlIEtypes_AutoTx_t;
+} MrvlIEtypes_AutoTx_t;
 
 typedef struct
 {
@@ -555,7 +567,7 @@ typedef struct
 {
     MrvlIEtypesHeader_t Header;
     u16 AuthType;
-}MrvlIEtypes_AuthType_t;
+} MrvlIEtypes_AuthType_t;
 
 #define MRVDRV_MAX_SUBBAND_802_11D		83
 #define COUNTRY_CODE_LEN			3
@@ -566,7 +578,7 @@ typedef struct _IEEEtypes_SubbandSet
     u8 FirstChan;
     u8 NoOfChan;
     u8 MaxTxPwr;
-}IEEEtypes_SubbandSet_t;
+} IEEEtypes_SubbandSet_t;
 
 typedef struct _IEEEtypes_CountryInfoSet
 {
@@ -574,7 +586,7 @@ typedef struct _IEEEtypes_CountryInfoSet
     u8 Len;
     u8 CountryCode[COUNTRY_CODE_LEN];
     IEEEtypes_SubbandSet_t Subband[1];
-}IEEEtypes_CountryInfoSet_t;
+} IEEEtypes_CountryInfoSet_t;
 
 typedef struct _IEEEtypes_CountryInfoFullSet
 {
@@ -582,14 +594,14 @@ typedef struct _IEEEtypes_CountryInfoFullSet
     u8 Len;
     u8 CountryCode[COUNTRY_CODE_LEN];
     IEEEtypes_SubbandSet_t Subband[MRVDRV_MAX_SUBBAND_802_11D];
-}IEEEtypes_CountryInfoFullSet_t;
+} IEEEtypes_CountryInfoFullSet_t;
 
 typedef struct _MrvlIEtypes_DomainParamSet
 {
     MrvlIEtypesHeader_t Header;
     u8 CountryCode[COUNTRY_CODE_LEN];
     IEEEtypes_SubbandSet_t Subband[1];
-}MrvlIEtypes_DomainParamSet_t;
+} MrvlIEtypes_DomainParamSet_t;
 
 /** Size of a TSPEC.  Used to allocate necessary buffer space in commands */
 #define WMM_TSPEC_SIZE              63
@@ -609,7 +621,7 @@ typedef enum
     WMM_AC_BE,
     WMM_AC_VI,
     WMM_AC_VO,
-}wlan_wmm_ac_e;
+} wlan_wmm_ac_e;
 
 /** data structure of WMM QoS information */
 typedef struct
@@ -617,7 +629,7 @@ typedef struct
     u8 ParaSetCount:4;
     u8 Reserved:3;
     u8 QosUAPSD:1;
-}IEEEtypes_WmmQosInfo_t;
+} IEEEtypes_WmmQosInfo_t;
 
 typedef struct
 {
@@ -625,14 +637,14 @@ typedef struct
     u8 Acm:1;
     u8 Aci:2;
     u8 Reserved:1;
-}IEEEtypes_WmmAciAifsn_t;
+} IEEEtypes_WmmAciAifsn_t;
 
 /**  data structure of WMM ECW */
 typedef struct
 {
     u8 EcwMin:4;
     u8 EcwMax:4;
-}IEEEtypes_WmmEcw_t;
+} IEEEtypes_WmmEcw_t;
 
 /** data structure of WMM AC parameters  */
 typedef struct
@@ -640,7 +652,7 @@ typedef struct
     IEEEtypes_WmmAciAifsn_t AciAifsn;
     IEEEtypes_WmmEcw_t Ecw;
     u16 TxopLimit;
-}IEEEtypes_WmmAcParameters_t;
+} IEEEtypes_WmmAcParameters_t;
 
 /** data structure of WMM Info IE  */
 typedef struct
@@ -649,7 +661,7 @@ typedef struct
     /**
      * WMM Info IE - Vendor Specific Header:
      *   ElementId   [221/0xdd]
-     *   Len         [7] 
+     *   Len         [7]
      *   Oui         [00:50:f2]
      *   OuiType     [2]
      *   OuiSubType  [0]
@@ -659,7 +671,7 @@ typedef struct
 
     IEEEtypes_WmmQosInfo_t QoSInfo;
 
-}IEEEtypes_WmmInfo_t;
+} IEEEtypes_WmmInfo_t;
 
 /** data structure of WMM parameter IE  */
 typedef struct
@@ -667,7 +679,7 @@ typedef struct
     /**
      * WMM Parameter IE - Vendor Specific Header:
      *   ElementId   [221/0xdd]
-     *   Len         [24] 
+     *   Len         [24]
      *   Oui         [00:50:f2]
      *   OuiType     [2]
      *   OuiSubType  [1]
@@ -681,20 +693,20 @@ typedef struct
     /** AC Parameters Record WMM_AC_BE, WMM_AC_BK, WMM_AC_VI, WMM_AC_VO */
     IEEEtypes_WmmAcParameters_t AcParams[MAX_AC_QUEUES];
 
-}IEEEtypes_WmmParameter_t;
+} IEEEtypes_WmmParameter_t;
 
 /**
  *  @brief Firmware command structure to retrieve the firmware WMM status.
  *
- *  Used to retrieve the status of each WMM AC Queue in TLV 
+ *  Used to retrieve the status of each WMM AC Queue in TLV
  *    format (MrvlIEtypes_WmmQueueStatus_t) as well as the current WMM
- *    parameter IE advertised by the AP.  
- *  
+ *    parameter IE advertised by the AP.
+ *
  *  Used in response to a MACREG_INT_CODE_WMM_STATUS_CHANGE event signalling
  *    a QOS change on one of the ACs or a change in the WMM Parameter in
  *    the Beacon.
  *
- *  TLV based command, byte arrays used for max sizing purpose. There are no 
+ *  TLV based command, byte arrays used for max sizing purpose. There are no
  *    arguments sent in the command, the TLVs are returned by the firmware.
  */
 typedef struct
@@ -702,10 +714,10 @@ typedef struct
     u8 queueStatusTlv[sizeof(MrvlIEtypes_WmmQueueStatus_t) * MAX_AC_QUEUES];
     u8 wmmParamTlv[sizeof(IEEEtypes_WmmParameter_t) + 2];
 
-}HostCmd_DS_WMM_GET_STATUS;
+} HostCmd_DS_WMM_GET_STATUS;
 
 /**
- *  @brief Enumeration for the command result from an ADDTS or DELTS command 
+ *  @brief Enumeration for the command result from an ADDTS or DELTS command
  */
 typedef enum
 {
@@ -714,12 +726,12 @@ typedef enum
     TSPEC_RESULT_TIMEOUT = 2,
     TSPEC_RESULT_DATA_INVALID = 3,
 
-}wlan_wmm_tspec_result_e;
+} wlan_wmm_tspec_result_e;
 
 /**
  *  @brief IOCTL structure to send an ADDTS request and retrieve the response.
  *
- *  IOCTL structure from the application layer relayed to firmware to 
+ *  IOCTL structure from the application layer relayed to firmware to
  *    instigate an ADDTS management frame with an appropriate TSPEC IE as well
  *    as any additional IEs appended in the ADDTS Action frame.
  *
@@ -736,12 +748,12 @@ typedef struct
 
     u8 addtsExtraIEBuf[WMM_ADDTS_EXTRA_IE_BYTES];
 
-}wlan_ioctl_wmm_addts_req_t;
+} wlan_ioctl_wmm_addts_req_t;
 
 /**
  *  @brief IOCTL structure to send a DELTS request.
  *
- *  IOCTL structure from the application layer relayed to firmware to 
+ *  IOCTL structure from the application layer relayed to firmware to
  *    instigate an DELTS management frame with an appropriate TSPEC IE.
  *
  *  @sa wlan_wmm_delts_req_ioctl
@@ -750,16 +762,16 @@ typedef struct
 {
     wlan_wmm_tspec_result_e commandResult;      //!< Firmware execution result
 
-    u8 ieeeReasonCode;          //!< IEEE reason code sent, unused for WMM 
+    u8 ieeeReasonCode;          //!< IEEE reason code sent, unused for WMM
 
     u8 tspecData[WMM_TSPEC_SIZE];       //!< TSPEC to send in the DELTS
 
-}wlan_ioctl_wmm_delts_req_t;
+} wlan_ioctl_wmm_delts_req_t;
 
 /**
  *  @brief Internal command structure used in executing an ADDTS command.
  *
- *  Relay information between the IOCTL layer and the firmware command and 
+ *  Relay information between the IOCTL layer and the firmware command and
  *    command response procedures.
  *
  *  @sa wlan_wmm_addts_req_ioctl
@@ -783,7 +795,7 @@ typedef struct
 /**
  *  @brief Internal command structure used in executing an DELTS command.
  *
- *  Relay information between the IOCTL layer and the firmware command and 
+ *  Relay information between the IOCTL layer and the firmware command and
  *    command response procedures.
  *
  *  @sa wlan_wmm_delts_req_ioctl
@@ -817,7 +829,7 @@ typedef struct
     u8 tspecData[WMM_TSPEC_SIZE];
     u8 addtsExtraIEBuf[WMM_ADDTS_EXTRA_IE_BYTES];
 
-}HostCmd_DS_WMM_ADDTS_REQ;
+} HostCmd_DS_WMM_ADDTS_REQ;
 
 /**
  *  @brief Command structure for the HostCmd_CMD_WMM_DELTS_REQ firmware command
@@ -829,7 +841,7 @@ typedef struct
     u8 ieeeReasonCode;
     u8 tspecData[WMM_TSPEC_SIZE];
 
-}HostCmd_DS_WMM_DELTS_REQ;
+} HostCmd_DS_WMM_DELTS_REQ;
 
 /**
  *  @brief Enumeration for the action field in the Queue configure command
@@ -841,7 +853,7 @@ typedef enum
     WMM_QUEUE_CONFIG_ACTION_DEFAULT = 2,
 
     WMM_QUEUE_CONFIG_ACTION_MAX
-}wlan_wmm_queue_config_action_e;
+} wlan_wmm_queue_config_action_e;
 
 /**
  *  @brief Command structure for the HostCmd_CMD_WMM_QUEUE_CONFIG firmware cmd
@@ -856,19 +868,19 @@ typedef struct
 
     /** @brief MSDU lifetime expiry per 802.11e
      *
-     *   - Ignored if 0 on a set command 
+     *   - Ignored if 0 on a set command
      *   - Set to the 802.11e specified 500 TUs when defaulted
      */
     u16 msduLifetimeExpiry;
 
     u8 tlvBuffer[WMM_QUEUE_CONFIG_EXTRA_TLV_BYTES];     //!< Not supported yet
 
-}HostCmd_DS_WMM_QUEUE_CONFIG;
+} HostCmd_DS_WMM_QUEUE_CONFIG;
 
 /**
  *  @brief Internal command structure used in executing a queue config command.
  *
- *  Relay information between the IOCTL layer and the firmware command and 
+ *  Relay information between the IOCTL layer and the firmware command and
  *    command response procedures.
  *
  *  @sa wlan_wmm_queue_config_ioctl
@@ -889,7 +901,7 @@ typedef struct
 /**
  *  @brief IOCTL structure to configure a specific AC Queue's parameters
  *
- *  IOCTL structure from the application layer relayed to firmware to 
+ *  IOCTL structure from the application layer relayed to firmware to
  *    get, set, or default the WMM AC queue parameters.
  *
  *  - msduLifetimeExpiry is ignored if set to 0 on a set command
@@ -904,7 +916,7 @@ typedef struct
 
     u8 supportedRates[10];      //!< Not supported yet
 
-}wlan_ioctl_wmm_queue_config_t;
+} wlan_ioctl_wmm_queue_config_t;
 
 /**
  *   @brief Enumeration for the action field in the queue stats command
@@ -918,7 +930,7 @@ typedef enum
     WMM_STATS_ACTION_GET_CFG = 4,       /* Not currently used */
 
     WMM_STATS_ACTION_MAX
-}wlan_wmm_stats_action_e;
+} wlan_wmm_stats_action_e;
 
 /** Number of bins in the histogram for the HostCmd_DS_WMM_QUEUE_STATS */
 #define WMM_STATS_PKTS_HIST_BINS  7
@@ -926,12 +938,12 @@ typedef enum
 /**
  *  @brief Command structure for the HostCmd_CMD_WMM_QUEUE_STATS firmware cmd
  *
- *  Turn statistical collection on/off for a given AC or retrieve the 
+ *  Turn statistical collection on/off for a given AC or retrieve the
  *    accumulated stats for an AC and clear them in the firmware.
  */
 typedef struct
 {
-    wlan_wmm_stats_action_e action;     //!< Start, Stop, or Get 
+    wlan_wmm_stats_action_e action;     //!< Start, Stop, or Get
     wlan_wmm_ac_e accessCategory;       //!< WMM_AC_BK(0) to WMM_AC_VO(3)
 
     u16 pktCount;               //!< Number of successful packets transmitted
@@ -941,7 +953,7 @@ typedef struct
     u32 usedTime;               //!< Calculated medium time - Not currently used
 
     /** @brief Queue Delay Histogram; number of packets per queue delay range
-     * 
+     *
      *  [0] -  0ms <= delay < 5ms
      *  [1] -  5ms <= delay < 10ms
      *  [2] - 10ms <= delay < 20ms
@@ -954,29 +966,29 @@ typedef struct
 
     u16 reserved_u16_1;
 
-}HostCmd_DS_WMM_QUEUE_STATS;
+} HostCmd_DS_WMM_QUEUE_STATS;
 
 /**
  *  @brief IOCTL structure to start, stop, and get statistics for a WMM AC
  *
- *  IOCTL structure from the application layer relayed to firmware to 
- *    start or stop statistical collection for a given AC.  Also used to 
+ *  IOCTL structure from the application layer relayed to firmware to
+ *    start or stop statistical collection for a given AC.  Also used to
  *    retrieve and clear the collected stats on a given AC.
  *
  *  @sa wlan_wmm_queue_stats_ioctl
  */
 typedef struct
 {
-    wlan_wmm_stats_action_e action;     //!< Start, Stop, or Get 
+    wlan_wmm_stats_action_e action;     //!< Start, Stop, or Get
     wlan_wmm_ac_e accessCategory;       //!< WMM_AC_BK(0) to WMM_AC_VO(3)
-    u16 pktCount;               //!< Number of successful packets transmitted  
-    u16 pktLoss;                //!< Packets lost; not included in pktCount    
+    u16 pktCount;               //!< Number of successful packets transmitted
+    u16 pktLoss;                //!< Packets lost; not included in pktCount
     u32 avgQueueDelay;          //!< Average Queue delay in microseconds
     u32 avgTxDelay;             //!< Average Transmission delay in microseconds
-    u32 usedTime;               //!< Calculated medium time 
+    u32 usedTime;               //!< Calculated medium time
 
     /** @brief Queue Delay Histogram; number of packets per queue delay range
-     * 
+     *
      *  [0] -  0ms <= delay < 5ms
      *  [1] -  5ms <= delay < 10ms
      *  [2] - 10ms <= delay < 20ms
@@ -986,9 +998,9 @@ typedef struct
      *  [6] - 50ms <= delay < msduLifetime (TUs)
      */
     u16 delayHistogram[WMM_STATS_PKTS_HIST_BINS];
-}wlan_ioctl_wmm_queue_stats_t;
+} wlan_ioctl_wmm_queue_stats_t;
 
-/** 
+/**
  *  @brief IOCTL sub structure for a specific WMM AC Status
  */
 typedef struct
@@ -997,7 +1009,7 @@ typedef struct
     u8 flowRequired;
     u8 flowCreated;
     u8 disabled;
-}wlan_ioctl_wmm_queue_status_ac_t;
+} wlan_ioctl_wmm_queue_status_ac_t;
 
 /**
  *  @brief IOCTL structure to retrieve the WMM AC Queue status
@@ -1011,7 +1023,7 @@ typedef struct
 typedef struct
 {
     wlan_ioctl_wmm_queue_status_ac_t acStatus[MAX_AC_QUEUES];
-}wlan_ioctl_wmm_queue_status_t;
+} wlan_ioctl_wmm_queue_status_t;
 
 /** Firmware status for a specific AC */
 typedef struct
