@@ -118,7 +118,7 @@ uint32_t w25qxx_page_write(uint32_t page_addr, const uint8_t* buffer)
     uint32_t index;
     uint8_t send_buffer[4];
 
-    RT_ASSERT((page_addr%256) == 0);
+    RT_ASSERT((page_addr&0xFF) == 0); /* page addr must align to 256byte. */
 
     send_buffer[0] = CMD_WREN;
     rt_spi_send(spi_flash_device.rt_spi_device, send_buffer, 1);
@@ -230,17 +230,18 @@ static rt_size_t w25qxx_flash_write(rt_device_t dev,
                                     const void* buffer,
                                     rt_size_t size)
 {
+    rt_size_t i = 0;
+    rt_size_t block = size;
     const uint8_t * ptr = buffer;
-    RT_ASSERT(size%PAGE_SIZE == 0);
 
     flash_lock((struct spi_flash_device *)dev);
 
-    while(size)
+    while(block--)
     {
-        w25qxx_page_write(pos*spi_flash_device.geometry.bytes_per_sector,
+        w25qxx_page_write((pos + i)*spi_flash_device.geometry.bytes_per_sector,
                           ptr);
         ptr += PAGE_SIZE;
-        size -= PAGE_SIZE;
+        i++;
     }
 
     flash_unlock((struct spi_flash_device *)dev);
