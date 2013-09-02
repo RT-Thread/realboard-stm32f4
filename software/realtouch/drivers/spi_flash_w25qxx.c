@@ -26,7 +26,13 @@
 #define FLASH_TRACE(...)
 #endif /* #ifdef FLASH_DEBUG */
 
-#define PAGE_SIZE           4096
+/* w25qx flash
+        1 PAGE  equal 256 byte
+        1 SECTOR equal 16 page
+*/
+
+#define PAGE_SIZE           256
+#define SECTOR_SIZE         4096
 
 /* JEDEC Manufacturer¡¯s ID */
 #define MF_ID           (0xEF)
@@ -108,12 +114,13 @@ static uint32_t w25qxx_read(uint32_t offset, uint8_t * buffer, uint32_t size)
 
 /** \brief write N page on [page]
  *
- * \param page_addr uint32_t unit : byte (4096 * N,1 page = 4096byte)
+ * \param page uint32_t unit : byte (4096 * N,1 page = 4096byte)
  * \param buffer const uint8_t*
+ * \param size uint32_t unit : byte ( 4096*N )
  * \return uint32_t
  *
  */
-uint32_t w25qxx_page_write(uint32_t page_addr, const uint8_t* buffer)
+static uint32_t w25qxx_page_write(uint32_t page_addr, const uint8_t* buffer)
 {
     uint32_t index;
     uint8_t send_buffer[4];
@@ -123,39 +130,60 @@ uint32_t w25qxx_page_write(uint32_t page_addr, const uint8_t* buffer)
     send_buffer[0] = CMD_WREN;
     rt_spi_send(spi_flash_device.rt_spi_device, send_buffer, 1);
 
+    send_buffer[0] = CMD_PP;
+    send_buffer[1] = (uint8_t)(page_addr >> 16);
+    send_buffer[2] = (uint8_t)(page_addr >> 8);
+    send_buffer[3] = (uint8_t)(page_addr);
+
+    rt_spi_send_then_send(spi_flash_device.rt_spi_device,
+                          send_buffer,
+                          4,
+                          buffer,
+                          PAGE_SIZE);
+    w25qxx_wait_busy();
+
+    return PAGE_SIZE;
+}
+
+/** \brief write 16 page on [1 sector]
+ *
+ * \param sector_addr uint32_t unit : byte (4096 * N,1 sector = 4096byte)
+ * \param buffer const uint8_t*
+ * \return uint32_t
+ *
+ */
+static uint32_t w25qxx_sector_write(uint32_t sector_addr, const uint8_t* buffer)
+{
+    uint32_t index;
+    uint32_t page_addr = sector_addr;
+    uint8_t send_buffer[4];
+
+    RT_ASSERT((sector_addr&0xFF) == 0); /* sector addr must align to 256byte. */
+
+    send_buffer[0] = CMD_WREN;
+    rt_spi_send(spi_flash_device.rt_spi_device, send_buffer, 1);
+
     send_buffer[0] = CMD_ERASE_4K;
-    send_buffer[1] = (page_addr >> 16);
-    send_buffer[2] = (page_addr >> 8);
-    send_buffer[3] = (page_addr);
+    send_buffer[1] = (sector_addr >> 16);
+    send_buffer[2] = (sector_addr >> 8);
+    send_buffer[3] = (sector_addr);
     rt_spi_send(spi_flash_device.rt_spi_device, send_buffer, 4);
 
     w25qxx_wait_busy(); // wait erase done.
 
-    for(index=0; index < (PAGE_SIZE / 256); index++)
+    // write 1 sector
+    for (index=0; index < (SECTOR_SIZE / PAGE_SIZE); index++)
     {
-        send_buffer[0] = CMD_WREN;
-        rt_spi_send(spi_flash_device.rt_spi_device, send_buffer, 1);
+        w25qxx_page_write(page_addr, buffer);
 
-        send_buffer[0] = CMD_PP;
-        send_buffer[1] = (uint8_t)(page_addr >> 16);
-        send_buffer[2] = (uint8_t)(page_addr >> 8);
-        send_buffer[3] = (uint8_t)(page_addr);
-
-        rt_spi_send_then_send(spi_flash_device.rt_spi_device,
-                              send_buffer,
-                              4,
-                              buffer,
-                              256);
-
-        buffer += 256;
-        page_addr += 256;
-        w25qxx_wait_busy();
+        buffer += PAGE_SIZE;
+        page_addr += PAGE_SIZE;
     }
 
     send_buffer[0] = CMD_WRDI;
     rt_spi_send(spi_flash_device.rt_spi_device, send_buffer, 1);
 
-    return PAGE_SIZE;
+    return SECTOR_SIZE;
 }
 
 /* RT-Thread device interface */
@@ -236,11 +264,14 @@ static rt_size_t w25qxx_flash_write(rt_device_t dev,
 
     flash_lock((struct spi_flash_device *)dev);
 
-    while(block--)
+    /* block not w25q block, is abstract class block device,
+       is here equal sector number.
+    */
+    while (block--)
     {
-        w25qxx_page_write((pos + i)*spi_flash_device.geometry.bytes_per_sector,
-                          ptr);
-        ptr += PAGE_SIZE;
+        w25qxx_sector_write((pos + i)*spi_flash_device.geometry.bytes_per_sector,
+                            ptr);
+        ptr += SECTOR_SIZE;
         i++;
     }
 
@@ -261,11 +292,13 @@ rt_err_t w25qxx_init(const char * flash_device_name, const char * spi_device_nam
     }
 
     rt_spi_device = (struct rt_spi_device *)rt_device_find(spi_device_name);
-    if(rt_spi_device == RT_NULL)
+
+    if (rt_spi_device == RT_NULL)
     {
         FLASH_TRACE("spi device %s not found!\r\n", spi_device_name);
         return -RT_ENOSYS;
     }
+
     spi_flash_device.rt_spi_device = rt_spi_device;
 
     /* config spi */
@@ -284,61 +317,62 @@ rt_err_t w25qxx_init(const char * flash_device_name, const char * spi_device_nam
         uint16_t memory_type_capacity;
 
         flash_lock(&spi_flash_device);
-
         cmd = CMD_WRDI;
         rt_spi_send(spi_flash_device.rt_spi_device, &cmd, 1);
 
         /* read flash id */
         cmd = CMD_JEDEC_ID;
-        rt_spi_send_then_recv(spi_flash_device.rt_spi_device, &cmd, 1, id_recv, 3);
+        rt_spi_send_then_recv(spi_flash_device.rt_spi_device, &cmd, 1, id_recv,
+            3);
 
         flash_unlock(&spi_flash_device);
 
-        if(id_recv[0] != MF_ID)
+        if (id_recv[0] != MF_ID)
         {
             FLASH_TRACE("Manufacturers ID error!\r\n");
-            FLASH_TRACE("JEDEC Read-ID Data : %02X %02X %02X\r\n", id_recv[0], id_recv[1], id_recv[2]);
+            FLASH_TRACE("JEDEC Read-ID Data : %02X %02X %02X\r\n", id_recv[0],
+                id_recv[1], id_recv[2]);
             return -RT_ENOSYS;
         }
 
-        spi_flash_device.geometry.bytes_per_sector = 4096;
+        spi_flash_device.geometry.bytes_per_sector = SECTOR_SIZE;
         spi_flash_device.geometry.block_size = 4096; /* block erase: 4k */
 
         /* get memory type and capacity */
         memory_type_capacity = id_recv[1];
         memory_type_capacity = (memory_type_capacity << 8) | id_recv[2];
 
-        if(memory_type_capacity == MTC_W25Q128_BV)
+        if (memory_type_capacity == MTC_W25Q128_BV)
         {
             FLASH_TRACE("W25Q128BV detection\r\n");
             spi_flash_device.geometry.sector_count = 4096;
         }
-        else if(memory_type_capacity == MTC_W25Q64_BV_CV)
+        else if (memory_type_capacity == MTC_W25Q64_BV_CV)
         {
             FLASH_TRACE("W25Q64BV or W25Q64CV detection\r\n");
             spi_flash_device.geometry.sector_count = 2048;
         }
-        else if(memory_type_capacity == MTC_W25Q64_DW)
+        else if (memory_type_capacity == MTC_W25Q64_DW)
         {
             FLASH_TRACE("W25Q64DW detection\r\n");
             spi_flash_device.geometry.sector_count = 2048;
         }
-        else if(memory_type_capacity == MTC_W25Q32_BV)
+        else if (memory_type_capacity == MTC_W25Q32_BV)
         {
             FLASH_TRACE("W25Q32BV detection\r\n");
             spi_flash_device.geometry.sector_count = 1024;
         }
-        else if(memory_type_capacity == MTC_W25Q32_DW)
+        else if (memory_type_capacity == MTC_W25Q32_DW)
         {
             FLASH_TRACE("W25Q32DW detection\r\n");
             spi_flash_device.geometry.sector_count = 1024;
         }
-        else if(memory_type_capacity == MTC_W25Q16_BV_CL_CV)
+        else if (memory_type_capacity == MTC_W25Q16_BV_CL_CV)
         {
             FLASH_TRACE("W25Q16BV or W25Q16CL or W25Q16CV detection\r\n");
             spi_flash_device.geometry.sector_count = 512;
         }
-        else if(memory_type_capacity == MTC_W25Q16_DW)
+        else if (memory_type_capacity == MTC_W25Q16_DW)
         {
             FLASH_TRACE("W25Q16DW detection\r\n");
             spi_flash_device.geometry.sector_count = 512;
