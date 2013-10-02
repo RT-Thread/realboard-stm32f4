@@ -98,6 +98,7 @@ void rt_init_thread_entry(void *parameter)
             /* download resource from www.rt-thread.org */
             {
                resource_download();
+
             }
 
 #if (RT_DFS_ELM_USE_LFN != 0) && (defined RT_DFS_ELM_CODE_PAGE_FILE)
