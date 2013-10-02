@@ -217,7 +217,9 @@ void EXTI9_5_IRQHandler(void)
         extern void ra8875_nwait_isr(void);
 
         EXTI_ClearITPendingBit(EXTI_Line6);
+		#if LCD_VERSION==1
         ra8875_nwait_isr();
+		#endif
     }
 
     if(EXTI_GetITStatus(EXTI_Line7) == SET)

@@ -5,6 +5,8 @@
 /********* control ***********/
 #include "board.h"
 
+#if LCD_VERSION==1
+
 /* redirect. */
 #define printf               rt_kprintf     /* use rt_kprintf. */
 //#define printf(...)                       /* none. */
@@ -1166,3 +1168,5 @@ void ra8875_init(void)
     rt_device_register(&_lcd_device, "lcd",
                        RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_STANDALONE);
 }
+
+#endif

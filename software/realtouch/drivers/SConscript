@@ -37,6 +37,9 @@ if GetDepend('RT_USING_I2C') == True:
 # add LCD driver.
 if GetDepend('RT_USING_RTGUI') == True:
 	src += ['ra8875.c']
+	src += ['ssd1289.c']	
+	src += ['ssd1963.c']	
+	src += ['md050sd.c']	
 	src += ['key.c']
 	src += ['touch.c']
 

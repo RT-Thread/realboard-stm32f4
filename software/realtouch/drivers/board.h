@@ -49,6 +49,13 @@
 // 	<i>Default: 1
 #define STM32_CONSOLE_USART		3
 
+/*原realtouch 使用 RA8875 ;    魔笛F4 使用其他型号   MD050SD暂不推荐使用*/
+// 1 = RA8875(7 inch)     2 = SSD1963(5 inch)     3 = SSD1289(3.2 inch)  4 =md050sd(5 inch)
+// 	<i>Default: 2
+#define LCD_VERSION		2
+
+#define _ILI_HORIZONTAL_DIRECTION_
+
 void rt_hw_board_init(void);
 rt_uint32_t rt_hw_tick_get_millisecond(void);
 rt_uint32_t rt_hw_tick_get_microsecond(void);

@@ -50,10 +50,25 @@ s  A2-A0 MODE SER/DFR PD1-PD0
 #define TOUCH_MSR_X     (START | MEASURE_X | MODE_12BIT | DIFFERENTIAL | POWER_MODE0)
 #define TOUCH_MSR_Y     (START | MEASURE_Y | MODE_12BIT | DIFFERENTIAL | POWER_MODE0)
 
+#if LCD_VERSION == 1 
 #define MIN_X_DEFAULT   0x7bd
 #define MAX_X_DEFAULT   0x20
 #define MIN_Y_DEFAULT   0x53
 #define MAX_Y_DEFAULT   0x79b
+
+#elif LCD_VERSION == 2
+#define MIN_X_DEFAULT   80
+#define MAX_X_DEFAULT   1968
+#define MIN_Y_DEFAULT   1860
+#define MAX_Y_DEFAULT   130
+
+#else
+#define MIN_X_DEFAULT   80
+#define MAX_X_DEFAULT   1968
+#define MIN_Y_DEFAULT   1860
+#define MAX_Y_DEFAULT   130
+#endif
+
 #define SAMP_CNT 8                              //the adc array size
 #define SAMP_CNT_DIV2 4                         //the middle of the adc array
 #define SH   10                                 // Valve value
@@ -117,7 +132,7 @@ static void rtgui_touch_calculate(void)
             /* calculate average */
 						{
 							rt_uint32_t total_x = 0;
-              rt_uint32_t total_y = 0;
+							rt_uint32_t total_y = 0;
 							for(k=0; k<2; k++)
 							{ 
 								// sorting the ADC value
