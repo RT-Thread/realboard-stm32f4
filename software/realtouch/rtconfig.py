@@ -10,7 +10,7 @@ if CROSS_TOOL == 'gcc':
     EXEC_PATH 	= r'D:/Program Files/CodeSourcery/Sourcery G++ Lite/bin'
 elif CROSS_TOOL == 'keil':
 	PLATFORM 	= 'armcc'
-	EXEC_PATH 	= r'D:/Keil'
+	EXEC_PATH 	= r'D:\Keil'
 elif CROSS_TOOL == 'iar':
     print '================ERROR============================'
     print 'Not support iar yet!'
