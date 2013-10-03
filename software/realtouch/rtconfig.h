@@ -65,6 +65,7 @@
 #define RT_UART_RX_BUFFER_SIZE	64
 // <bool name="RT_USING_I2C" description="Using I2C Device Driver Framework" default="true" />
 #define RT_USING_I2C
+#define RT_USING_I2C_BITOPS
 // <bool name="RT_USING_SDIO" description="Using SDIO Device Driver Framework" default="true" />
 #define RT_USING_SDIO
 // <integer name="RT_MMCSD_THREAD_PREORITY" description="The prority of mmcsd thread" default="15" />
