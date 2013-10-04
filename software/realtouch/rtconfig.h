@@ -51,7 +51,7 @@
 #define RT_USING_SMALL_MEM
 // <bool name="RT_USING_SLAB" description="Using SLAB memory management for large memory" default="false" />
 // #define RT_USING_SLAB
-// </section>
+
 
 // <section name="RT_USING_DEVICE" description="Using Device Driver Framework" default="true" >
 #define RT_USING_DEVICE

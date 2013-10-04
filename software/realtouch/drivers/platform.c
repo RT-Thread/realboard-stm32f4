@@ -151,9 +151,25 @@ void rt_platform_init(void)
 #endif /* RT_USING_DFS */
 
 #ifdef RT_USING_RTGUI
-    /* initilize ra8875 lcd controller */
-    ra8875_init();
-
+    /* initilize  lcd controller */
+	#if LCD_VERSION==1
+	{
+		ra8875_init();
+	}
+	#elif LCD_VERSION==2
+	{
+		ssd1963_init();
+	}
+	#elif LCD_VERSION==3
+	{
+		ssd1289_init();
+	}	
+	#elif LCD_VERSION==4
+	{
+		md050sd_init();
+	}
+	
+	#endif
     /* initilize key module */
     rt_hw_key_init();
 #endif /* RT_USING_RTGUI */
@@ -164,5 +180,7 @@ void rt_platform_init(void)
 
     rt_thread_delay(50);
     rt_device_init_all();
+
+
 }
 
