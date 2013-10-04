@@ -60,5 +60,12 @@ void realtouch_ui_init(void)
     app_mgr_init();
     rt_thread_delay(10);
 
+	/* add calibrate*/
+	calibration_set_restore(cali_setup);
+    calibration_set_after(cali_store);
+	{
+		 extern void calibration_init(void);
+	     calibration_init();
+	}	
 }
 
