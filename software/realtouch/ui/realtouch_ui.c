@@ -66,6 +66,6 @@ void realtouch_ui_init(void)
 	{
 		 extern void calibration_init(void);
 	     calibration_init();
-	}	
+	}
 }
 

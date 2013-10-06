@@ -26,7 +26,7 @@ void ext_sram_init(void)
 
     /*--------------------- write timings configuration ---------------------*/
     Timing_write.FSMC_AddressSetupTime = 4;  /* [3:0] F2/F4 1~15 HCLK */
-    Timing_write.FSMC_AddressHoldTime = 2;//0;   /* [7:4] keep 0x00 in SRAM mode */
+    Timing_write.FSMC_AddressHoldTime = 0;   /* [7:4] keep 0x00 in SRAM mode */
     Timing_write.FSMC_DataSetupTime = 5;     /* [15:8] F2/F4 0~255 HCLK */
 	
     /* [19:16] Time between NEx high to NEx low (BUSTURN HCLK) */
