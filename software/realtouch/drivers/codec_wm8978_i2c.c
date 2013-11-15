@@ -94,6 +94,13 @@ static void GPIO_Configuration(void)
     GPIO_PinAFConfig(GPIOB, GPIO_PinSource4, GPIO_AF_I2S3ext);
     GPIO_PinAFConfig(GPIOB, GPIO_PinSource5, GPIO_AF_SPI3);
 
+#if !CODEC_MASTER_MODE
+    GPIO_PinAFConfig(GPIOC, GPIO_PinSource7, GPIO_AF_SPI3);
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
+    GPIO_Init(GPIOC, &GPIO_InitStructure);
+    /* I2S3_MCK */
+#endif
+
     /* I2S3S_WS */
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
@@ -142,14 +149,15 @@ static void I2S_Configuration(uint32_t I2S_AudioFreq)
     /* I2S peripheral configuration */
     I2S_InitStructure.I2S_Standard = I2S_Standard_Phillips;
     I2S_InitStructure.I2S_DataFormat = I2S_DataFormat_16b;
-    I2S_InitStructure.I2S_MCLKOutput = I2S_MCLKOutput_Disable;
     I2S_InitStructure.I2S_AudioFreq = I2S_AudioFreq;
     I2S_InitStructure.I2S_CPOL = I2S_CPOL_Low;
 
     /* I2S2 configuration */
 #if CODEC_MASTER_MODE
     I2S_InitStructure.I2S_Mode = I2S_Mode_SlaveTx;
+    I2S_InitStructure.I2S_MCLKOutput = I2S_MCLKOutput_Disable;
 #else
+    I2S_InitStructure.I2S_MCLKOutput = I2S_MCLKOutput_Enable;
     I2S_InitStructure.I2S_Mode = I2S_Mode_MasterTx;
 #endif
     I2S_Init(CODEC_I2S_PORT, &I2S_InitStructure);
