@@ -10,7 +10,7 @@ void main(void)
 	struct rtgui_win* win;	
 	struct rtgui_label* label;
 
-	application = rtgui_app_create(rt_thread_self(), "label");
+	application = rtgui_app_create("label");
 	if (application != RT_NULL)
 	{	
 		rtgui_rect_t rect = {220, 250, 400, 450};

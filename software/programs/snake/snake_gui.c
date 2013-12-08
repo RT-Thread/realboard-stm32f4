@@ -360,7 +360,7 @@ void main(void)
     struct rtgui_app* application;
     struct rtgui_win* win;
 
-    application = rtgui_app_create(rt_thread_self(), "sanke_app");
+    application = rtgui_app_create("sanke_app");
     if (application != RT_NULL)
     {
         win = rtgui_mainwin_create(RT_NULL,

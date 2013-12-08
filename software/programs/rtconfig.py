@@ -4,7 +4,7 @@ import os
 BSP = 'stm32f40x'
 
 # toolchains
-EXEC_PATH = 'C:/Program Files/CodeSourcery/Sourcery G++ Lite/bin'
+EXEC_PATH 	= r'D:\Program Files\CodeSourcery\Sourcery_CodeBench_Lite_for_ARM_EABI\bin'
 if os.getenv('RTT_EXEC_PATH'):
     EXEC_PATH = os.getenv('RTT_EXEC_PATH')
 

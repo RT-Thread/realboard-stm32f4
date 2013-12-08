@@ -13,7 +13,7 @@ void main(void)
     /*局部变量*/
     struct rtgui_app *application;
     /*建立应用程序*/
-    application = rtgui_app_create(rt_thread_self(), "tetris");
+    application = rtgui_app_create("tetris");
     /*判断是否成功建立应用程序*/
     if (RT_NULL == application)
     {

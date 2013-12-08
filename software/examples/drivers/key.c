@@ -1,8 +1,42 @@
+/*
+	rewrite keyboard driver  2013-11-11 by jiezhi320
+*/
+
 #include <rtthread.h>
 #include <board.h>
 
 #include <rtgui/event.h>
 #include <rtgui/rtgui_server.h>
+
+//常规按键处理使用
+#define DEBOUNCE_SHORT_TIME 	3   // 轻触按键消抖时间5（单位：20毫秒）
+#define DEBOUNCE_LONG_TIME  	5  // 长按键时间DEBOUNCE_COUT_FIRST+DEBOUNCE_COUT_INTERVAL*DEBOUNCE_LONG_TIME（单位：10毫秒）
+#define DEBOUNCE_COUT_FIRST 	500//50 // 连按键间隔时间100（单位：20毫秒）
+#define DEBOUNCE_COUT_INTERVAL 	10  // 连按键间隔时间50（单位：20毫秒）
+
+//特殊按键处理使用
+#define C_RELASE_COUT			3
+#define C_SHORT_COUT			3	//3*20ms
+#define C_SPECIAL_LONG_COUT		60  //60*20ms
+
+//按键标志
+#define C_FLAG_SHORT			0x00000001
+#define C_FLAG_COUNT			0x00000002
+#define C_FLAG_LONG				0x00000004
+#define C_FLAG_RELASE			0x00000008
+
+//按键键值
+#define  C_UP_KEY 				0x1
+#define  C_DOWN_KEY 			0x2
+#define  C_LEFT_KEY 			0x4
+#define  C_RIGHT_KEY 			0x8
+#define  C_STOP_KEY 			0x10
+#define  C_MENU_KEY 			0x20
+#define  C_ENTER_KEY 			0x40
+#define  C_SPECIAL_KEY 			C_ENTER_KEY
+
+/*enter键长按 我们定义为home键*/
+#define  C_HOME_KEY 			C_SPECIAL_KEY+0x44
 
 /*
 KEY_UP    PF6
@@ -21,6 +55,30 @@ KEY_ENTER PA0  (WKUP)
 #define key_menu_GETVALUE()   GPIO_ReadInputDataBit(GPIOF, GPIO_Pin_11)
 #define key_enter_GETVALUE()  GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0)
 
+/* 使用面向对象的方式，将按键所用到的所有元素进行打包 */
+struct rtgui_key
+{
+    rt_timer_t poll_timer;
+    struct rtgui_event_kbd kbd_event;
+	
+	rt_uint32_t key_last;
+	rt_uint32_t key_current;
+	//检测到的按键值
+	rt_uint32_t key_get;
+	//常规按键使用
+	rt_uint32_t key_debounce_count;
+	rt_uint32_t key_long_count;
+	//特殊按键使用
+	rt_uint32_t key_special_count;	
+	rt_uint32_t key_relase_count;
+	//按键标志
+	rt_uint32_t key_flag;
+	
+};
+
+static struct rtgui_key *key;
+
+
 static void GPIO_Configuration(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
@@ -33,7 +91,9 @@ static void GPIO_Configuration(void)
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
     GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_DOWN;
-
+	#if LCD_VERSION!=1	//魔笛f4 使用上拉
+    GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_UP;	
+	#endif
     GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_0;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 
@@ -42,183 +102,182 @@ static void GPIO_Configuration(void)
     GPIO_Init(GPIOF, &GPIO_InitStructure);
 }
 
-static void EXTI_Configuration(void)
+
+
+
+static void key_timeout(void* parameter)
 {
-    EXTI_InitTypeDef   EXTI_InitStructure;
+	key->key_current = key_up_GETVALUE();
+	key->key_current |= key_down_GETVALUE()<<1;	
+	key->key_current |= key_left_GETVALUE()<<2;	
+	key->key_current |= key_right_GETVALUE()<<3;	
+	key->key_current |= key_stop_GETVALUE()<<4;	
+	key->key_current |= key_menu_GETVALUE()<<5;	
+	key->key_current |= key_enter_GETVALUE()<<6;		
+	#if LCD_VERSION==1
 
-    /* Connect EXTI Line0 to PA0 pin */
-    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA, EXTI_PinSource0);
-    /* Configure EXTI Line0 */
-    EXTI_InitStructure.EXTI_Line = EXTI_Line0;
-    EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
-    EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-    EXTI_Init(&EXTI_InitStructure);
 
-    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, EXTI_PinSource6);
-    /* Configure EXTI Line6 */
-    EXTI_InitStructure.EXTI_Line = EXTI_Line6;
-    EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
-    EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-    EXTI_Init(&EXTI_InitStructure);
+	#else 
+	key->key_current=~(key->key_current);
+	key->key_current&=0x0000007f;
+	
+	#endif
 
-    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, EXTI_PinSource7);
-    /* Configure EXTI Line7 */
-    EXTI_InitStructure.EXTI_Line = EXTI_Line7;
-    EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
-    EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-    EXTI_Init(&EXTI_InitStructure);
+	key->key_flag &= ~C_FLAG_SHORT;
+	key->key_flag &= ~C_FLAG_COUNT;
+	key->key_flag &= ~C_FLAG_LONG;
+	key->key_get = 0;	
 
-    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, EXTI_PinSource8);
-    /* Configure EXTI Line8 */
-    EXTI_InitStructure.EXTI_Line = EXTI_Line8;
-    EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
-    EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-    EXTI_Init(&EXTI_InitStructure);
-
-    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, EXTI_PinSource9);
-    /* Configure EXTI Line9 */
-    EXTI_InitStructure.EXTI_Line = EXTI_Line9;
-    EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
-    EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-    EXTI_Init(&EXTI_InitStructure);
-
-    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, EXTI_PinSource10);
-    /* Configure EXTI Line10 */
-    EXTI_InitStructure.EXTI_Line = EXTI_Line10;
-    EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
-    EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-    EXTI_Init(&EXTI_InitStructure);
-
-    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, EXTI_PinSource11);
-    /* Configure EXTI Line11 */
-    EXTI_InitStructure.EXTI_Line = EXTI_Line11;
-    EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
-    EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-    EXTI_Init(&EXTI_InitStructure);
-}
-
-static void NVIC_Configuration(void)
-{
-    NVIC_InitTypeDef NVIC_InitStructure;
-
-    /* Enable the EXTI0 Interrupt */
-    NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0F;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x0F;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
-
-    /* Enable the EXTI9-5 Interrupt */
-    NVIC_InitStructure.NVIC_IRQChannel = EXTI9_5_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0F;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x0F;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
-}
-
-static void key_thread_entry(void *parameter)
-{
-    rt_time_t next_delay;
-    struct rtgui_event_kbd kbd_event;
-
-    GPIO_Configuration();
-//    EXTI_Configuration();
-//    NVIC_Configuration();
-
-    /* init keyboard event */
-    RTGUI_EVENT_KBD_INIT(&kbd_event);
-	kbd_event.wid = RT_NULL;
-    kbd_event.mod  = RTGUI_KMOD_NONE;
-    kbd_event.unicode = 0;
-
-    while (1)
+//
+	/*对于有长按和短按的特殊键做处理*/	
+	if ((key->key_flag)&C_FLAG_RELASE)
+	{//检查放键
+		if (key->key_current == 0)
+		{
+			if ((++(key->key_relase_count)) >= C_RELASE_COUT)
+			{ //按键已经放开
+				key->key_relase_count = 0;
+				key->key_flag &= ~C_FLAG_RELASE;
+			}
+		}
+		else
+		{
+			key->key_relase_count = 0;
+		}
+	}
+	else
+	{//检查按键
+		if (key->key_current == C_SPECIAL_KEY)		
+		{
+			if ((++(key->key_special_count)) >= C_SPECIAL_LONG_COUT)
+			{
+				key->key_special_count = 0;
+				
+				key->key_get = C_HOME_KEY;      
+				key->key_flag |= C_FLAG_LONG;	//特殊键 长按键按下
+				key->key_flag |= C_FLAG_RELASE;;//按下后要求检测放键
+			}
+		}
+		else
+		{//放开键后才检测短按
+			if ((key->key_special_count >= C_SHORT_COUT) && (key->key_special_count <C_SHORT_COUT+30)) 
+			{
+				key->key_get = C_SPECIAL_KEY;
+				key->key_flag |= C_FLAG_SHORT;	//特殊键 短按键按下
+			}
+			key->key_special_count = 0;
+		}
+	}
+	
+// 普通按键处理
+	if((key->key_current == 0)||(key->key_current != key->key_last)|| (key->key_current == C_SPECIAL_KEY))
+	{
+		key->key_debounce_count = 0;	//第一次	
+		key->key_long_count=0;	        //清除长按键计数器
+	}
+	else
+	{
+		if(++(key->key_debounce_count) == DEBOUNCE_SHORT_TIME)
+		{
+			key->key_get = key->key_current;
+			key->key_flag |= C_FLAG_SHORT;	//短按键按下
+		}
+		if(key->key_debounce_count == DEBOUNCE_COUT_FIRST + DEBOUNCE_COUT_INTERVAL)
+		{
+			key->key_get = key->key_current;
+			key->key_flag |= C_FLAG_COUNT;	//连按键 按键按下
+			key->key_debounce_count = DEBOUNCE_COUT_FIRST;
+			++(key->key_long_count);			
+		}
+	
+		if(key->key_long_count == DEBOUNCE_LONG_TIME)
+		{
+			key->key_get = key->key_current;
+			key->key_flag |= C_FLAG_LONG;	//短按键按下
+			key->key_long_count=DEBOUNCE_LONG_TIME+1;
+		}		
+	}
+	
+	key->key_last = key->key_current;				// 保存本次键值
+	
+	
+	/* 检测到按键后，向系统上报键值 */
+	key->kbd_event.key = RTGUIK_UNKNOWN;
+    key->kbd_event.type = RTGUI_KEYDOWN;
+	
+	if (key->key_get)
+	{	
+		//rt_kprintf("key = %x \n",key->key_get);
+		if (((key->key_get)==C_UP_KEY) && ((key->key_flag) & C_FLAG_SHORT))
+			key->kbd_event.key  = RTGUIK_UP;
+		
+		if (((key->key_get)==C_DOWN_KEY) && ((key->key_flag) & C_FLAG_SHORT))
+			key->kbd_event.key  = RTGUIK_DOWN;
+		
+		if (((key->key_get)==C_LEFT_KEY) && ((key->key_flag) & C_FLAG_SHORT))
+			key->kbd_event.key  = RTGUIK_LEFT;
+		
+		if (((key->key_get)==C_RIGHT_KEY) && ((key->key_flag) & C_FLAG_SHORT))
+			key->kbd_event.key  = RTGUIK_RIGHT;
+		
+		//if (((key->key_get)==C_STOP_KEY) && ((key->key_flag) & C_FLAG_SHORT))
+		//	key->kbd_event.key  = RTGUIK_UP;
+		//if (((key->key_get)==C_MENU_KEY) && ((key->key_flag) & C_FLAG_SHORT))
+		//	key->kbd_event.key  = RTGUIK_UP; 
+		if ((key->key_get)==C_ENTER_KEY) 
+			key->kbd_event.key  = RTGUIK_RETURN;		
+		
+		if ((key->key_get)==C_HOME_KEY) 
+			key->kbd_event.key  = RTGUIK_HOME;	
+	}	
+	
+	if (key->kbd_event.key != RTGUIK_UNKNOWN)
     {
-        next_delay = 10;
-        kbd_event.key = RTGUIK_UNKNOWN;
-        kbd_event.type = RTGUI_KEYDOWN;
+        /* 先上报按键按下*/
+        rtgui_server_post_event(&(key->kbd_event.parent), sizeof(key->kbd_event));
 
-        if ( key_enter_GETVALUE() == 1 )
-        {
-            rt_thread_delay( next_delay*4 );
-            if (key_enter_GETVALUE() == 1)
-            {
-                /* HOME key */
-                rt_kprintf("key_home\n");
-                kbd_event.key  = RTGUIK_HOME;
-            }
-            else
-            {
-                rt_kprintf("key_enter\n");
-                kbd_event.key  = RTGUIK_RETURN;
-            }
-        }
+        /* delay to post up event */
+        rt_thread_delay(2);
 
-        if ( key_up_GETVALUE()    == 1 )
-        {
-            rt_kprintf("key_up\n");
-            kbd_event.key  = RTGUIK_UP;
-        }
-
-        if ( key_down_GETVALUE()  == 1 )
-        {
-            rt_kprintf("key_down\n");
-            kbd_event.key  = RTGUIK_DOWN;
-        }
-
-        if ( key_left_GETVALUE()  == 1 )
-        {
-            rt_kprintf("key_left\n");
-            kbd_event.key  = RTGUIK_LEFT;
-        }
-
-        if ( key_right_GETVALUE() == 1 )
-        {
-            rt_kprintf("key_right\n");
-            kbd_event.key  = RTGUIK_RIGHT;
-        }
-
-        if(key_stop_GETVALUE() == 1)
-        {
-            rt_kprintf("key_stop\n");
-        }
-
-        if(key_menu_GETVALUE() == 1)
-        {
-            rt_kprintf("key_menu\n");
-        }
-
-        if (kbd_event.key != RTGUIK_UNKNOWN)
-        {
-            /* post down event */
-            rtgui_server_post_event(&(kbd_event.parent), sizeof(kbd_event));
-
-            next_delay = 10;
-            /* delay to post up event */
-            rt_thread_delay(next_delay);
-
-            /* post up event */
-            kbd_event.type = RTGUI_KEYUP;
-            rtgui_server_post_event(&(kbd_event.parent), sizeof(kbd_event));
-        }
-
-        /* wait next key press */
-        rt_thread_delay(next_delay);
+        /* 再上报按键松开，完成一个从按下到松开的组合*/
+        key->kbd_event.type = RTGUI_KEYUP;
+        rtgui_server_post_event(&(key->kbd_event.parent), sizeof(key->kbd_event));
     }
 }
 
-void rt_hw_key_init(void)
+
+int rt_hw_key_init(void)
 {
-    rt_thread_t key_tid;
-    key_tid = rt_thread_create("key",
-                               key_thread_entry, RT_NULL,
-                               384, RTGUI_SVR_THREAD_PRIORITY-1, 5);
-    if (key_tid != RT_NULL) rt_thread_startup(key_tid);
+	GPIO_Configuration();
+	
+	key = (struct rtgui_key*)rt_malloc (sizeof(struct rtgui_key));
+    if (key == RT_NULL)
+		return -1; /* no memory yet */
+	
+	/* init keyboard event */
+    RTGUI_EVENT_KBD_INIT(&(key->kbd_event));
+	key->kbd_event.wid = RT_NULL;
+    key->kbd_event.mod  = RTGUI_KMOD_NONE;
+    key->kbd_event.unicode = 0;
+	
+	key->key_last = 0;
+	key->key_current = 0;
+	key->key_get = 0;
+	key->key_debounce_count = 0;
+	key->key_long_count = 0;
+	key->key_special_count = 0;
+	key->key_relase_count = 0;
+	key->key_flag = 0;
+	
+	/* create 1/50=20ms  timer */
+    key->poll_timer = rt_timer_create("key", key_timeout, RT_NULL,
+                                        RT_TICK_PER_SECOND/50, RT_TIMER_FLAG_PERIODIC);
+	
+     /* 启动定时器 */
+    if (key->poll_timer != RT_NULL)
+        rt_timer_start(key->poll_timer); 	
+	
+	return 0;
 }
 
+//INIT_DEVICE_EXPORT(rt_hw_key_init);

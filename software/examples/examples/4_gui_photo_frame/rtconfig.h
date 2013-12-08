@@ -164,6 +164,7 @@
 #define RTGUI_IMAGE_XPM
 #define RTGUI_IMAGE_BMP
 
+
 /* name length of RTGUI object */
 #define RTGUI_NAME_MAX		12
 /* support 16 weight font */

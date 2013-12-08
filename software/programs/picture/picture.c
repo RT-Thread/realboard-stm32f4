@@ -7,7 +7,7 @@
 #include <dfs_posix.h>
 #include <string.h>
 
-#define PICTURE_DIR "/picture"
+#define PICTURE_DIR "/SD/picture"
 
 /* current picture file name */
 rt_bool_t key_pressed = RT_FALSE;
@@ -204,10 +204,10 @@ void main(void)
     struct rtgui_rect rect1;
     rtgui_timer_t *timer;
     
-    app = rtgui_app_create(rt_thread_self(), "picture");
+    app = rtgui_app_create("picture");
     if (app == RT_NULL)
     {
-        rt_kprintf("Create application \"picture\" failed!\n");
+        rt_kprintf("Create application \"SD\picture\" failed!\n");
         return;
     }
 

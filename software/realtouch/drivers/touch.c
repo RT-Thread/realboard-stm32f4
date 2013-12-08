@@ -115,7 +115,7 @@ static void rtgui_touch_calculate(void)
                                       recv_buffer,
                                       2);
                 tmpxy[0][i]  = (recv_buffer[0] & 0x7F) << 4;
-                tmpxy[1][i] |= (recv_buffer[1] >> 4) & 0x0F;
+                tmpxy[0][i] |= (recv_buffer[1] >> 3) & 0x0F;
 
                 send_buffer[0] = TOUCH_MSR_Y;
                 rt_spi_send_then_recv(touch->spi_device,
@@ -124,7 +124,7 @@ static void rtgui_touch_calculate(void)
                                       recv_buffer,
                                       2);
                 tmpxy[1][i]  = (recv_buffer[0] & 0x7F) << 4;
-                tmpxy[1][i] |= (recv_buffer[1] >> 4) & 0x0F;
+                tmpxy[1][i] |= (recv_buffer[1] >> 3) & 0x0F;
             }
             send_buffer[0] = 1 << 7;
             rt_spi_send(touch->spi_device, send_buffer, 1);

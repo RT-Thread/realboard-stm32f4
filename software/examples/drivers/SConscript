@@ -43,6 +43,9 @@ if GetDepend('RT_USING_RTGUI') == True:
 	src += ['ra8875.c']
 	src += ['key.c']
 	src += ['touch.c']
+	src += ['ssd1289.c']
+	src += ['ssd1963.c']
+	src += ['md050sd.c']
 
 # add USB Host driver.
 if GetDepend('RT_USING_USB_HOST') == True:
