@@ -18,7 +18,6 @@
 #include <drivers/sdio.h>
 
 #include "stm32f4xx_sd.h"
-#include <string.h>
 
 #define REQ_ST_INIT (1U << 0)
 #define REQ_ST_CMD  (1U << 1)
@@ -53,9 +52,6 @@ SDIO_InitTypeDef SDIO_InitStructure;
 SDIO_CmdInitTypeDef SDIO_CmdInitStructure;
 SDIO_DataInitTypeDef SDIO_DataInitStructure;
 
-uint8_t *rx_data = RT_NULL;
-ALIGN(8)
-uint8_t rx_buf[4096];
 
 static void stm32f4xx_sdio_process_next(struct stm32f4xx_sdio *sdio);
 
@@ -262,7 +258,7 @@ static void stm32f4xx_sdio_completed_command(struct stm32f4xx_sdio *sdio, rt_uin
         }
         else
         {
-            if (status & (SDIO_IT_DCRCFAIL | SDIO_IT_DTIMEOUT |
+            if (status & (SDIO_IT_DCRCFAIL | SDIO_IT_DTIMEOUT | 
 				SDIO_IT_RXOVERR | SDIO_IT_TXUNDERR))
             {
                 if (data)
@@ -283,7 +279,7 @@ static void stm32f4xx_sdio_completed_command(struct stm32f4xx_sdio *sdio, rt_uin
                     cmd->err = -RT_ERROR;
             }
 
-            sdio_dbg("error detected and set to %d/%d (cmd = %d),0x%08x\n",
+            rt_kprintf("error detected and set to %d/%d (cmd = %d),0x%08x\n",
                        cmd->err, data ? data->err : 0,
                        cmd->cmd_code, status);
         }
@@ -328,12 +324,6 @@ void SD_ProcessIRQSrc(void)
         if (SDIO_GetITStatus(SDIO_IT_DATAEND) != RESET)
         {
             SDIO_ClearITPendingBit(SDIO_IT_DATAEND);
-            if( (stm32f4_sdio->cmd->data->flags & DATA_DIR_READ) &&
-                ((uint32_t)stm32f4_sdio->cmd->data->buf & 0x03) )
-            {
-                memcpy(stm32f4_sdio->cmd->data->buf, rx_buf,
-                       stm32f4_sdio->cmd->data->blksize * stm32f4_sdio->cmd->data->blks);
-            }
             complete = 1;
         }
 
@@ -411,21 +401,11 @@ static void stm32f4xx_sdio_send_command(struct stm32f4xx_sdio *sdio, struct rt_m
 
         if (data->flags & DATA_DIR_WRITE)
         {
-            //rt_kprintf("SDIO W 0x%08X %u\r\n", (uint32_t)data->buf, data->blksize * data->blks);
             SD_LowLevel_DMA_TxConfig((uint32_t *)data->buf, data->blksize * data->blks);
         }
         else if (data->flags & DATA_DIR_READ)
         {
-            //rt_kprintf("SDIO R 0x%08X %u\r\n", (uint32_t)data->buf, data->blksize * data->blks);
-            if((uint32_t)data->buf & 0x03)
-            {
-                //rt_kprintf("bad addr %08X\r\n", data->buf);
-                SD_LowLevel_DMA_RxConfig((uint32_t *)rx_buf, data->blksize * data->blks);
-            }
-            else
-            {
-                SD_LowLevel_DMA_RxConfig((uint32_t *)data->buf, data->blksize * data->blks);
-            }
+            SD_LowLevel_DMA_RxConfig((uint32_t *)data->buf, data->blksize * data->blks);
         }
         SDIO_ITConfig(SDIO_IT_DCRCFAIL | SDIO_IT_DTIMEOUT | SDIO_IT_DATAEND | SDIO_IT_RXOVERR | SDIO_IT_STBITERR, ENABLE);
         SDIO_DMACmd(ENABLE);

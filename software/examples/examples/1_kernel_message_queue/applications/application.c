@@ -27,7 +27,7 @@ struct rt_thread thread1;
 /* 线程1入口函数 */
 static void thread1_entry(void* parameter)
 {
-    char buf[128];
+    char buf[120];
 
     while (1)
     {
@@ -57,7 +57,7 @@ struct rt_thread thread2;
 static void thread2_entry(void* parameter)
 {
     int i, result;
-    char buf[128];
+    char buf[120];
 
     i = 0;
     while (1)    
@@ -105,7 +105,7 @@ int rt_application_init()
     rt_err_t result;
 
     /* 初始化消息队列 */
-    rt_mq_init(&mq, "mqt", 
+    result = rt_mq_init(&mq, "mqt", 
         &msg_pool[0], /* 内存池指向msg_pool */ 
         128 - sizeof(void*), /* 每个消息的大小是 128 - void* */
         sizeof(msg_pool), /* 内存池的大小是msg_pool的大小 */
