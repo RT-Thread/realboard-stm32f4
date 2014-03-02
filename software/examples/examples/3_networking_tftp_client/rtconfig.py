@@ -5,26 +5,26 @@ ARCH='arm'
 CPU='cortex-m4'
 CROSS_TOOL='keil'
 
+# get setting from environment.
 if os.getenv('RTT_CC'):
-	CROSS_TOOL = os.getenv('RTT_CC')
+        CROSS_TOOL = os.getenv('RTT_CC')
 
 # cross_tool provides the cross compiler
 # EXEC_PATH is the compiler execute path, for example, CodeSourcery, Keil MDK, IAR
 if  CROSS_TOOL == 'gcc':
 	PLATFORM 	= 'gcc'
-	EXEC_PATH 	= r'C:/Program Files/CodeSourcery/Sourcery G++ Lite/bin'
+	EXEC_PATH 	= r'D:\Program Files\CodeSourcery\Sourcery_CodeBench_Lite_for_ARM_EABI\bin'
 elif CROSS_TOOL == 'keil':
 	PLATFORM 	= 'armcc'
-	EXEC_PATH 	= r'C:/Keil'
+	EXEC_PATH 	= r'D:/Keil'
 elif CROSS_TOOL == 'iar':
-    print '================ERROR============================'
-    print 'Not support iar yet!'
-    print '================================================='
-    exit(0)
+	PLATFORM 	= 'iar'
+	IAR_PATH 	= r'C:/Program Files/IAR Systems/Embedded Workbench 6.0'
 
 if os.getenv('RTT_EXEC_PATH'):
-	EXEC_PATH = os.getenv('RTT_EXEC_PATH')
+        EXEC_PATH = os.getenv('RTT_EXEC_PATH')
 
+#
 BUILD = 'debug'
 STM32_TYPE = 'STM32F4XX'
 
@@ -35,15 +35,15 @@ if PLATFORM == 'gcc':
     AS = PREFIX + 'gcc'
     AR = PREFIX + 'ar'
     LINK = PREFIX + 'gcc'
-    TARGET_EXT = 'axf'
+    TARGET_EXT = 'elf'
     SIZE = PREFIX + 'size'
     OBJDUMP = PREFIX + 'objdump'
     OBJCPY = PREFIX + 'objcopy'
 
     DEVICE = ' -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=softfp -ffunction-sections -fdata-sections'
     CFLAGS = DEVICE 
-    AFLAGS = ' -c' + DEVICE + ' -x assembler-with-cpp'
-    LFLAGS = DEVICE + ' -Wl,--gc-sections,-Map=rtthread-stm32.map,-cref,-u,Reset_Handler -T stm32_rom.ld'
+    AFLAGS = ' -c' + DEVICE + ' -x assembler-with-cpp -Wa,-mimplicit-it=thumb '
+    LFLAGS = DEVICE + ' -Wl,--gc-sections,-Map=rtthread-stm32f4xx.map,-cref,-u,Reset_Handler -T stm32_rom.ld'
 
     CPATH = ''
     LPATH = ''
@@ -117,7 +117,7 @@ elif PLATFORM == 'iar':
     AFLAGS += ' --cpu Cortex-M4' 
     AFLAGS += ' --fpu None' 
 
-    LFLAGS = ' --config stm32f10x_flash.icf'
+    LFLAGS = ' --config lpc40xx_flash.icf'
     LFLAGS += ' --redirect _Printf=_PrintfTiny' 
     LFLAGS += ' --redirect _Scanf=_ScanfSmall' 
     LFLAGS += ' --entry __iar_program_start'    

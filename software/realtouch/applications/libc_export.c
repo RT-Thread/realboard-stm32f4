@@ -10,7 +10,8 @@
 #include <math.h>
 
 /********** begin export for libc **********/
-
+RTM_EXPORT(atof);
+RTM_EXPORT(sprintf);
 /* Standard C String & Character */
 //RTM_EXPORT(atof);
 RTM_EXPORT(atoi);

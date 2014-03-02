@@ -650,7 +650,7 @@ static void codec_dma_isr(void)
         }
 #endif
 
-        rt_kprintf("*\n");
+    //    rt_kprintf("****\n");
     } /* codec tx done. */
 
     /* notify transmitted complete. */

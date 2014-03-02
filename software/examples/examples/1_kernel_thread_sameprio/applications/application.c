@@ -1,56 +1,42 @@
+/*
+ * File      : application.c
+ * This file is part of RT-Thread RTOS
+ * COPYRIGHT (C) 2006, RT-Thread Development Team
+ *
+ * The license and distribution terms for this file may be
+ * found in the file LICENSE in this distribution or at
+ * http://www.rt-thread.org/license/LICENSE
+ *
+ * Change Logs:
+ * Date           Author       Notes
+ * 2009-01-05     Bernard      the first version
+ */
+
 #include <rtthread.h>
+#ifdef RT_USING_FINSH
+#include <finsh.h>
+#include <shell.h>
+#endif
 
-static struct rt_thread thread1;
-static struct rt_thread thread2;
-static char thread1_stack[512];
-static char thread2_stack[512];
-
-static void thread1_entry(void* parameter)
+void rt_init_thread_entry(void* parameter)
 {
-    rt_uint8_t i;
-    for(i = 0; i < 6; i ++)
-    {
-        rt_kprintf("Thread1:\n\r");
-        rt_kprintf("This is \n");
-        rt_kprintf("a\n");
-        rt_kprintf("demo\n");
-        rt_thread_delay(10);
-    }
-}
-
-static void thread2_entry(void* parameter)
-{
-    rt_uint8_t j;
-    for(j = 0; j <60; j ++)
-    {
-        rt_kprintf("Thread2:\n\r");
-        rt_kprintf("This is \n");
-        rt_kprintf("a\n");
-        rt_kprintf("demo\n");
-    }
+	
+	{
+		extern int demo_init(void);
+		demo_init();
+	}	
 }
 
 int rt_application_init()
 {
-    rt_err_t result;
+    rt_thread_t tid;
 
-    result = rt_thread_init(&thread1,
-        "t1",
-        thread1_entry, RT_NULL,
-        &thread1_stack[0], sizeof(thread1_stack),
-        6, 10);
-    if (result == RT_EOK)
-        rt_thread_startup(&thread1);
-
-
-    result = rt_thread_init(&thread2,
-        "t2",
-        thread2_entry, RT_NULL,
-        &thread2_stack[0], sizeof(thread2_stack),
-        6, 5);
-    if (result == RT_EOK)
-        rt_thread_startup(&thread2);
-
-
-    return result;
+    tid = rt_thread_create("init",
+        rt_init_thread_entry, RT_NULL,
+        2048, RT_THREAD_PRIORITY_MAX/3, 20);//
+	
+    if (tid != RT_NULL)
+        rt_thread_startup(tid);
+	
+    return 0;
 }

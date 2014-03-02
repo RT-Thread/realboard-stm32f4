@@ -5,20 +5,24 @@ ARCH='arm'
 CPU='cortex-m4'
 CROSS_TOOL='keil'
 
-if CROSS_TOOL == 'gcc':
-    PLATFORM 	= 'gcc'
-    EXEC_PATH 	= r'D:/Program Files/CodeSourcery/Sourcery G++ Lite/bin'
+# get setting from environment.
+if os.getenv('RTT_CC'):
+        CROSS_TOOL = os.getenv('RTT_CC')
+
+# cross_tool provides the cross compiler
+# EXEC_PATH is the compiler execute path, for example, CodeSourcery, Keil MDK, IAR
+if  CROSS_TOOL == 'gcc':
+	PLATFORM 	= 'gcc'
+	EXEC_PATH 	= r'C:\Program Files\CodeSourcery\Sourcery_CodeBench_Lite_for_ARM_EABI\bin'
 elif CROSS_TOOL == 'keil':
 	PLATFORM 	= 'armcc'
-	EXEC_PATH 	= r'D:\Keil'
+	EXEC_PATH 	= r'D:/Keil4.23'
 elif CROSS_TOOL == 'iar':
-    print '================ERROR============================'
-    print 'Not support iar yet!'
-    print '================================================='
-    exit(0)
+	PLATFORM 	= 'iar'
+	IAR_PATH 	= r'C:/Program Files/IAR Systems/Embedded Workbench 6.0'
 
 if os.getenv('RTT_EXEC_PATH'):
-    EXEC_PATH = os.getenv('RTT_EXEC_PATH')
+        EXEC_PATH = os.getenv('RTT_EXEC_PATH')
 
 BUILD = 'debug'
 STM32_TYPE = 'STM32F4XX'
@@ -27,7 +31,6 @@ if PLATFORM == 'gcc':
     # toolchains
     PREFIX = 'arm-none-eabi-'
     CC = PREFIX + 'gcc'
-    # CC = EXEC_PATH + CC
     AS = PREFIX + 'gcc'
     AR = PREFIX + 'ar'
     LINK = PREFIX + 'gcc'
@@ -38,7 +41,7 @@ if PLATFORM == 'gcc':
 
     DEVICE = ' -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=softfp -ffunction-sections -fdata-sections'
     CFLAGS = DEVICE 
-    AFLAGS = ' -c' + DEVICE + ' -x assembler-with-cpp'
+    AFLAGS = ' -c' + DEVICE + ' -x assembler-with-cpp -Wa,-mimplicit-it=thumb '
     LFLAGS = DEVICE + ' -Wl,--gc-sections,-Map=rtthread-stm32.map,-cref,-u,Reset_Handler -T stm32_rom.ld'
 
     CPATH = ''
@@ -77,3 +80,47 @@ elif PLATFORM == 'armcc':
         CFLAGS += ' -O2'
 
     POST_ACTION = 'fromelf --bin $TARGET --output rtthread.bin \nfromelf -z $TARGET'
+
+elif PLATFORM == 'iar':
+    # toolchains
+    CC = 'iccarm'
+    AS = 'iasmarm'
+    AR = 'iarchive'
+    LINK = 'ilinkarm'
+    TARGET_EXT = 'out'
+
+    DEVICE = ' -D USE_STDPERIPH_DRIVER' + ' -D STM32F10X_HD'
+
+    CFLAGS = DEVICE
+    CFLAGS += ' --diag_suppress Pa050'
+    CFLAGS += ' --no_cse' 
+    CFLAGS += ' --no_unroll' 
+    CFLAGS += ' --no_inline' 
+    CFLAGS += ' --no_code_motion' 
+    CFLAGS += ' --no_tbaa' 
+    CFLAGS += ' --no_clustering' 
+    CFLAGS += ' --no_scheduling' 
+    CFLAGS += ' --debug' 
+    CFLAGS += ' --endian=little' 
+    CFLAGS += ' --cpu=Cortex-M4' 
+    CFLAGS += ' -e' 
+    CFLAGS += ' --fpu=None'
+    CFLAGS += ' --dlib_config "' + IAR_PATH + '/arm/INC/c/DLib_Config_Normal.h"'    
+    CFLAGS += ' -Ol'    
+    CFLAGS += ' --use_c++_inline'
+        
+    AFLAGS = ''
+    AFLAGS += ' -s+' 
+    AFLAGS += ' -w+' 
+    AFLAGS += ' -r' 
+    AFLAGS += ' --cpu Cortex-M4' 
+    AFLAGS += ' --fpu None' 
+
+    LFLAGS = ' --config lpc40xx_flash.icf'
+    LFLAGS += ' --redirect _Printf=_PrintfTiny' 
+    LFLAGS += ' --redirect _Scanf=_ScanfSmall' 
+    LFLAGS += ' --entry __iar_program_start'    
+
+    EXEC_PATH = IAR_PATH + '/arm/bin/'
+    POST_ACTION = ''
+

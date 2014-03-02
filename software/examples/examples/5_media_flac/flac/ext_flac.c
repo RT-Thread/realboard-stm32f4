@@ -25,7 +25,7 @@
 #include <string.h>
 
 #include "board.h"
-#include "codec.h"
+#include "codec_wm8978_i2c.h"
 #include "decoder.h"
 
 #define true RT_TRUE

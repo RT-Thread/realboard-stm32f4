@@ -191,7 +191,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "sdio_sd.h"
-
+#include "string.h"
 /** @addtogroup Utilities
   * @{
   */
@@ -2919,7 +2919,7 @@ uint8_t convert_from_bytes_to_power_of_two(uint16_t NumberOfBytes)
 static struct rt_device sdcard_device;
 static struct dfs_partition part;
 static struct rt_semaphore sd_lock;
-static rt_uint8_t _sdcard_buffer[SECTOR_SIZE];
+//static rt_uint8_t _sdcard_buffer[SECTOR_SIZE];
 /* RT-Thread Device Driver Interface */
 static rt_err_t rt_sdcard_init(rt_device_t dev)
 {
@@ -2957,11 +2957,6 @@ static rt_size_t rt_sdcard_read(rt_device_t dev, rt_off_t pos, void* buffer, rt_
 	SD_Error status;
 	rt_uint32_t retry;
 	rt_uint32_t factor;
-
-	if((uint32_t)buffer & 0x03)
-    {
-	rt_kprintf("sd: read 0x%X, sector 0x%X, 0x%X\n", (uint32_t)buffer ,pos, size);
-    }
 
 	if (CardType == SDIO_HIGH_CAPACITY_SD_CARD) factor = 1;
 	else factor = SECTOR_SIZE;

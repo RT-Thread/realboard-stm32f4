@@ -63,10 +63,10 @@ s  A2-A0 MODE SER/DFR PD1-PD0
 #define MAX_Y_DEFAULT   130
 
 #else
-#define MIN_X_DEFAULT   80
-#define MAX_X_DEFAULT   1968
-#define MIN_Y_DEFAULT   1860
-#define MAX_Y_DEFAULT   130
+#define MIN_X_DEFAULT   129
+#define MAX_X_DEFAULT   1833
+#define MIN_Y_DEFAULT   1931
+#define MAX_Y_DEFAULT   77
 #endif
 
 #define SAMP_CNT 8                              //the adc array size
@@ -91,9 +91,13 @@ static struct rtgui_touch_device *touch = RT_NULL;
 
 rt_inline void touch_int_cmd(FunctionalState NewState);
 
-
+#if LCD_VERSION == 3 
+#define X_WIDTH 240
+#define Y_WIDTH 320
+#else
 #define X_WIDTH 800
 #define Y_WIDTH 480
+#endif
 
 static void rtgui_touch_calculate(void)
 {

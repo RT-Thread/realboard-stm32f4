@@ -1,0 +1,21 @@
+# RT-Thread building script for component
+import os
+from building import *
+
+cwd = GetCurrentDir()
+src = Glob('*.c')
+CPPPATH = [os.path.join(cwd, '..', 'include')]
+
+if GetDepend('RTGUI_USING_FONT_COMPACT'):
+    import stract_cjk
+    common_src.append('font_cmp_hz16.c')
+    common_src.append('font_cmp_hz12.c')
+    RegisterPreBuildingAction(stract_cjk.gen_cmp_font_file)
+else:
+    SrcRemove(src, 'font_mph-tmpl.c')
+    SrcRemove(src, 'font_cmp_hz16.c')
+    SrcRemove(src, 'font_cmp_hz12.c')
+
+group = DefineGroup('RTGUI', src, depend = ['RT_USING_RTGUI'], CPPPATH = CPPPATH)
+
+Return('group')

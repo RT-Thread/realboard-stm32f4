@@ -18,6 +18,7 @@ CS0: PG10  SPI FLASH
 CS1: PB12  TOUCH
 CS2: PG7   WIFI
 */
+
 static void rt_hw_spi2_init(void)
 {
     /* register spi bus */
@@ -117,6 +118,8 @@ static void rt_hw_spi2_init(void)
     }
 }
 #endif /* RT_USING_SPI */
+
+extern void rt_hw_sdcard_init(void);
 
 void rt_platform_init(void)
 {

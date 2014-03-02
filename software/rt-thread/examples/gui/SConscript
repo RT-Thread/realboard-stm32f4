@@ -1,0 +1,12 @@
+Import('RTT_ROOT')
+from building import *
+
+src = Glob('*.c')
+
+group = DefineGroup('Startup', src, depend = ['']) + \
+        SConscript(dirs='examples',
+                variant_dir='build/examples',
+                duplicate=0)
+ 
+
+Return('group')

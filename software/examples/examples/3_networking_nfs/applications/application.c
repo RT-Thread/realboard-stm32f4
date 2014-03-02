@@ -1,33 +1,28 @@
 /*
- * File      : application.c
- * This file is part of RT-Thread RTOS
- * COPYRIGHT (C) 2006, RT-Thread Development Team
- *
- * The license and distribution terms for this file may be
- * found in the file LICENSE in this distribution or at
- * http://www.rt-thread.org/license/LICENSE
- *
- * Change Logs:
- * Date           Author       Notes
- * 2009-01-05     Bernard      the first version
+   此demo用于演示网络文件系统
+   RT_NFS_HOST_EXPORT 设为主机IP地址
+   
  */
-
-/**
- * @addtogroup STM32
- */
-/*@{*/
-
-#include <stdio.h>
 #include <board.h>
 #include <rtthread.h>
-
-#ifdef RT_USING_LWIP
-#include <lwip/sys.h>
-#include <lwip/api.h>
-#include <netif/ethernetif.h>
+#ifdef RT_USING_FINSH
+#include <finsh.h>
+#include <shell.h>
 #endif
 
-#define RT_NFS_HOST_EXPORT	"10.0.0.104:/" 
+
+#include "components.h"
+
+#ifdef RT_USING_LWIP
+extern rt_hw_stm32_eth_init(void);
+#endif
+
+#ifdef RT_USING_COMPONENTS_INIT
+extern void rt_components_init(void);
+#endif
+
+
+extern struct netif * netif_list;
 
 void rt_init_thread_entry(void* parameter)
 {
@@ -37,44 +32,79 @@ void rt_init_thread_entry(void* parameter)
 #endif
 
 #ifdef RT_USING_COMPONENTS_INIT
-    /* initialization RT-Thread Components */
-    rt_components_init();
+	/* initialization RT-Thread Components */
+	rt_components_init();
 #endif
+	
+	rt_platform_init();
 
-    rt_platform_init();
+	rt_kprintf(" link beginning \r\n");
+	while( !(netif_list->flags & NETIF_FLAG_UP)) 
+	{	/*等待网络准备好*/
+		rt_thread_delay( RT_TICK_PER_SECOND);
+	}
+
+	rt_kprintf(" link ok \r\n");
+    list_if();
+
 
     /* do some thing here. */
-#if defined(RT_USING_DFS) && defined(RT_USING_LWIP) && defined(RT_USING_DFS_NFS)
-	{
-		/* NFSv3 Initialization */
-		rt_kprintf("begin init NFSv3 File System ...\n");
-		if (dfs_mount(RT_NULL, "/", "nfs", 0, RT_NFS_HOST_EXPORT) == 0)
-			rt_kprintf("NFSv3 File System initialized!\n");
-		else
-			rt_kprintf("NFSv3 File System initialzation failed!\n");
-	}
-#endif
-
 }
 
 int rt_application_init()
 {
-    rt_thread_t init_thread;
+    rt_thread_t tid;
 
-#if (RT_THREAD_PRIORITY_MAX == 32)
-    init_thread = rt_thread_create("init",
-                                   rt_init_thread_entry, RT_NULL,
-                                   2048, 8, 20);
-#else
-    init_thread = rt_thread_create("init",
-                                   rt_init_thread_entry, RT_NULL,
-                                   2048, 80, 20);
-#endif
-
-    if (init_thread != RT_NULL)
-        rt_thread_startup(init_thread);
-
+    tid = rt_thread_create("init",
+        rt_init_thread_entry, RT_NULL,
+        2048, RT_THREAD_PRIORITY_MAX/3, 20);//
+	
+    if (tid != RT_NULL)
+        rt_thread_startup(tid);
+	
     return 0;
 }
 
-/*@}*/
+#include <finsh.h>
+int mountsd(const char * path)
+{
+	const char * mountpath = "/sd";
+	if (path != NULL)
+		mountpath = path;
+    /* Filesystem Initialization */
+#ifdef RT_USING_DFS
+#ifdef RT_USING_DFS_ELMFAT
+	/* mount sd card fat partition 1 as root directory */
+	if (dfs_mount("sd0", mountpath, "elm", 0, 0) == 0)
+	{
+		rt_kprintf("[ok]\n");
+		return 0;
+	}
+	else
+	{
+		rt_kprintf("[failed!]\n");
+		return -1;
+	}
+#endif
+#endif
+}
+FINSH_FUNCTION_EXPORT(mountsd, mount sdcard)
+
+int mountnfs(const char * path)
+{
+	const char * mountpath = "/";
+	if (path != NULL)
+		mountpath = path;
+	rt_kprintf("mount nfs to %s...", mountpath);
+	if (dfs_mount(RT_NULL, mountpath, "nfs", 0, RT_NFS_HOST_EXPORT) == 0)
+	{
+		rt_kprintf("[ok]\n");
+		return 0;
+	}
+	else
+	{
+		rt_kprintf("[failed!]\n");
+		return -1;
+	}
+}
+FINSH_FUNCTION_EXPORT(mountnfs, mount nfs)

@@ -55,8 +55,10 @@ void realtouch_ui_init(void)
 
     /* re-set graphic device */    
     rtgui_graphic_set_device(device); 
-    /*font system init*/		
-    rtgui_font_system_init();
+	/* 在rt_components_init时由于文件系统尚未挂载，
+	中文字库还没准备好，所以待中文字库准备好后，再来一次rtgui初始化*/
+	rtgui_system_server_init();	
+	
     app_mgr_init();
     rt_thread_delay(10);
 

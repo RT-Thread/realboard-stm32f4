@@ -1,0 +1,11 @@
+# RT-Thread building script for component
+import os
+from building import *
+
+cwd = GetCurrentDir()
+src = Glob('*.c')
+CPPPATH = [os.path.join(cwd, '..', 'include')]
+
+group = DefineGroup('RTGUI', src, depend = ['RT_USING_RTGUI'], CPPPATH = CPPPATH)
+
+Return('group')

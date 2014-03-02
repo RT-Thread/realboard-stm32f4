@@ -67,7 +67,7 @@
 #define RT_USING_I2C
 #define RT_USING_I2C_BITOPS
 // <bool name="RT_USING_SDIO" description="Using SDIO Device Driver Framework" default="true" />
-#define RT_USING_SDIO
+//#define RT_USING_SDIO
 // <integer name="RT_MMCSD_THREAD_PREORITY" description="The prority of mmcsd thread" default="15" />
 #define RT_MMCSD_THREAD_PREORITY	15
 // </section>
@@ -179,6 +179,8 @@
 //#define RTGUI_USING_FONT12
 // <bool name="RTGUI_USING_FONTHZ" description="Support Chinese font" default="false" />
 #define RTGUI_USING_FONTHZ
+// <integer name="RTGUI_DEFAULT_FONT_SIZE" description="default font size in RT-Thread/GUI" default="16" />
+#define RTGUI_DEFAULT_FONT_SIZE	16
 // <bool name="RTGUI_USING_DFS_FILERW" description="Using DFS as file interface " default="true" />
 #define RTGUI_USING_DFS_FILERW
 // <bool name="RTGUI_USING_HZ_FILE" description="Using font file as Chinese font" default="false" />
@@ -221,7 +223,7 @@
 // <integer name="RT_LWIP_TCP_PCB_NUM" description="Maximal number of simultaneously active TCP connections" default="5" />
 #define RT_LWIP_TCP_PCB_NUM	3
 // <integer name="RT_LWIP_TCP_SND_BUF" description="TCP sender buffer size" default="8192" />
-#define RT_LWIP_TCP_SND_BUF	2048
+#define RT_LWIP_TCP_SND_BUF	4096//2048 1.1.1
 // <integer name="RT_LWIP_TCP_WND" description="TCP receive window" default="8192" />
 #define RT_LWIP_TCP_WND	2048
 // <bool name="RT_LWIP_SNMP" description="Enable SNMP protocol" default="false" />

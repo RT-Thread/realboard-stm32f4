@@ -11,8 +11,6 @@
  * Date           Author       Notes
  * 2009-09-22     Bernard      add board.h to this bsp
  */
-
-// <<< Use Configuration Wizard in Context Menu >>>
 #ifndef __BOARD_H__
 #define __BOARD_H__
 
@@ -39,10 +37,11 @@
 // #define RT_USING_UART1
 // #define RT_USING_UART2
 #define RT_USING_UART3
-
+#define RT_CONSOLE_DEVICE_NAME	"uart3"
 // <o> Console on USART: <0=> no console <1=>USART 1 <2=>USART 2 <3=> USART 3
 // 	<i>Default: 1
 #define STM32_CONSOLE_USART		3
+
 
 void rt_hw_board_init(void);
 rt_uint32_t rt_hw_tick_get_millisecond(void);
@@ -60,4 +59,4 @@ void rt_hw_usart_init(void);
 
 #endif
 
-// <<< Use Configuration Wizard in Context Menu >>>
+
