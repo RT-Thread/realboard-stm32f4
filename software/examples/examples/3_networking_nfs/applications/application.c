@@ -1,7 +1,8 @@
 /*
-   此demo用于演示网络文件系统
+   此demo用于演示网络文件系统nfs
    RT_NFS_HOST_EXPORT 设为主机IP地址
-   
+   须先在PC端建立nfs服务器，可以使用FreeNFS.exe这个工具
+   程序需开启外扩ram
  */
 #include <board.h>
 #include <rtthread.h>

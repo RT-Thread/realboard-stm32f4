@@ -176,7 +176,7 @@ static rt_uint8_t USBD_DataInStage(USB_OTG_CORE_HANDLE *pdev , uint8_t epnum)
         }
     }
     else
-    {           
+    {
         struct udev_msg msg;
 
         msg.type = USB_MSG_DATA_NOTIFY;
@@ -273,7 +273,7 @@ static rt_err_t clear_feature(rt_uint16_t value, rt_uint16_t index)
     {
         DCD_EP_ClrStall(&USB_OTG_Core, (rt_uint8_t)(index & 0xFF));
     }
-    
+
     return RT_EOK;
 }
 

@@ -35,7 +35,7 @@ int ext_sram_init(void)
     Timing_write.FSMC_DataLatency = 0; /* [27:25] keep 0x00 in SRAM mode  */
     Timing_write.FSMC_AccessMode = FSMC_AccessMode_A;   /* FSMC ·ÃÎÊÄ£Ê½ */
 
-  /* Reset NOR/SRAM Init structure parameters values */
+    /* Reset NOR/SRAM Init structure parameters values */
 //  FSMC_NORSRAMInitStruct->FSMC_Bank = FSMC_Bank1_NORSRAM1;
 //  FSMC_NORSRAMInitStruct->FSMC_DataAddressMux = FSMC_DataAddressMux_Enable;
 //  FSMC_NORSRAMInitStruct->FSMC_MemoryType = FSMC_MemoryType_SRAM;
@@ -69,8 +69,8 @@ int ext_sram_init(void)
     FSMC_NORSRAMInit(&FSMC_NORSRAMInitStructure);
     FSMC_NORSRAMCmd(FSMC_NORSRAMInitStructure.FSMC_Bank, ENABLE);
 
-	ext_sram_test();
-	return 0;
+    ext_sram_test();
+    return 0;
 }
 
 

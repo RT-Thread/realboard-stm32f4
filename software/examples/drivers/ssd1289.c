@@ -22,7 +22,7 @@ by jiezhi320   ssd1289 driver
 
 //输出重定向
 #define printf               rt_kprintf //使用rt_kprintf来输出
-//#define printf(...)  
+//#define printf(...)
 
 /* LCD is connected to the FSMC_Bank1_NOR/SRAM4 and NE4 is used as ship select signal */
 /* RS <==> A0 */
@@ -46,7 +46,7 @@ by jiezhi320   ssd1289 driver
 
 #define rw_data_prepare()               write_cmd(34)
 
-static rt_uint16_t deviceid;     //设置一个静态变量用来保存LCD的ID 
+static rt_uint16_t deviceid;     //设置一个静态变量用来保存LCD的ID
 struct rt_device _lcd_device;	 //设备框架结构体  RTGRAPHIC_PIXEL_FORMAT_RGB565
 
 static void delay(rt_uint32_t cnt)
@@ -57,7 +57,7 @@ static void delay(rt_uint32_t cnt)
         for(dl=0; dl<500; dl++);
     }
 }
-/* 总线配置*/               
+/* 总线配置*/
 static void LCD_FSMCConfig(void)
 {
     FSMC_NORSRAMInitTypeDef  FSMC_NORSRAMInitStructure;
@@ -148,9 +148,9 @@ static void lcd_port_init(void)
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_Init(GPIOE, &GPIO_InitStructure);
-	
-	GPIO_ResetBits(GPIOE, GPIO_Pin_5);  
-	
+
+    GPIO_ResetBits(GPIOE, GPIO_Pin_5);
+
     LCD_FSMCConfig();
 }
 
@@ -207,12 +207,12 @@ static rt_uint16_t BGR2RGB(rt_uint16_t c)
 static void lcd_SetCursor(rt_uint32_t x, rt_uint32_t y)
 {
 #if defined(_ILI_HORIZONTAL_DIRECTION_)
-	write_reg(0x4e,y);    /* 0-239 */
+    write_reg(0x4e,y);    /* 0-239 */
     write_reg(0x4f,x);    /* 0-319 */
 #else
-	write_reg(0x4e,x);    /* 0-239 */
-	write_reg(0x4f,y);    /* 0-319 */
-#endif	    
+    write_reg(0x4e,x);    /* 0-239 */
+    write_reg(0x4f,y);    /* 0-319 */
+#endif
 }
 
 /* 读取指定地址的GRAM */
@@ -239,7 +239,7 @@ static void lcd_clear(rt_uint16_t Color)
         write_data(Color);
     }
 }
-#endif 
+#endif
 
 
 static void lcd_data_bus_test(void)
@@ -247,7 +247,7 @@ static void lcd_data_bus_test(void)
     unsigned short temp1;
     unsigned short temp2;
 
-	write_reg(0x0011,0x6030 | (0<<3)); // AM=0 hline
+    write_reg(0x0011,0x6030 | (0<<3)); // AM=0 hline
     /* wirte */
     lcd_SetCursor(0,0);
     rw_data_prepare();
@@ -314,9 +314,9 @@ static void lcd_gram_test(void)
 void lcd_Initializtion(void)
 {
     lcd_port_init();
-	delay(100); 
-	write_reg(0x0000,0x0001);
-	delay(100); 
+    delay(100);
+    write_reg(0x0000,0x0001);
+    delay(100);
     deviceid = read_reg(0x00);
 
     /* deviceid check */
@@ -362,11 +362,11 @@ void lcd_Initializtion(void)
     // 0 0   1    0    1    0    1    1   0 0 0 0 0 0 0 0
     write_reg(0x000E,0x2900);
     write_reg(0x001E,0x00B8);
-	
+
 #if defined(_ILI_REVERSE_DIRECTION_)
     write_reg(0x0001,0x293F);//驱动输出控制320*240  0x6B3F
 #else
-   write_reg(0x0001,0x2B3F);//驱动输出控制320*240  0x6B3F
+    write_reg(0x0001,0x2B3F);//驱动输出控制320*240  0x6B3F
 #endif
 
     write_reg(0x0010,0x0000);
@@ -425,11 +425,11 @@ rt_uint8_t * rt_hw_lcd_get_framebuffer(void)
 /*  设置像素点 颜色,X,Y */
 void rt_hw_lcd_set_pixel(const char* c, rt_base_t x, rt_base_t y)
 {
-	rt_uint16_t p;
-	p =  *(uint16_t *)c;
-	//p = rtgui_color_to_565p(*c);
+    rt_uint16_t p;
+    p =  *(uint16_t *)c;
+    //p = rtgui_color_to_565p(*c);
     lcd_SetCursor(x,y);
-    
+
     rw_data_prepare();
     write_data(p);
 }
@@ -437,29 +437,29 @@ void rt_hw_lcd_set_pixel(const char* c, rt_base_t x, rt_base_t y)
 /* 获取像素点颜色 */
 void rt_hw_lcd_get_pixel(char* c, rt_base_t x, rt_base_t y)
 {
-	rt_uint16_t p;
-	
-    p = (lcd_read_gram(x,y));  
-   
-	 *(rt_uint16_t*)c = p;
+    rt_uint16_t p;
+
+    p = (lcd_read_gram(x,y));
+
+    *(rt_uint16_t*)c = p;
 }
 
 
 /* 画水平线 */
 void rt_hw_lcd_draw_hline(const char* c, int x1, int x2, int y)
 {
-	rt_uint16_t p;
-	
-	p = *(uint16_t *)c;
-	//p = rtgui_color_to_565(*pixel);
+    rt_uint16_t p;
+
+    p = *(uint16_t *)c;
+    //p = rtgui_color_to_565(*pixel);
     /* [5:4]-ID~ID0 [3]-AM-1垂直-0水平 */
-	#if defined(_ILI_HORIZONTAL_DIRECTION_)
-	/* [5:4]-ID~ID0 [3]-AM-1垂直-0水平 */
+#if defined(_ILI_HORIZONTAL_DIRECTION_)
+    /* [5:4]-ID~ID0 [3]-AM-1垂直-0水平 */
     write_reg(0x0011,0x6070 | (1<<3)); // AM=0 hline
-	#else
-	/* [5:4]-ID~ID0 [3]-AM-1垂直-0水平 */
+#else
+    /* [5:4]-ID~ID0 [3]-AM-1垂直-0水平 */
     write_reg(0x0011,0x6030 | (0<<3)); // AM=0 hline
-	#endif	
+#endif
 
     lcd_SetCursor(x1, y);
     rw_data_prepare(); /* Prepare to write GRAM */
@@ -473,17 +473,17 @@ void rt_hw_lcd_draw_hline(const char* c, int x1, int x2, int y)
 /* 垂直线 */
 void rt_hw_lcd_draw_vline(const char* c, int x, int y1, int y2)
 {
-	rt_uint16_t p;
-	
-	p = *(uint16_t *)c;
-	//p = rtgui_color_to_565p(*pixel);
-	
-     /* [5:4]-ID~ID0 [3]-AM-1垂直-0水平 */
-	#if defined(_ILI_HORIZONTAL_DIRECTION_)
-	write_reg(0x0011,0x6030 | (0<<3)); // AM=0 hline
-	#else
-	write_reg(0x0011,0x6070 | (1<<3)); // AM=0 hline
-	#endif
+    rt_uint16_t p;
+
+    p = *(uint16_t *)c;
+    //p = rtgui_color_to_565p(*pixel);
+
+    /* [5:4]-ID~ID0 [3]-AM-1垂直-0水平 */
+#if defined(_ILI_HORIZONTAL_DIRECTION_)
+    write_reg(0x0011,0x6030 | (0<<3)); // AM=0 hline
+#else
+    write_reg(0x0011,0x6070 | (1<<3)); // AM=0 hline
+#endif
 
     lcd_SetCursor(x, y1);
     rw_data_prepare(); /* Prepare to write GRAM */
@@ -500,13 +500,13 @@ void rt_hw_lcd_draw_blit_line(const char* c, int x, int y, rt_size_t size)
     rt_uint16_t *ptr;
     ptr = (rt_uint16_t*)c;
 
-	#if defined(_ILI_HORIZONTAL_DIRECTION_)
-	/* [5:4]-ID~ID0 [3]-AM-1垂直-0水平 */
+#if defined(_ILI_HORIZONTAL_DIRECTION_)
+    /* [5:4]-ID~ID0 [3]-AM-1垂直-0水平 */
     write_reg(0x0011,0x6070 | (1<<3)); // AM=0 hline
-	#else
-	/* [5:4]-ID~ID0 [3]-AM-1垂直-0水平 */
+#else
+    /* [5:4]-ID~ID0 [3]-AM-1垂直-0水平 */
     write_reg(0x0011,0x6030 | (0<<3)); // AM=0 hline
-	#endif	
+#endif
 
     lcd_SetCursor(x, y);
     rw_data_prepare(); /* Prepare to write GRAM */
@@ -557,13 +557,13 @@ static rt_err_t lcd_control(rt_device_t dev, rt_uint8_t cmd, void *args)
         info->bits_per_pixel = 16;
         info->pixel_format = RTGRAPHIC_PIXEL_FORMAT_RGB565P;
         info->framebuffer = RT_NULL;
-	#if defined(_ILI_HORIZONTAL_DIRECTION_)
+#if defined(_ILI_HORIZONTAL_DIRECTION_)
         info->width = LCD_HEIGHT;
         info->height = LCD_WIDTH;
-	#else
-		info->width = LCD_WIDTH;
+#else
+        info->width = LCD_WIDTH;
         info->height = LCD_HEIGHT;
-	#endif
+#endif
     }
     break;
 
@@ -581,10 +581,10 @@ static rt_err_t lcd_control(rt_device_t dev, rt_uint8_t cmd, void *args)
 /* 需直接调用的 用于硬件初始化和注册设备 */
 void ssd1289_init(void)
 {
-	GPIO_ResetBits(GPIOC, GPIO_Pin_6);  /* RESET LCD */
+    GPIO_ResetBits(GPIOC, GPIO_Pin_6);  /* RESET LCD */
     delay(100);
     GPIO_SetBits(GPIOC, GPIO_Pin_6);  /* release LCD */
-	
+
     /* register lcd device */
     _lcd_device.type  = RT_Device_Class_Graphic;
     _lcd_device.init  = lcd_init;

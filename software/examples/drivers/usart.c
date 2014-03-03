@@ -23,104 +23,104 @@
 /* STM32 uart driver */
 struct stm32_uart
 {
-	USART_TypeDef* uart_device;
-	IRQn_Type irq;
+    USART_TypeDef* uart_device;
+    IRQn_Type irq;
 };
 
 static rt_err_t stm32_configure(struct rt_serial_device *serial, struct serial_configure *cfg)
 {
-	struct stm32_uart* uart;
-	USART_InitTypeDef USART_InitStructure;
+    struct stm32_uart* uart;
+    USART_InitTypeDef USART_InitStructure;
 
-	RT_ASSERT(serial != RT_NULL);
-	RT_ASSERT(cfg != RT_NULL);
+    RT_ASSERT(serial != RT_NULL);
+    RT_ASSERT(cfg != RT_NULL);
 
-	uart = (struct stm32_uart *)serial->parent.user_data;
+    uart = (struct stm32_uart *)serial->parent.user_data;
 
-	if (cfg->baud_rate == BAUD_RATE_9600)
-		USART_InitStructure.USART_BaudRate = 9600;
-	else if (cfg->baud_rate == BAUD_RATE_115200)
-		USART_InitStructure.USART_BaudRate = 115200;
+    if (cfg->baud_rate == BAUD_RATE_9600)
+        USART_InitStructure.USART_BaudRate = 9600;
+    else if (cfg->baud_rate == BAUD_RATE_115200)
+        USART_InitStructure.USART_BaudRate = 115200;
 
-	if (cfg->data_bits == DATA_BITS_8)
-		USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+    if (cfg->data_bits == DATA_BITS_8)
+        USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 
-	if (cfg->stop_bits == STOP_BITS_1)
-		USART_InitStructure.USART_StopBits = USART_StopBits_1;
-	else if (cfg->stop_bits == STOP_BITS_2)
-		USART_InitStructure.USART_StopBits = USART_StopBits_2;
+    if (cfg->stop_bits == STOP_BITS_1)
+        USART_InitStructure.USART_StopBits = USART_StopBits_1;
+    else if (cfg->stop_bits == STOP_BITS_2)
+        USART_InitStructure.USART_StopBits = USART_StopBits_2;
 
-	USART_InitStructure.USART_Parity = USART_Parity_No;
-	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-	USART_Init(uart->uart_device, &USART_InitStructure);
+    USART_InitStructure.USART_Parity = USART_Parity_No;
+    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+    USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+    USART_Init(uart->uart_device, &USART_InitStructure);
 
-	/* Enable USART */
-	USART_Cmd(uart->uart_device, ENABLE);
-	/* enable interrupt */
-	USART_ITConfig(uart->uart_device, USART_IT_RXNE, ENABLE);
+    /* Enable USART */
+    USART_Cmd(uart->uart_device, ENABLE);
+    /* enable interrupt */
+    USART_ITConfig(uart->uart_device, USART_IT_RXNE, ENABLE);
 
-	return RT_EOK;
+    return RT_EOK;
 }
 
 static rt_err_t stm32_control(struct rt_serial_device *serial, int cmd, void *arg)
 {
-	struct stm32_uart* uart;
+    struct stm32_uart* uart;
 
-	RT_ASSERT(serial != RT_NULL);
-	uart = (struct stm32_uart *)serial->parent.user_data;
+    RT_ASSERT(serial != RT_NULL);
+    uart = (struct stm32_uart *)serial->parent.user_data;
 
-	switch (cmd)
-	{
-	case RT_DEVICE_CTRL_CLR_INT:
-		/* disable rx irq */
-		UART_DISABLE_IRQ(uart->irq);
-		break;
-	case RT_DEVICE_CTRL_SET_INT:
-		/* enable rx irq */
-		UART_ENABLE_IRQ(uart->irq);
-		break;
-	}
+    switch (cmd)
+    {
+    case RT_DEVICE_CTRL_CLR_INT:
+        /* disable rx irq */
+        UART_DISABLE_IRQ(uart->irq);
+        break;
+    case RT_DEVICE_CTRL_SET_INT:
+        /* enable rx irq */
+        UART_ENABLE_IRQ(uart->irq);
+        break;
+    }
 
-	return RT_EOK;
+    return RT_EOK;
 }
 
 static int stm32_putc(struct rt_serial_device *serial, char c)
 {
-	struct stm32_uart* uart;
+    struct stm32_uart* uart;
 
-	RT_ASSERT(serial != RT_NULL);
-	uart = (struct stm32_uart *)serial->parent.user_data;
+    RT_ASSERT(serial != RT_NULL);
+    uart = (struct stm32_uart *)serial->parent.user_data;
 
-	while (!(uart->uart_device->SR & USART_FLAG_TXE));
-	uart->uart_device->DR = c;
+    while (!(uart->uart_device->SR & USART_FLAG_TXE));
+    uart->uart_device->DR = c;
 
-	return 1;
+    return 1;
 }
 
 static int stm32_getc(struct rt_serial_device *serial)
 {
-	int ch;
-	struct stm32_uart* uart;
+    int ch;
+    struct stm32_uart* uart;
 
-	RT_ASSERT(serial != RT_NULL);
-	uart = (struct stm32_uart *)serial->parent.user_data;
+    RT_ASSERT(serial != RT_NULL);
+    uart = (struct stm32_uart *)serial->parent.user_data;
 
-	ch = -1;
-	if (uart->uart_device->SR & USART_FLAG_RXNE)
-	{
-		ch = uart->uart_device->DR & 0xff;
-	}
+    ch = -1;
+    if (uart->uart_device->SR & USART_FLAG_RXNE)
+    {
+        ch = uart->uart_device->DR & 0xff;
+    }
 
-	return ch;
+    return ch;
 }
 
 static const struct rt_uart_ops stm32_uart_ops =
 {
-	stm32_configure,
-	stm32_control,
-	stm32_putc,
-	stm32_getc,
+    stm32_configure,
+    stm32_control,
+    stm32_putc,
+    stm32_getc,
 };
 
 #if defined(RT_USING_UART1)
@@ -128,33 +128,33 @@ static const struct rt_uart_ops stm32_uart_ops =
 struct serial_ringbuffer uart1_int_rx;
 struct stm32_uart uart1 =
 {
-	USART1,
-	USART1_IRQn,
+    USART1,
+    USART1_IRQn,
 };
 struct rt_serial_device serial1;
 
 void USART1_IRQHandler(void)
 {
-	struct stm32_uart* uart;
+    struct stm32_uart* uart;
 
-	uart = &uart1;
+    uart = &uart1;
 
-	/* enter interrupt */
-	rt_interrupt_enter();
-	if(USART_GetITStatus(uart->uart_device, USART_IT_RXNE) != RESET)
-	{
-		rt_hw_serial_isr(&serial1);
-		/* clear interrupt */
-		USART_ClearITPendingBit(uart->uart_device, USART_IT_RXNE);
-	}
-	if (USART_GetITStatus(uart->uart_device, USART_IT_TC) != RESET)
-	{
-		/* clear interrupt */
-		USART_ClearITPendingBit(uart->uart_device, USART_IT_TC);
-	}
+    /* enter interrupt */
+    rt_interrupt_enter();
+    if(USART_GetITStatus(uart->uart_device, USART_IT_RXNE) != RESET)
+    {
+        rt_hw_serial_isr(&serial1);
+        /* clear interrupt */
+        USART_ClearITPendingBit(uart->uart_device, USART_IT_RXNE);
+    }
+    if (USART_GetITStatus(uart->uart_device, USART_IT_TC) != RESET)
+    {
+        /* clear interrupt */
+        USART_ClearITPendingBit(uart->uart_device, USART_IT_TC);
+    }
 
-	/* leave interrupt */
-	rt_interrupt_leave();
+    /* leave interrupt */
+    rt_interrupt_leave();
 }
 #endif
 
@@ -163,33 +163,33 @@ void USART1_IRQHandler(void)
 struct serial_ringbuffer uart2_int_rx;
 struct stm32_uart uart2 =
 {
-	USART2,
-	USART2_IRQn,
+    USART2,
+    USART2_IRQn,
 };
 struct rt_serial_device serial2;
 
 void USART2_IRQHandler(void)
 {
-	struct stm32_uart* uart;
+    struct stm32_uart* uart;
 
-	uart = &uart2;
+    uart = &uart2;
 
-	/* enter interrupt */
-	rt_interrupt_enter();
-	if(USART_GetITStatus(uart->uart_device, USART_IT_RXNE) != RESET)
-	{
-		rt_hw_serial_isr(&serial2);
-		/* clear interrupt */
-		USART_ClearITPendingBit(uart->uart_device, USART_IT_RXNE);
-	}
-	if (USART_GetITStatus(uart->uart_device, USART_IT_TC) != RESET)
-	{
-		/* clear interrupt */
-		USART_ClearITPendingBit(uart->uart_device, USART_IT_TC);
-	}
+    /* enter interrupt */
+    rt_interrupt_enter();
+    if(USART_GetITStatus(uart->uart_device, USART_IT_RXNE) != RESET)
+    {
+        rt_hw_serial_isr(&serial2);
+        /* clear interrupt */
+        USART_ClearITPendingBit(uart->uart_device, USART_IT_RXNE);
+    }
+    if (USART_GetITStatus(uart->uart_device, USART_IT_TC) != RESET)
+    {
+        /* clear interrupt */
+        USART_ClearITPendingBit(uart->uart_device, USART_IT_TC);
+    }
 
-	/* leave interrupt */
-	rt_interrupt_leave();
+    /* leave interrupt */
+    rt_interrupt_leave();
 }
 #endif
 
@@ -198,33 +198,33 @@ void USART2_IRQHandler(void)
 struct serial_ringbuffer uart3_int_rx;
 struct stm32_uart uart3 =
 {
-	USART3,
-	USART3_IRQn,
+    USART3,
+    USART3_IRQn,
 };
 struct rt_serial_device serial3;
 
 void USART3_IRQHandler(void)
 {
-	struct stm32_uart* uart;
+    struct stm32_uart* uart;
 
-	uart = &uart3;
+    uart = &uart3;
 
-	/* enter interrupt */
-	rt_interrupt_enter();
-	if(USART_GetITStatus(uart->uart_device, USART_IT_RXNE) != RESET)
-	{
-		rt_hw_serial_isr(&serial3);
-		/* clear interrupt */
-		USART_ClearITPendingBit(uart->uart_device, USART_IT_RXNE);
-	}
-	if (USART_GetITStatus(uart->uart_device, USART_IT_TC) != RESET)
-	{
-		/* clear interrupt */
-		USART_ClearITPendingBit(uart->uart_device, USART_IT_TC);
-	}
+    /* enter interrupt */
+    rt_interrupt_enter();
+    if(USART_GetITStatus(uart->uart_device, USART_IT_RXNE) != RESET)
+    {
+        rt_hw_serial_isr(&serial3);
+        /* clear interrupt */
+        USART_ClearITPendingBit(uart->uart_device, USART_IT_RXNE);
+    }
+    if (USART_GetITStatus(uart->uart_device, USART_IT_TC) != RESET)
+    {
+        /* clear interrupt */
+        USART_ClearITPendingBit(uart->uart_device, USART_IT_TC);
+    }
 
-	/* leave interrupt */
-	rt_interrupt_leave();
+    /* leave interrupt */
+    rt_interrupt_leave();
 }
 #endif
 
@@ -261,43 +261,43 @@ void USART3_IRQHandler(void)
 static void RCC_Configuration(void)
 {
 #ifdef RT_USING_UART1
-	/* Enable UART1 GPIO clocks */
-	RCC_AHB1PeriphClockCmd(UART1_GPIO_RCC, ENABLE);
-	/* Enable UART1 clock */
-	RCC_APB2PeriphClockCmd(RCC_APBPeriph_UART1, ENABLE);
+    /* Enable UART1 GPIO clocks */
+    RCC_AHB1PeriphClockCmd(UART1_GPIO_RCC, ENABLE);
+    /* Enable UART1 clock */
+    RCC_APB2PeriphClockCmd(RCC_APBPeriph_UART1, ENABLE);
 #endif
 
 #ifdef RT_USING_UART2
-	/* Enable UART2 GPIO clocks */
-	RCC_AHB1PeriphClockCmd(UART2_GPIO_RCC, ENABLE);
-	/* Enable UART2 clock */
-	RCC_APB1PeriphClockCmd(RCC_APBPeriph_UART2, ENABLE);
+    /* Enable UART2 GPIO clocks */
+    RCC_AHB1PeriphClockCmd(UART2_GPIO_RCC, ENABLE);
+    /* Enable UART2 clock */
+    RCC_APB1PeriphClockCmd(RCC_APBPeriph_UART2, ENABLE);
 #endif
 
 #ifdef RT_USING_UART3
-	/* Enable UART3 GPIO clocks */
-	RCC_AHB1PeriphClockCmd(UART3_GPIO_RCC, ENABLE);
-	/* Enable UART3 clock */
-	RCC_APB1PeriphClockCmd(RCC_APBPeriph_UART3, ENABLE);
+    /* Enable UART3 GPIO clocks */
+    RCC_AHB1PeriphClockCmd(UART3_GPIO_RCC, ENABLE);
+    /* Enable UART3 clock */
+    RCC_APB1PeriphClockCmd(RCC_APBPeriph_UART3, ENABLE);
 
-	/* DMA clock enable */
-	RCC_APB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
+    /* DMA clock enable */
+    RCC_APB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
 #endif
 }
 
 static void GPIO_Configuration(void)
 {
-	GPIO_InitTypeDef GPIO_InitStructure;
+    GPIO_InitTypeDef GPIO_InitStructure;
 
-	GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_AF;
-	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_UP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_AF;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_UP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 
 #ifdef RT_USING_UART1
-	/* Configure USART1 Rx/tx PIN */
-	GPIO_InitStructure.GPIO_Pin = UART1_GPIO_RX | UART1_GPIO_TX;
-	GPIO_Init(UART1_GPIO, &GPIO_InitStructure);
+    /* Configure USART1 Rx/tx PIN */
+    GPIO_InitStructure.GPIO_Pin = UART1_GPIO_RX | UART1_GPIO_TX;
+    GPIO_Init(UART1_GPIO, &GPIO_InitStructure);
 
     /* Connect alternate function */
     GPIO_PinAFConfig(UART1_GPIO, UART1_TX_PIN_SOURCE, GPIO_AF_USART1);
@@ -305,9 +305,9 @@ static void GPIO_Configuration(void)
 #endif
 
 #ifdef RT_USING_UART2
-	/* Configure USART2 Rx/tx PIN */
-	GPIO_InitStructure.GPIO_Pin = UART2_GPIO_TX | UART2_GPIO_RX;
-	GPIO_Init(UART2_GPIO, &GPIO_InitStructure);
+    /* Configure USART2 Rx/tx PIN */
+    GPIO_InitStructure.GPIO_Pin = UART2_GPIO_TX | UART2_GPIO_RX;
+    GPIO_Init(UART2_GPIO, &GPIO_InitStructure);
 
     /* Connect alternate function */
     GPIO_PinAFConfig(UART2_GPIO, UART2_TX_PIN_SOURCE, GPIO_AF_USART2);
@@ -315,9 +315,9 @@ static void GPIO_Configuration(void)
 #endif
 
 #ifdef RT_USING_UART3
-	/* Configure USART3 Rx/tx PIN */
-	GPIO_InitStructure.GPIO_Pin = UART3_GPIO_TX | UART3_GPIO_RX;
-	GPIO_Init(UART3_GPIO, &GPIO_InitStructure);
+    /* Configure USART3 Rx/tx PIN */
+    GPIO_InitStructure.GPIO_Pin = UART3_GPIO_TX | UART3_GPIO_RX;
+    GPIO_Init(UART3_GPIO, &GPIO_InitStructure);
 
     /* Connect alternate function */
     GPIO_PinAFConfig(UART3_GPIO, UART3_TX_PIN_SOURCE, GPIO_AF_USART3);
@@ -327,86 +327,86 @@ static void GPIO_Configuration(void)
 
 static void NVIC_Configuration(struct stm32_uart* uart)
 {
-	NVIC_InitTypeDef NVIC_InitStructure;
+    NVIC_InitTypeDef NVIC_InitStructure;
 
-	/* Enable the USART1 Interrupt */
-	NVIC_InitStructure.NVIC_IRQChannel = uart->irq;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
+    /* Enable the USART1 Interrupt */
+    NVIC_InitStructure.NVIC_IRQChannel = uart->irq;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
 }
 
 void rt_hw_usart_init(void)
 {
-	struct stm32_uart* uart;
-	struct serial_configure config;
+    struct stm32_uart* uart;
+    struct serial_configure config;
 
-	RCC_Configuration();
-	GPIO_Configuration();
+    RCC_Configuration();
+    GPIO_Configuration();
 
 #ifdef RT_USING_UART1
-	uart = &uart1;
-	config.baud_rate = BAUD_RATE_115200;
-	config.bit_order = BIT_ORDER_LSB;
-	config.data_bits = DATA_BITS_8;
-	config.parity    = PARITY_NONE;
-	config.stop_bits = STOP_BITS_1;
-	config.invert    = NRZ_NORMAL;
+    uart = &uart1;
+    config.baud_rate = BAUD_RATE_115200;
+    config.bit_order = BIT_ORDER_LSB;
+    config.data_bits = DATA_BITS_8;
+    config.parity    = PARITY_NONE;
+    config.stop_bits = STOP_BITS_1;
+    config.invert    = NRZ_NORMAL;
 
-	serial1.ops    = &stm32_uart_ops;
-	serial1.int_rx = &uart1_int_rx;
-	serial1.config = config;
+    serial1.ops    = &stm32_uart_ops;
+    serial1.int_rx = &uart1_int_rx;
+    serial1.config = config;
 
-	NVIC_Configuration(&uart1);
+    NVIC_Configuration(&uart1);
 
-	/* register UART1 device */
-	rt_hw_serial_register(&serial1, "uart1",
-		RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX | RT_DEVICE_FLAG_STREAM,
-		uart);
+    /* register UART1 device */
+    rt_hw_serial_register(&serial1, "uart1",
+                          RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX | RT_DEVICE_FLAG_STREAM,
+                          uart);
 #endif
 
 #ifdef RT_USING_UART2
-	uart = &uart2;
+    uart = &uart2;
 
-	config.baud_rate = BAUD_RATE_115200;
-	config.bit_order = BIT_ORDER_LSB;
-	config.data_bits = DATA_BITS_8;
-	config.parity    = PARITY_NONE;
-	config.stop_bits = STOP_BITS_1;
-	config.invert    = NRZ_NORMAL;
+    config.baud_rate = BAUD_RATE_115200;
+    config.bit_order = BIT_ORDER_LSB;
+    config.data_bits = DATA_BITS_8;
+    config.parity    = PARITY_NONE;
+    config.stop_bits = STOP_BITS_1;
+    config.invert    = NRZ_NORMAL;
 
-	serial2.ops    = &stm32_uart_ops;
-	serial2.int_rx = &uart2_int_rx;
-	serial2.config = config;
+    serial2.ops    = &stm32_uart_ops;
+    serial2.int_rx = &uart2_int_rx;
+    serial2.config = config;
 
-	NVIC_Configuration(&uart2);
+    NVIC_Configuration(&uart2);
 
-	/* register UART1 device */
-	rt_hw_serial_register(&serial2, "uart2",
-		RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX | RT_DEVICE_FLAG_STREAM,
-		uart);
+    /* register UART1 device */
+    rt_hw_serial_register(&serial2, "uart2",
+                          RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX | RT_DEVICE_FLAG_STREAM,
+                          uart);
 #endif
 
 #ifdef RT_USING_UART3
-	uart = &uart3;
+    uart = &uart3;
 
-	config.baud_rate = BAUD_RATE_115200;
-	config.bit_order = BIT_ORDER_LSB;
-	config.data_bits = DATA_BITS_8;
-	config.parity    = PARITY_NONE;
-	config.stop_bits = STOP_BITS_1;
-	config.invert    = NRZ_NORMAL;
+    config.baud_rate = BAUD_RATE_115200;
+    config.bit_order = BIT_ORDER_LSB;
+    config.data_bits = DATA_BITS_8;
+    config.parity    = PARITY_NONE;
+    config.stop_bits = STOP_BITS_1;
+    config.invert    = NRZ_NORMAL;
 
-	serial3.ops    = &stm32_uart_ops;
-	serial3.int_rx = &uart3_int_rx;
-	serial3.config = config;
+    serial3.ops    = &stm32_uart_ops;
+    serial3.int_rx = &uart3_int_rx;
+    serial3.config = config;
 
-	NVIC_Configuration(&uart3);
+    NVIC_Configuration(&uart3);
 
-	/* register UART1 device */
-	rt_hw_serial_register(&serial3, "uart3",
-		RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX | RT_DEVICE_FLAG_STREAM,
-		uart);
+    /* register UART1 device */
+    rt_hw_serial_register(&serial3, "uart3",
+                          RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX | RT_DEVICE_FLAG_STREAM,
+                          uart);
 #endif
 }

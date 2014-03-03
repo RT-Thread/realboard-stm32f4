@@ -155,24 +155,24 @@ void rt_platform_init(void)
 
 #ifdef RT_USING_RTGUI
     /* initilize  lcd controller */
-	#if LCD_VERSION==1
-	{
-		ra8875_init();
-	}
-	#elif LCD_VERSION==2
-	{
-		ssd1963_init();
-	}
-	#elif LCD_VERSION==3
-	{
-		ssd1289_init();
-	}	
-	#elif LCD_VERSION==4
-	{
-		md050sd_init();
-	}
-	
-	#endif
+#if LCD_VERSION==1
+    {
+        ra8875_init();
+    }
+#elif LCD_VERSION==2
+    {
+        ssd1963_init();
+    }
+#elif LCD_VERSION==3
+    {
+        ssd1289_init();
+    }
+#elif LCD_VERSION==4
+    {
+        md050sd_init();
+    }
+
+#endif
     /* initilize key module */
     rt_hw_key_init();
 #endif /* RT_USING_RTGUI */

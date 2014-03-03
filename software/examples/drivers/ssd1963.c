@@ -19,7 +19,7 @@ by jiezhi320   ssd1963 driver
 
 //输出重定向
 #define printf               rt_kprintf //使用rt_kprintf来输出
-//#define printf(...)  
+//#define printf(...)
 
 /* LCD is connected to the FSMC_Bank1_NOR/SRAM4 and NE4 is used as ship select signal */
 /* RS <==> A0 */
@@ -52,7 +52,7 @@ by jiezhi320   ssd1963 driver
 #define  VPW 	16
 
 
-//static rt_uint32_t deviceid;     //设置一个静态变量用来保存LCD的ID 
+//static rt_uint32_t deviceid;     //设置一个静态变量用来保存LCD的ID
 struct rt_device _lcd_device;	 //设备框架结构体  RTGRAPHIC_PIXEL_FORMAT_RGB565
 
 static void delayms(rt_uint32_t cnt)
@@ -63,7 +63,7 @@ static void delayms(rt_uint32_t cnt)
         for(dl=0; dl<2000; dl++);
     }
 }
-/* 总线配置*/               
+/* 总线配置*/
 static void LCD_FSMCConfig(void)
 {
     FSMC_NORSRAMInitTypeDef  FSMC_NORSRAMInitStructure;
@@ -147,7 +147,7 @@ static void lcd_port_init(void)
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_Init(GPIOD, &GPIO_InitStructure);
     */
-	
+
     // back light control PE5
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
@@ -155,7 +155,7 @@ static void lcd_port_init(void)
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_25MHz;//GPIO_Speed_2MHz;
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_Init(GPIOE, &GPIO_InitStructure);
-	
+
     LCD_FSMCConfig();
 }
 
@@ -194,24 +194,24 @@ static rt_uint16_t BGR2RGB(rt_uint16_t c)
 }
 
 */
-lcd_inline void _set_window(u16 x1, u16 y1, u16 x2, u16 y2)  
-{  
-	write_reg(0x002A);  
-    write_data(x1>>8);        
-    write_data(x1&0x00ff);  
-    write_data(x2>>8);  
-    write_data(x2&0x00ff);  
-    write_reg(0x002b);  
-    write_data(y1>>8);  
-    write_data(y1&0x00ff);  
-    write_data(y2>>8);  
-    write_data(y2&0x00ff);  
-}  
-   
-lcd_inline void _set_cursor(u16 x,u16 y)  
-{  
-	_set_window(x, y, LCD_WIDTH-1, LCD_HEIGHT-1);  
-}  
+lcd_inline void _set_window(u16 x1, u16 y1, u16 x2, u16 y2)
+{
+    write_reg(0x002A);
+    write_data(x1>>8);
+    write_data(x1&0x00ff);
+    write_data(x2>>8);
+    write_data(x2&0x00ff);
+    write_reg(0x002b);
+    write_data(y1>>8);
+    write_data(y1&0x00ff);
+    write_data(y2>>8);
+    write_data(y2&0x00ff);
+}
+
+lcd_inline void _set_cursor(u16 x,u16 y)
+{
+    _set_window(x, y, LCD_WIDTH-1, LCD_HEIGHT-1);
+}
 
 #if 1
 static void lcd_clear(rt_uint16_t Color)
@@ -224,9 +224,9 @@ static void lcd_clear(rt_uint16_t Color)
     {
         write_data(Color);
     }
-	
+
 }
-#endif 
+#endif
 
 
 static void lcd_data_bus_test(void)
@@ -244,10 +244,10 @@ static void lcd_data_bus_test(void)
 
     /* read */
     _set_cursor(0,0);
-	
-	write_reg(0x2e);  
-	temp1 = read_data();  	
-	temp2 = read_data();  		
+
+    write_reg(0x2e);
+    temp1 = read_data();
+    temp2 = read_data();
 
     if( (temp1 == 0x5566) && (temp2 == 0xAAbb) )
     {
@@ -263,86 +263,86 @@ static void lcd_data_bus_test(void)
 void lcd_Initializtion(void)
 {
     lcd_port_init();
-	delayms(100); 
-	GPIO_ResetBits(GPIOE, GPIO_Pin_5);  
-	delayms(1000); 	
-	GPIO_ResetBits(GPIOC, GPIO_Pin_6);  /* RESET LCD */
+    delayms(100);
+    GPIO_ResetBits(GPIOE, GPIO_Pin_5);
     delayms(1000);
-    GPIO_SetBits(GPIOC, GPIO_Pin_6);  /* release LCD */	
-	delayms(1000);	
-	
-	write_reg(0x00E2);	//PLL multiplier, set PLL clock to 120M
-	write_data(0x0023);	    //N=0x36 for 6.5M, 0x23 for 10M crystal
-	write_data(0x0002);
-	write_data(0x0004);
-	write_reg(0x00E0);  // PLL enable
-	write_data(0x0001);
-	delayms(5);
-	write_reg(0x00E0);
-	write_data(0x0003);
-	delayms(5);
-	write_reg(0x0001);  // software reset
-	delayms(50);
-	write_reg(0x00E6);	//PLL setting for PCLK, depends on resolution
-	write_data(0x0003);
-	write_data(0x00ff);
-	write_data(0x00ff);
+    GPIO_ResetBits(GPIOC, GPIO_Pin_6);  /* RESET LCD */
+    delayms(1000);
+    GPIO_SetBits(GPIOC, GPIO_Pin_6);  /* release LCD */
+    delayms(1000);
 
-	write_reg(0x00B0);	//LCD SPECIFICATION
-	write_data(0x0027);
-	write_data(0x0000);
-	write_data((HDP>>8)&0X00FF);  //Set HDP
-	write_data(HDP&0X00FF);
+    write_reg(0x00E2);	//PLL multiplier, set PLL clock to 120M
+    write_data(0x0023);	    //N=0x36 for 6.5M, 0x23 for 10M crystal
+    write_data(0x0002);
+    write_data(0x0004);
+    write_reg(0x00E0);  // PLL enable
+    write_data(0x0001);
+    delayms(5);
+    write_reg(0x00E0);
+    write_data(0x0003);
+    delayms(5);
+    write_reg(0x0001);  // software reset
+    delayms(50);
+    write_reg(0x00E6);	//PLL setting for PCLK, depends on resolution
+    write_data(0x0003);
+    write_data(0x00ff);
+    write_data(0x00ff);
+
+    write_reg(0x00B0);	//LCD SPECIFICATION
+    write_data(0x0027);
+    write_data(0x0000);
+    write_data((HDP>>8)&0X00FF);  //Set HDP
+    write_data(HDP&0X00FF);
     write_data((VDP>>8)&0X00FF);  //Set VDP
-	write_data(VDP&0X00FF);
+    write_data(VDP&0X00FF);
     write_data(0x0000);
 
-	write_reg(0x00B4);	//HSYNC
-	write_data((HT>>8)&0X00FF);  //Set HT
-	write_data(HT&0X00FF);
-	write_data((HPS>>8)&0X00FF);  //Set HPS
-	write_data(HPS&0X00FF);
-	write_data(HPW);			   //Set HPW
-	write_data((LPS>>8)&0X00FF);  //Set HPS
-	write_data(LPS&0X00FF);
-	write_data(0x0000);
+    write_reg(0x00B4);	//HSYNC
+    write_data((HT>>8)&0X00FF);  //Set HT
+    write_data(HT&0X00FF);
+    write_data((HPS>>8)&0X00FF);  //Set HPS
+    write_data(HPS&0X00FF);
+    write_data(HPW);			   //Set HPW
+    write_data((LPS>>8)&0X00FF);  //Set HPS
+    write_data(LPS&0X00FF);
+    write_data(0x0000);
 
-	write_reg(0x00B6);	//VSYNC
-	write_data((VT>>8)&0X00FF);   //Set VT
-	write_data(VT&0X00FF);
-	write_data((VPS>>8)&0X00FF);  //Set VPS
-	write_data(VPS&0X00FF);
-	write_data(VPW);			   //Set VPW
-	write_data((FPS>>8)&0X00FF);  //Set FPS
-	write_data(FPS&0X00FF);
+    write_reg(0x00B6);	//VSYNC
+    write_data((VT>>8)&0X00FF);   //Set VT
+    write_data(VT&0X00FF);
+    write_data((VPS>>8)&0X00FF);  //Set VPS
+    write_data(VPS&0X00FF);
+    write_data(VPW);			   //Set VPW
+    write_data((FPS>>8)&0X00FF);  //Set FPS
+    write_data(FPS&0X00FF);
 
-	write_reg(0x00BA);
-	write_data(0x000F);    //GPIO[3:0] out 1
+    write_reg(0x00BA);
+    write_data(0x000F);    //GPIO[3:0] out 1
 
-	write_reg(0x00B8);
-	write_data(0x0007);    //GPIO3=input, GPIO[2:0]=output
-	write_data(0x0001);    //GPIO0 normal
+    write_reg(0x00B8);
+    write_data(0x0007);    //GPIO3=input, GPIO[2:0]=output
+    write_data(0x0001);    //GPIO0 normal
 
-	write_reg(0x0036); //rotation
-	write_data(0x0000);
+    write_reg(0x0036); //rotation
+    write_data(0x0000);
 
-	write_reg(0x00F0); //pixel data interface
-	write_data(0x0003);
+    write_reg(0x00F0); //pixel data interface
+    write_data(0x0003);
 
 
-	delayms(5);
+    delayms(5);
 
-	write_reg(0x0029); //display on
+    write_reg(0x0029); //display on
 
-	write_reg(0x00d0); 
-	write_data(0x000d);
-	delayms(5);
+    write_reg(0x00d0);
+    write_data(0x000d);
+    delayms(5);
     //数据总线测试,用于测试硬件连接是否正常.
     lcd_data_bus_test();
 
     //清屏
     lcd_clear( Blue );
-	
+
 }
 
 
@@ -359,33 +359,33 @@ rt_uint8_t * rt_hw_lcd_get_framebuffer(void)
 /*  设置像素点 颜色,X,Y */
 void rt_hw_lcd_set_pixel(const char* c, int x, int y)
 {
-	
-	rt_uint16_t p;
-	p =  *(uint16_t *)c;
-	
-	_set_cursor(x, y);  
-	write_reg(0x2c);  
-	write_data(p);  
-	
+
+    rt_uint16_t p;
+    p =  *(uint16_t *)c;
+
+    _set_cursor(x, y);
+    write_reg(0x2c);
+    write_data(p);
+
 }
 
 /* 获取像素点颜色 */
 void rt_hw_lcd_get_pixel(char* c, int x, int y)
 {
-	_set_cursor(x, y);  
-	write_reg(0x2e);  
-	*(rt_uint16_t*)c = read_data();  
-	
+    _set_cursor(x, y);
+    write_reg(0x2e);
+    *(rt_uint16_t*)c = read_data();
+
 }
 
 
 /* 画水平线 */
 void rt_hw_lcd_draw_hline(const char* c, int x1, int x2, int y)
 {
-	
-	rt_uint16_t p;
-	
-	p = *(uint16_t *)c;
+
+    rt_uint16_t p;
+
+    p = *(uint16_t *)c;
 
     _set_cursor(x1, y);
     write_reg(0x2c);
@@ -394,26 +394,26 @@ void rt_hw_lcd_draw_hline(const char* c, int x1, int x2, int y)
         write_data(p);
         x1++;
     }
-	
-	
+
+
 }
 
 /* 垂直线 */
 void rt_hw_lcd_draw_vline(const char* c, int x, int y1, int y2)
 {
-	
-	rt_uint16_t p;
-	
-	p = *(uint16_t *)c;
 
-	_set_window(x, y1, x, y2);  
-	write_reg(0x2c);  
-    while (y1 < y2)  
-    {  
-        write_data(p);  
-        y1++;  
-    }  	
-	
+    rt_uint16_t p;
+
+    p = *(uint16_t *)c;
+
+    _set_window(x, y1, x, y2);
+    write_reg(0x2c);
+    while (y1 < y2)
+    {
+        write_data(p);
+        y1++;
+    }
+
 }
 
 /* ?? */
@@ -423,7 +423,7 @@ void rt_hw_lcd_draw_blit_line(const char* c, int x, int y, rt_size_t size)
     ptr = (rt_uint16_t*)c;
 
     _set_cursor(x, y);
-    write_reg(0x2c);  
+    write_reg(0x2c);
     while (size)
     {
         write_data(*ptr ++);
@@ -472,7 +472,7 @@ static rt_err_t lcd_control(rt_device_t dev, rt_uint8_t cmd, void *args)
         info->pixel_format = RTGRAPHIC_PIXEL_FORMAT_RGB565P;
         info->framebuffer = RT_NULL;
 
-		info->width = LCD_WIDTH;
+        info->width = LCD_WIDTH;
         info->height = LCD_HEIGHT;
 
     }

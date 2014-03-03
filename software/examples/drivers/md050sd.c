@@ -96,11 +96,11 @@ static void _lcd_gpio_init(void)
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_Init(GPIOE, &GPIO_InitStructure);
-	
-	GPIO_ResetBits(GPIOE, GPIO_Pin_5);  
+
+    GPIO_ResetBits(GPIOE, GPIO_Pin_5);
 }
 
-/* 总线配置*/               
+/* 总线配置*/
 static void LCD_FSMCConfig(void)
 {
     FSMC_NORSRAMInitTypeDef  FSMC_NORSRAMInitStructure;
@@ -189,16 +189,16 @@ lcd_inline unsigned short read_reg(rt_uint16_t reg_addr)
 }
 static void Address_set(rt_uint16_t x1, rt_uint16_t y1, rt_uint16_t x2, rt_uint16_t y2)
 {
-#if defined(_ILI_HORIZONTAL_DIRECTION_)	
-	write_reg(0x02,y1);//y开始
-	write_reg(0x03,x1);//x开始
-	
-	write_reg(0x06,y2);//y结束
-	write_reg(0x07,x2);//x结束	
+#if defined(_ILI_HORIZONTAL_DIRECTION_)
+    write_reg(0x02,y1);//y开始
+    write_reg(0x03,x1);//x开始
+
+    write_reg(0x06,y2);//y结束
+    write_reg(0x07,x2);//x结束
 #else
-	
-#endif	
-	write_cmd(0x0f);    //指向数据区	
+
+#endif
+    write_cmd(0x0f);    //指向数据区
 }
 
 static rt_uint16_t BGR2RGB(rt_uint16_t c)
@@ -232,14 +232,14 @@ static void lcd_clear(rt_uint16_t Color)
     rt_uint32_t x ,y;
 
     Address_set(0,0,LCD_WIDTH-1,LCD_HEIGHT-1);
-    
+
     for (y=0; y<LCD_HEIGHT; y++)
     {
-		for(x=0; x<LCD_WIDTH; x++)
-			write_data(Color);
+        for(x=0; x<LCD_WIDTH; x++)
+            write_data(Color);
     }
 }
-#endif 
+#endif
 
 static void lcd_data_bus_test(void)
 {
@@ -253,10 +253,10 @@ static void lcd_data_bus_test(void)
 
     /* read */
     Address_set(0,0,1,0);
-    
+
     temp1 = (lcd_read_gram(0,0));
     temp2 = (lcd_read_gram(1,0));
- 
+
     if( (temp1 == 0x5555) && (temp2 == 0xAAAA) )
     {
         printf(" data bus test pass!");
@@ -277,9 +277,9 @@ static void lcd_gram_test(void)
 
     /* write */
     temp=0;
-   
+
     Address_set(0,0,LCD_WIDTH-1,LCD_HEIGHT-1);
-    
+
     for(test_y=0; test_y<LCD_HEIGHT*LCD_WIDTH; test_y++)
     {
         write_data(temp);
@@ -297,7 +297,7 @@ static void lcd_gram_test(void)
                 {
                     printf("  LCD GRAM ERR!!");
                     //while(1);
-					return ;
+                    return ;
                 }
             }
         }
@@ -308,21 +308,21 @@ static void lcd_gram_test(void)
 
 void lcd_Initializtion(void)
 {
-    _lcd_gpio_init();    
-	LCD_FSMCConfig();
+    _lcd_gpio_init();
+    LCD_FSMCConfig();
     delay(30);
     GPIO_ResetBits(GPIOC, GPIO_Pin_6);  /* RESET LCD */
     rt_thread_delay(50);//delay(2000);
     GPIO_SetBits(GPIOC, GPIO_Pin_6);  /* release LCD */
     rt_thread_delay(50);//delay(2000);
-	
-	write_reg(0x0001,16);//打开背光	
-	
-	delay(1000); 	
+
+    write_reg(0x0001,16);//打开背光
+
+    delay(1000);
     //数据总线测试,用于测试硬件连接是否正常.
     lcd_data_bus_test();
-	
-	lcd_clear( Blue2 );
+
+    lcd_clear( Blue2 );
 }
 
 
@@ -339,33 +339,33 @@ rt_uint8_t * rt_hw_lcd_get_framebuffer(void)
 /*  设置像素点 颜色,X,Y */
 void rt_hw_lcd_set_pixel(const char* c, rt_base_t x, rt_base_t y)
 {
-	rt_uint16_t p;
-	p =  *(uint16_t *)c;
-	
-	Address_set(x,y,x,y);//设置光标位置 
+    rt_uint16_t p;
+    p =  *(uint16_t *)c;
+
+    Address_set(x,y,x,y);//设置光标位置
     write_data(p);
 }
 
 /* 获取像素点颜色 */
 void rt_hw_lcd_get_pixel(char* c, rt_base_t x, rt_base_t y)
 {
-	rt_uint16_t p;
-	 
-    p = lcd_read_gram(x,y);  
-     
-	 *(rt_uint16_t*)c = p;
+    rt_uint16_t p;
+
+    p = lcd_read_gram(x,y);
+
+    *(rt_uint16_t*)c = p;
 }
 
 
 /* 画水平线 */
 void rt_hw_lcd_draw_hline(const char* c, int x1, int x2, int y)
 {
-	rt_uint16_t p;
-	
-	p = *(uint16_t *)c;
+    rt_uint16_t p;
+
+    p = *(uint16_t *)c;
 
     Address_set(x1,y, x2,y);
-   
+
     while (x1 < x2)
     {
         write_data(p);
@@ -376,10 +376,10 @@ void rt_hw_lcd_draw_hline(const char* c, int x1, int x2, int y)
 /* 垂直线 */
 void rt_hw_lcd_draw_vline(const char* c, int x, int y1, int y2)
 {
-	rt_uint16_t p;
-	
-	p = *(uint16_t *)c;
-	
+    rt_uint16_t p;
+
+    p = *(uint16_t *)c;
+
 
     Address_set(x, y1,x,y2);
     while (y1 < y2)
@@ -396,7 +396,7 @@ void rt_hw_lcd_draw_blit_line(const char* c, int x, int y, rt_size_t size)
     ptr = (rt_uint16_t*)c;
 
     Address_set(x, y,x+size,y);
- 
+
     while (size--)
     {
         write_data(*ptr ++);
@@ -451,7 +451,7 @@ static rt_err_t lcd_control(rt_device_t dev, rt_uint8_t cmd, void *args)
         result = RT_EOK;
     }
     break;
-	}
+    }
 
     return result;
 }
@@ -459,8 +459,8 @@ static rt_err_t lcd_control(rt_device_t dev, rt_uint8_t cmd, void *args)
 
 void md050sd_init(void)
 {
-	lcd_Initializtion();
-	
+    lcd_Initializtion();
+
     /* register lcd device */
     _lcd_device.type  = RT_Device_Class_Graphic;
     _lcd_device.init  = lcd_init;

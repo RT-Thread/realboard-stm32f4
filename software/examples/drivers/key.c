@@ -60,20 +60,20 @@ struct rtgui_key
 {
     rt_timer_t poll_timer;
     struct rtgui_event_kbd kbd_event;
-	
-	rt_uint32_t key_last;
-	rt_uint32_t key_current;
-	//检测到的按键值
-	rt_uint32_t key_get;
-	//常规按键使用
-	rt_uint32_t key_debounce_count;
-	rt_uint32_t key_long_count;
-	//特殊按键使用
-	rt_uint32_t key_special_count;	
-	rt_uint32_t key_relase_count;
-	//按键标志
-	rt_uint32_t key_flag;
-	
+
+    rt_uint32_t key_last;
+    rt_uint32_t key_current;
+    //检测到的按键值
+    rt_uint32_t key_get;
+    //常规按键使用
+    rt_uint32_t key_debounce_count;
+    rt_uint32_t key_long_count;
+    //特殊按键使用
+    rt_uint32_t key_special_count;
+    rt_uint32_t key_relase_count;
+    //按键标志
+    rt_uint32_t key_flag;
+
 };
 
 static struct rtgui_key *key;
@@ -91,9 +91,9 @@ static void GPIO_Configuration(void)
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
     GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_DOWN;
-	#if LCD_VERSION!=1	//魔笛f4 使用上拉
-    GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_UP;	
-	#endif
+#if LCD_VERSION!=1	//魔笛f4 使用上拉
+    GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_UP;
+#endif
     GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_0;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 
@@ -107,131 +107,131 @@ static void GPIO_Configuration(void)
 
 static void key_timeout(void* parameter)
 {
-	key->key_current = key_up_GETVALUE();
-	key->key_current |= key_down_GETVALUE()<<1;	
-	key->key_current |= key_left_GETVALUE()<<2;	
-	key->key_current |= key_right_GETVALUE()<<3;	
-	key->key_current |= key_stop_GETVALUE()<<4;	
-	key->key_current |= key_menu_GETVALUE()<<5;	
-	key->key_current |= key_enter_GETVALUE()<<6;		
-	#if LCD_VERSION==1
+    key->key_current = key_up_GETVALUE();
+    key->key_current |= key_down_GETVALUE()<<1;
+    key->key_current |= key_left_GETVALUE()<<2;
+    key->key_current |= key_right_GETVALUE()<<3;
+    key->key_current |= key_stop_GETVALUE()<<4;
+    key->key_current |= key_menu_GETVALUE()<<5;
+    key->key_current |= key_enter_GETVALUE()<<6;
+#if LCD_VERSION==1
 
 
-	#else 
-	key->key_current=~(key->key_current);
-	key->key_current&=0x0000007f;
-	
-	#endif
+#else
+    key->key_current=~(key->key_current);
+    key->key_current&=0x0000007f;
 
-	key->key_flag &= ~C_FLAG_SHORT;
-	key->key_flag &= ~C_FLAG_COUNT;
-	key->key_flag &= ~C_FLAG_LONG;
-	key->key_get = 0;	
+#endif
+
+    key->key_flag &= ~C_FLAG_SHORT;
+    key->key_flag &= ~C_FLAG_COUNT;
+    key->key_flag &= ~C_FLAG_LONG;
+    key->key_get = 0;
 
 //
-	/*对于有长按和短按的特殊键做处理*/	
-	if ((key->key_flag)&C_FLAG_RELASE)
-	{//检查放键
-		if (key->key_current == 0)
-		{
-			if ((++(key->key_relase_count)) >= C_RELASE_COUT)
-			{ //按键已经放开
-				key->key_relase_count = 0;
-				key->key_flag &= ~C_FLAG_RELASE;
-			}
-		}
-		else
-		{
-			key->key_relase_count = 0;
-		}
-	}
-	else
-	{//检查按键
-		if (key->key_current == C_SPECIAL_KEY)		
-		{
-			if ((++(key->key_special_count)) >= C_SPECIAL_LONG_COUT)
-			{
-				key->key_special_count = 0;
-				
-				key->key_get = C_HOME_KEY;      
-				key->key_flag |= C_FLAG_LONG;	//特殊键 长按键按下
-				key->key_flag |= C_FLAG_RELASE;;//按下后要求检测放键
-			}
-		}
-		else
-		{//放开键后才检测短按
-			if ((key->key_special_count >= C_SHORT_COUT) && (key->key_special_count <C_SHORT_COUT+30)) 
-			{
-				key->key_get = C_SPECIAL_KEY;
-				key->key_flag |= C_FLAG_SHORT;	//特殊键 短按键按下
-			}
-			key->key_special_count = 0;
-		}
-	}
-	
+    /*对于有长按和短按的特殊键做处理*/
+    if ((key->key_flag)&C_FLAG_RELASE)
+    {   //检查放键
+        if (key->key_current == 0)
+        {
+            if ((++(key->key_relase_count)) >= C_RELASE_COUT)
+            {   //按键已经放开
+                key->key_relase_count = 0;
+                key->key_flag &= ~C_FLAG_RELASE;
+            }
+        }
+        else
+        {
+            key->key_relase_count = 0;
+        }
+    }
+    else
+    {   //检查按键
+        if (key->key_current == C_SPECIAL_KEY)
+        {
+            if ((++(key->key_special_count)) >= C_SPECIAL_LONG_COUT)
+            {
+                key->key_special_count = 0;
+
+                key->key_get = C_HOME_KEY;
+                key->key_flag |= C_FLAG_LONG;	//特殊键 长按键按下
+                key->key_flag |= C_FLAG_RELASE;;//按下后要求检测放键
+            }
+        }
+        else
+        {   //放开键后才检测短按
+            if ((key->key_special_count >= C_SHORT_COUT) && (key->key_special_count <C_SHORT_COUT+30))
+            {
+                key->key_get = C_SPECIAL_KEY;
+                key->key_flag |= C_FLAG_SHORT;	//特殊键 短按键按下
+            }
+            key->key_special_count = 0;
+        }
+    }
+
 // 普通按键处理
-	if((key->key_current == 0)||(key->key_current != key->key_last)|| (key->key_current == C_SPECIAL_KEY))
-	{
-		key->key_debounce_count = 0;	//第一次	
-		key->key_long_count=0;	        //清除长按键计数器
-	}
-	else
-	{
-		if(++(key->key_debounce_count) == DEBOUNCE_SHORT_TIME)
-		{
-			key->key_get = key->key_current;
-			key->key_flag |= C_FLAG_SHORT;	//短按键按下
-		}
-		if(key->key_debounce_count == DEBOUNCE_COUT_FIRST + DEBOUNCE_COUT_INTERVAL)
-		{
-			key->key_get = key->key_current;
-			key->key_flag |= C_FLAG_COUNT;	//连按键 按键按下
-			key->key_debounce_count = DEBOUNCE_COUT_FIRST;
-			++(key->key_long_count);			
-		}
-	
-		if(key->key_long_count == DEBOUNCE_LONG_TIME)
-		{
-			key->key_get = key->key_current;
-			key->key_flag |= C_FLAG_LONG;	//短按键按下
-			key->key_long_count=DEBOUNCE_LONG_TIME+1;
-		}		
-	}
-	
-	key->key_last = key->key_current;				// 保存本次键值
-	
-	
-	/* 检测到按键后，向系统上报键值 */
-	key->kbd_event.key = RTGUIK_UNKNOWN;
+    if((key->key_current == 0)||(key->key_current != key->key_last)|| (key->key_current == C_SPECIAL_KEY))
+    {
+        key->key_debounce_count = 0;	//第一次
+        key->key_long_count=0;	        //清除长按键计数器
+    }
+    else
+    {
+        if(++(key->key_debounce_count) == DEBOUNCE_SHORT_TIME)
+        {
+            key->key_get = key->key_current;
+            key->key_flag |= C_FLAG_SHORT;	//短按键按下
+        }
+        if(key->key_debounce_count == DEBOUNCE_COUT_FIRST + DEBOUNCE_COUT_INTERVAL)
+        {
+            key->key_get = key->key_current;
+            key->key_flag |= C_FLAG_COUNT;	//连按键 按键按下
+            key->key_debounce_count = DEBOUNCE_COUT_FIRST;
+            ++(key->key_long_count);
+        }
+
+        if(key->key_long_count == DEBOUNCE_LONG_TIME)
+        {
+            key->key_get = key->key_current;
+            key->key_flag |= C_FLAG_LONG;	//短按键按下
+            key->key_long_count=DEBOUNCE_LONG_TIME+1;
+        }
+    }
+
+    key->key_last = key->key_current;				// 保存本次键值
+
+
+    /* 检测到按键后，向系统上报键值 */
+    key->kbd_event.key = RTGUIK_UNKNOWN;
     key->kbd_event.type = RTGUI_KEYDOWN;
-	
-	if (key->key_get)
-	{	
-		//rt_kprintf("key = %x \n",key->key_get);
-		if (((key->key_get)==C_UP_KEY) && ((key->key_flag) & C_FLAG_SHORT))
-			key->kbd_event.key  = RTGUIK_UP;
-		
-		if (((key->key_get)==C_DOWN_KEY) && ((key->key_flag) & C_FLAG_SHORT))
-			key->kbd_event.key  = RTGUIK_DOWN;
-		
-		if (((key->key_get)==C_LEFT_KEY) && ((key->key_flag) & C_FLAG_SHORT))
-			key->kbd_event.key  = RTGUIK_LEFT;
-		
-		if (((key->key_get)==C_RIGHT_KEY) && ((key->key_flag) & C_FLAG_SHORT))
-			key->kbd_event.key  = RTGUIK_RIGHT;
-		
-		//if (((key->key_get)==C_STOP_KEY) && ((key->key_flag) & C_FLAG_SHORT))
-		//	key->kbd_event.key  = RTGUIK_UP;
-		//if (((key->key_get)==C_MENU_KEY) && ((key->key_flag) & C_FLAG_SHORT))
-		//	key->kbd_event.key  = RTGUIK_UP; 
-		if ((key->key_get)==C_ENTER_KEY) 
-			key->kbd_event.key  = RTGUIK_RETURN;		
-		
-		if ((key->key_get)==C_HOME_KEY) 
-			key->kbd_event.key  = RTGUIK_HOME;	
-	}	
-	
-	if (key->kbd_event.key != RTGUIK_UNKNOWN)
+
+    if (key->key_get)
+    {
+        //rt_kprintf("key = %x \n",key->key_get);
+        if (((key->key_get)==C_UP_KEY) && ((key->key_flag) & C_FLAG_SHORT))
+            key->kbd_event.key  = RTGUIK_UP;
+
+        if (((key->key_get)==C_DOWN_KEY) && ((key->key_flag) & C_FLAG_SHORT))
+            key->kbd_event.key  = RTGUIK_DOWN;
+
+        if (((key->key_get)==C_LEFT_KEY) && ((key->key_flag) & C_FLAG_SHORT))
+            key->kbd_event.key  = RTGUIK_LEFT;
+
+        if (((key->key_get)==C_RIGHT_KEY) && ((key->key_flag) & C_FLAG_SHORT))
+            key->kbd_event.key  = RTGUIK_RIGHT;
+
+        //if (((key->key_get)==C_STOP_KEY) && ((key->key_flag) & C_FLAG_SHORT))
+        //	key->kbd_event.key  = RTGUIK_UP;
+        //if (((key->key_get)==C_MENU_KEY) && ((key->key_flag) & C_FLAG_SHORT))
+        //	key->kbd_event.key  = RTGUIK_UP;
+        if ((key->key_get)==C_ENTER_KEY)
+            key->kbd_event.key  = RTGUIK_RETURN;
+
+        if ((key->key_get)==C_HOME_KEY)
+            key->kbd_event.key  = RTGUIK_HOME;
+    }
+
+    if (key->kbd_event.key != RTGUIK_UNKNOWN)
     {
         /* 先上报按键按下*/
         rtgui_server_post_event(&(key->kbd_event.parent), sizeof(key->kbd_event));
@@ -248,36 +248,36 @@ static void key_timeout(void* parameter)
 
 int rt_hw_key_init(void)
 {
-	GPIO_Configuration();
-	
-	key = (struct rtgui_key*)rt_malloc (sizeof(struct rtgui_key));
+    GPIO_Configuration();
+
+    key = (struct rtgui_key*)rt_malloc (sizeof(struct rtgui_key));
     if (key == RT_NULL)
-		return -1; /* no memory yet */
-	
-	/* init keyboard event */
+        return -1; /* no memory yet */
+
+    /* init keyboard event */
     RTGUI_EVENT_KBD_INIT(&(key->kbd_event));
-	key->kbd_event.wid = RT_NULL;
+    key->kbd_event.wid = RT_NULL;
     key->kbd_event.mod  = RTGUI_KMOD_NONE;
     key->kbd_event.unicode = 0;
-	
-	key->key_last = 0;
-	key->key_current = 0;
-	key->key_get = 0;
-	key->key_debounce_count = 0;
-	key->key_long_count = 0;
-	key->key_special_count = 0;
-	key->key_relase_count = 0;
-	key->key_flag = 0;
-	
-	/* create 1/50=20ms  timer */
+
+    key->key_last = 0;
+    key->key_current = 0;
+    key->key_get = 0;
+    key->key_debounce_count = 0;
+    key->key_long_count = 0;
+    key->key_special_count = 0;
+    key->key_relase_count = 0;
+    key->key_flag = 0;
+
+    /* create 1/50=20ms  timer */
     key->poll_timer = rt_timer_create("key", key_timeout, RT_NULL,
-                                        RT_TICK_PER_SECOND/50, RT_TIMER_FLAG_PERIODIC);
-	
-     /* 启动定时器 */
+                                      RT_TICK_PER_SECOND/50, RT_TIMER_FLAG_PERIODIC);
+
+    /* 启动定时器 */
     if (key->poll_timer != RT_NULL)
-        rt_timer_start(key->poll_timer); 	
-	
-	return 0;
+        rt_timer_start(key->poll_timer);
+
+    return 0;
 }
 
 //INIT_DEVICE_EXPORT(rt_hw_key_init);

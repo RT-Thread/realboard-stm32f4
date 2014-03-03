@@ -8,21 +8,21 @@ extern "C" {
 #include "board.h"
 
 //#define SD_POLLING_MODE
-    /**
-      * @brief  SD FLASH SDIO Interface
-      */
+/**
+  * @brief  SD FLASH SDIO Interface
+  */
 #define SD_DETECT_PIN                    GPIO_Pin_13                 /* PH.13 */
 #define SD_DETECT_GPIO_PORT              GPIOH                       /* GPIOH */
 #define SD_DETECT_GPIO_CLK               RCC_AHB1Periph_GPIOH
 
 #define SDIO_FIFO_ADDRESS                ((uint32_t)0x40012C80)
-    /**
-      * @brief  SDIO Intialization Frequency (400KHz max)
-      */
+/**
+  * @brief  SDIO Intialization Frequency (400KHz max)
+  */
 #define SDIO_INIT_CLK_DIV                ((uint8_t)0x76)
-    /**
-      * @brief  SDIO Data Transfer Frequency (25MHz max)
-      */
+/**
+  * @brief  SDIO Data Transfer Frequency (25MHz max)
+  */
 #define SDIO_TRANSFER_CLK_DIV            ((uint8_t)0x0)
 
 #define SD_SDIO_DMA                   DMA2
@@ -53,9 +53,9 @@ extern "C" {
 #define SD_SDIO_DMA_IRQHANDLER        DMA2_Stream6_IRQHandler
 #endif /* SD_SDIO_DMA_STREAM3 */
 
-    /**
-      * @brief  SD detection on its memory slot
-      */
+/**
+  * @brief  SD detection on its memory slot
+  */
 #define SD_PRESENT                                 ((uint8_t)0x01)
 #define SD_NOT_PRESENT                             ((uint8_t)0x00)
 

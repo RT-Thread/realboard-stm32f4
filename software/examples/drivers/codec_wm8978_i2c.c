@@ -365,7 +365,7 @@ rt_err_t sample_rate(int sr)
         r07 |= SR_48KHZ;
         break;
 
-    /* Warning: in WM8978 datasheet, sample rate 96K doesn't support. */
+        /* Warning: in WM8978 datasheet, sample rate 96K doesn't support. */
     case 96000: /* MCLK : 12.288 */
         PLL_N = PLL_N_122880;
         PLL_K = PLL_K_122880;
@@ -650,7 +650,7 @@ static void codec_dma_isr(void)
         }
 #endif
 
-    //    rt_kprintf("****\n");
+        //    rt_kprintf("****\n");
     } /* codec tx done. */
 
     /* notify transmitted complete. */

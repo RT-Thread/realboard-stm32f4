@@ -1,0 +1,69 @@
+Import('RTT_ROOT')
+Import('rtconfig')
+from building import *
+
+# get current directory
+cwd     = GetCurrentDir()
+
+src	= Split("""
+board.c
+platform.c
+usart.c
+ext_sram.c
+stm32f4xx_it.c
+""")
+
+# add SD driver.
+if GetDepend('RT_USING_DFS') == True:
+	if GetDepend('RT_USING_SDIO') == True:
+		src += ['stm32f4xx_sd.c']
+	else:
+		src += ['sdio_sd.c']
+
+# add ethernet driver.
+if GetDepend('RT_USING_LWIP') == True:
+	src += ['stm32f4xx_eth.c']
+
+# add spi driver.
+if GetDepend('RT_USING_SPI') == True:
+	src += ['stm32f20x_40x_spi.c']
+	src += ['spi_flash_w25qxx.c']
+
+# add nand driver.
+if GetDepend('RT_USING_MTD_NAND') == True:
+	src += ['k9f2g08u0b.c']
+
+# add i2c driver.
+if GetDepend('RT_USING_I2C') == True:
+	src += ['stm32_i2c.c']
+	src += ['codec_wm8978_i2c.c']
+
+# add LCD driver.
+if GetDepend('RT_USING_RTGUI') == True:
+	src += ['ra8875.c']
+	src += ['key.c']
+	src += ['touch.c']
+	src += ['ssd1289.c']
+	src += ['ssd1963.c']
+	src += ['md050sd.c']
+
+# add USB Host driver.
+if GetDepend('RT_USING_USB_HOST') == True:
+	src+= ['stm32f4xx_hcd.c']
+	src+= ['usb_bsp.c']
+	
+# add USB Device driver
+if GetDepend('RT_USING_USB_DEVICE') == True:
+	src+= ['stm32f4xx_dcd.c']
+	src+= ['usb_bsp.c']
+
+# add RTC driver.
+if GetDepend('RT_USING_RTC') == True:
+	src+= ['stm32f4_rtc.c']
+
+	
+CPPPATH = [cwd]
+
+group = DefineGroup('Drivers', src, depend = [''], CPPPATH = CPPPATH)
+
+Return('group')
