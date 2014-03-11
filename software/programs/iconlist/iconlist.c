@@ -281,7 +281,7 @@ void main(void)
         items[ITEM_MAX].parameter = RT_NULL;
     }
 
-	application = rtgui_app_create(rt_thread_self(), "iconview");
+	application = rtgui_app_create("iconview");
 	if (application != RT_NULL)
 	{			
 		struct rtgui_rect rect;

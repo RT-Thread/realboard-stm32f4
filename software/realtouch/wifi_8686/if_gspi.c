@@ -269,7 +269,7 @@ int WlanCardProbe(WlanCard * card)
     gspi_read_reg( CHIPREV_REG, &chiprev);
     card->ChipID = chiprev;
     WlanDebug(WlanMsg,"Chip ID 0x%x\n", chiprev);
-
+    rt_kprintf("WiFi Chip ID : 0x%x\n", chiprev);//add by jiezhi320
     gspi_read_reg(HOST_INT_STATUS_REG, &host_int_mask);
 
     if (gspi_register_irq((int*)&irq_num) != GSPI_OK)

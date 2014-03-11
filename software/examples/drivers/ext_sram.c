@@ -1,7 +1,11 @@
 #include "rtthread.h"
 #include "board.h"
 
-void ext_sram_init(void)
+#if 1//STM32_EXT_SRAM       
+
+static void ext_sram_test(void);
+
+int ext_sram_init(void)
 {
     FSMC_NORSRAMInitTypeDef  FSMC_NORSRAMInitStructure;
     FSMC_NORSRAMTimingInitTypeDef  Timing_read,Timing_write;
@@ -31,7 +35,7 @@ void ext_sram_init(void)
     Timing_write.FSMC_DataLatency = 0; /* [27:25] keep 0x00 in SRAM mode  */
     Timing_write.FSMC_AccessMode = FSMC_AccessMode_A;   /* FSMC ·ÃÎÊÄ£Ê½ */
 
-  /* Reset NOR/SRAM Init structure parameters values */
+    /* Reset NOR/SRAM Init structure parameters values */
 //  FSMC_NORSRAMInitStruct->FSMC_Bank = FSMC_Bank1_NORSRAM1;
 //  FSMC_NORSRAMInitStruct->FSMC_DataAddressMux = FSMC_DataAddressMux_Enable;
 //  FSMC_NORSRAMInitStruct->FSMC_MemoryType = FSMC_MemoryType_SRAM;
@@ -64,4 +68,38 @@ void ext_sram_init(void)
     FSMC_NORSRAMInitStructure.FSMC_Bank = FSMC_Bank1_NORSRAM1;
     FSMC_NORSRAMInit(&FSMC_NORSRAMInitStructure);
     FSMC_NORSRAMCmd(FSMC_NORSRAMInitStructure.FSMC_Bank, ENABLE);
+
+    ext_sram_test();
+    return 0;
 }
+
+
+
+void ext_sram_test(void)
+{
+    /* memtest */
+    {
+        unsigned char * p_extram = (unsigned char *)STM32_EXT_SRAM_BEGIN;
+        unsigned int temp;
+
+        rt_kprintf("\r\nmem testing....");
+        for(temp=0; temp<(STM32_EXT_SRAM_END-STM32_EXT_SRAM_BEGIN); temp++)
+        {
+            *p_extram++ = (unsigned char)temp;
+        }
+
+        p_extram = (unsigned char *)STM32_EXT_SRAM_BEGIN;
+        for(temp=0; temp<(STM32_EXT_SRAM_END-STM32_EXT_SRAM_BEGIN); temp++)
+        {
+            if( *p_extram++ != (unsigned char)temp )
+            {
+                rt_kprintf("\rmemtest fail @ %08X\r\nsystem halt!!!!!",(unsigned int)p_extram);
+                while(1);
+            }
+        }
+        rt_kprintf("\rmem test pass!!\r\n");
+    }/* memtest */
+
+}
+
+#endif

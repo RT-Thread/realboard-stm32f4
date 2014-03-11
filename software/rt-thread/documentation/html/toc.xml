@@ -1,0 +1,731 @@
+<toc label="RT-Thread RTOS" topic="index.html">
+  <topic label="Introduction" href="index.html">
+    <topic label="RT-Thread Architecture" href="index.html#kernel_arch"/>
+    <topic label="Kernel API" href="index.html#kernel_service"/>
+    <topic label="System Initialization" href="index.html#system_init"/>
+  </topic>
+  <topic label="Deprecated List" href="deprecated.html"/>
+  <topic label="Modules" href="modules.html">
+    <topic label="Basic Definitions" href="group___basic_def.html">
+      <topic label="RT_VERSION" href="group___basic_def.html#gad78104e02f13751dab9952ba4d9788f8"/>
+      <topic label="RT_SUBVERSION" href="group___basic_def.html#gae2986d88dd8f5b076c9089931463c6d2"/>
+      <topic label="RT_REVISION" href="group___basic_def.html#ga8ac050659ff67d9c8be5b59ddd1790cc"/>
+      <topic label="RT_TRUE" href="group___basic_def.html#ga5e3d4a1b993df67473bc161096dba218"/>
+      <topic label="RT_FALSE" href="group___basic_def.html#gaad465603954df66df7791befd55ff325"/>
+      <topic label="RT_ALIGN" href="group___basic_def.html#ga8e803706fb0e206869f5f706c1289949"/>
+      <topic label="RT_ALIGN_DOWN" href="group___basic_def.html#gadf0d0c14b78871331bac6701d7ee6e42"/>
+      <topic label="RT_NULL" href="group___basic_def.html#gab3633bbb2a09b3406b19463ffc634345"/>
+      <topic label="rt_int8_t" href="group___basic_def.html#ga0718c1881c49fdb1cfd55946ddfe0f64"/>
+      <topic label="rt_int16_t" href="group___basic_def.html#gad48863e8de10f558c764213f434d14cd"/>
+      <topic label="rt_int32_t" href="group___basic_def.html#gae5c6ccee15f067714ca9c44e509c4047"/>
+      <topic label="rt_uint8_t" href="group___basic_def.html#ga585e2ad0fbab0f83817cb61373465df6"/>
+      <topic label="rt_uint16_t" href="group___basic_def.html#ga5acba55f46553417996ac70828b874da"/>
+      <topic label="rt_uint32_t" href="group___basic_def.html#ga909edcac80e5e3f93f63fcebc95922c7"/>
+      <topic label="rt_bool_t" href="group___basic_def.html#ga3e03a3519ef7e33d13ebd34c482db49c"/>
+      <topic label="rt_base_t" href="group___basic_def.html#gab7ede51a23ea8b78381b5a59506edd7d"/>
+      <topic label="rt_ubase_t" href="group___basic_def.html#ga958cc0f5d3f7bf59850cd8bd13a4aeb0"/>
+      <topic label="rt_err_t" href="group___basic_def.html#ga42df42aabf676f2a89f5af2208b79950"/>
+      <topic label="rt_time_t" href="group___basic_def.html#ga102dfa15727cd1166d97cf5392dfe3b9"/>
+      <topic label="rt_tick_t" href="group___basic_def.html#ga66c400929925784dba020d671154978a"/>
+      <topic label="rt_flag_t" href="group___basic_def.html#gac0517c5e13c1374877d8462b84e72755"/>
+      <topic label="rt_size_t" href="group___basic_def.html#ga8011d259fdfc54b8a9aa006b4d49ac14"/>
+      <topic label="rt_dev_t" href="group___basic_def.html#ga79ffea5dac0a5c145822b5b1c9b55a09"/>
+      <topic label="rt_off_t" href="group___basic_def.html#ga0fd4981851ce935649b6723a81f2f1bf"/>
+    </topic>
+    <topic label="Device Virtual File System" href="group___d_f_s.html">
+      <topic label="File Descriptor" href="group___fd.html">
+        <topic label="fd_new" href="group___fd.html#ga25447322c47880333b369209e049eb34"/>
+        <topic label="fd_get" href="group___fd.html#gae80adc596c165e0ceab60d11bd0f1054"/>
+        <topic label="fd_put" href="group___fd.html#ga298c6ad34e475bb5d616bb83c8721fed"/>
+        <topic label="fd_is_open" href="group___fd.html#gaac5ef888b25e5c4a32667c5b9589d3d8"/>
+      </topic>
+      <topic label="File System API" href="group___fs_api.html">
+        <topic label="dfs_register" href="group___fs_api.html#gad49e7fadf531f55b19e63074ca255177"/>
+        <topic label="dfs_filesystem_lookup" href="group___fs_api.html#ga1ecf73109f4592e4209471c7d6b90365"/>
+        <topic label="dfs_filesystem_get_partition" href="group___fs_api.html#gaf598237c1dcc7cfae8828ba11e971a2b"/>
+        <topic label="dfs_mount" href="group___fs_api.html#ga702705756723b44edb0e15d9ac17e114"/>
+        <topic label="dfs_unmount" href="group___fs_api.html#ga7b98c02de9e4f4716890faf98c8197af"/>
+        <topic label="dfs_mkfs" href="group___fs_api.html#ga496d9227cdf71e5f42207faf2c2cd6c1"/>
+        <topic label="dfs_statfs" href="group___fs_api.html#ga23bdcfa90747eee0d4004aaab2744e08"/>
+      </topic>
+      <topic label="File API" href="group___file_api.html">
+        <topic label="dfs_file_open" href="group___file_api.html#ga69605ecef6247356eba5f0d6d42a838a"/>
+        <topic label="dfs_file_close" href="group___file_api.html#ga236fc80632f93ca39ed2dbf686e483d8"/>
+        <topic label="dfs_file_ioctl" href="group___file_api.html#ga0fe7b7f5445b634beb014b3354ef23c9"/>
+        <topic label="dfs_file_read" href="group___file_api.html#ga0bec1c07f75b0f04e048191409a975ef"/>
+        <topic label="dfs_file_getdents" href="group___file_api.html#ga79137515b3298d652ab3845f95901a46"/>
+        <topic label="dfs_file_unlink" href="group___file_api.html#ga5e4ad5654aba88c0e37c3f8c1c7dfe66"/>
+        <topic label="dfs_file_write" href="group___file_api.html#gac772bd08eb785c64969129f255ac8118"/>
+        <topic label="dfs_file_flush" href="group___file_api.html#ga1d4f54fe6bd307dce523c30d4ab9eb1a"/>
+        <topic label="dfs_file_lseek" href="group___file_api.html#ga28b8c8b55cbe8358c244350cbe3b1fa2"/>
+        <topic label="dfs_file_stat" href="group___file_api.html#gae3b60867436d7b3be91af7cc40299f13"/>
+        <topic label="dfs_file_rename" href="group___file_api.html#gaf8756544960620bf56886c0020e35e4f"/>
+      </topic>
+      <topic label="File POSIX API" href="group___fs_posix_api.html">
+        <topic label="open" href="group___fs_posix_api.html#gad48be43140602f16c8490e82f7bbe0b2"/>
+        <topic label="close" href="group___fs_posix_api.html#gaafbcde67669a1b96577e735ddebd8634"/>
+        <topic label="read" href="group___fs_posix_api.html#gac327608bc25b32fe6b55aaa0d4bb3f44"/>
+        <topic label="write" href="group___fs_posix_api.html#ga6556217b4010a1fa24d4171625cba2f7"/>
+        <topic label="lseek" href="group___fs_posix_api.html#ga8bd74caed008a66808d92d57fa74d9f6"/>
+        <topic label="rename" href="group___fs_posix_api.html#ga2ce7c2db9fdb6aec06afaf3cfc5979c7"/>
+        <topic label="unlink" href="group___fs_posix_api.html#gaf3cee068f32a919cdd638e0578c1e5f8"/>
+        <topic label="stat" href="group___fs_posix_api.html#gac21b705a5ebd42c4c46363250ab817bc"/>
+        <topic label="fstat" href="group___fs_posix_api.html#gac1759a877da2f37512096f3a491e4112"/>
+        <topic label="statfs" href="group___fs_posix_api.html#gae7af18cc5fa39f42a3be1bf1eb24119d"/>
+        <topic label="mkdir" href="group___fs_posix_api.html#ga548e5b744ca2e97beb61ad7aa41114e2"/>
+        <topic label="rmdir" href="group___fs_posix_api.html#ga570282ae7ba596263ec812b368d99b34"/>
+        <topic label="opendir" href="group___fs_posix_api.html#ga1632d8c06c14f295c6d9407b7fec67af"/>
+        <topic label="readdir" href="group___fs_posix_api.html#gaa7687571d2af8efd5153874ae6e678d9"/>
+        <topic label="telldir" href="group___fs_posix_api.html#gaaf08168ca632ba3f9385aa53261ae63d"/>
+        <topic label="seekdir" href="group___fs_posix_api.html#ga58829cca160034015b3dddc17bb502ab"/>
+        <topic label="rewinddir" href="group___fs_posix_api.html#ga08e6a89050229d246d07d9e17d57cb29"/>
+        <topic label="closedir" href="group___fs_posix_api.html#ga058e669d865116ec6419ea3a52207830"/>
+        <topic label="getcwd" href="group___fs_posix_api.html#ga3284211bd28346254245c9d4fd071d7f"/>
+      </topic>
+      <topic label="dfs_init" href="group___d_f_s.html#ga059e3377e4d073cfbe2987536a7ce4dd"/>
+      <topic label="dfs_lock" href="group___d_f_s.html#ga8fbd44e83279d3da28d999d25bca8952"/>
+      <topic label="dfs_unlock" href="group___d_f_s.html#ga2ac674bd319f61a6b1c9e2338018b523"/>
+      <topic label="dfs_subdir" href="group___d_f_s.html#ga90fc91be4455e48fd7d3f2a33ce599ee"/>
+      <topic label="dfs_normalize_path" href="group___d_f_s.html#gabd8ed9059034edfcf320864d0e537b9d"/>
+    </topic>
+    <topic label="finsh shell" href="group__finsh.html">
+      <topic label="FINSH_ERROR_OK" href="group__finsh.html#ga3488e933d5632544dc9a916134245af7"/>
+      <topic label="FINSH_ERROR_INVALID_TOKEN" href="group__finsh.html#ga64923347c4fc23842edd636c26d795a6"/>
+      <topic label="FINSH_ERROR_EXPECT_TYPE" href="group__finsh.html#ga1770f167ef1582ac09b41d3bed3ad3f3"/>
+      <topic label="FINSH_ERROR_UNKNOWN_TYPE" href="group__finsh.html#gac2ddf9ed1d596afb60c2d076dfdb2818"/>
+      <topic label="FINSH_ERROR_VARIABLE_EXIST" href="group__finsh.html#gaa4e83b37a8c73e8cfd10c763444aa7ce"/>
+      <topic label="FINSH_ERROR_EXPECT_OPERATOR" href="group__finsh.html#gaa2b4532fe15f9800b96741a9060795f7"/>
+      <topic label="FINSH_ERROR_MEMORY_FULL" href="group__finsh.html#gaff9a0273efba0367039731941b1deef7"/>
+      <topic label="FINSH_ERROR_UNKNOWN_OP" href="group__finsh.html#gaaba62469aa55c69494a5b6773de671ad"/>
+      <topic label="FINSH_ERROR_UNKNOWN_NODE" href="group__finsh.html#ga76ab95077f21b51fc82c736617c0ba4a"/>
+      <topic label="FINSH_ERROR_EXPECT_CHAR" href="group__finsh.html#gac4c47cabbf68dbdf3c17cd8e8a715b5e"/>
+      <topic label="FINSH_ERROR_UNEXPECT_END" href="group__finsh.html#ga859aef184195257c8577972e0fe20222"/>
+      <topic label="FINSH_ERROR_UNKNOWN_TOKEN" href="group__finsh.html#gae6f47a9204cfea6348f2df1de0c29383"/>
+      <topic label="FINSH_ERROR_NO_FLOAT" href="group__finsh.html#ga52a3188969ee71847bddf52ad1e714bf"/>
+      <topic label="FINSH_ERROR_UNKNOWN_SYMBOL" href="group__finsh.html#gaf19f58eb853fac234bef69752cf791bb"/>
+      <topic label="FINSH_ERROR_NULL_NODE" href="group__finsh.html#ga2f3c0f6a80e2bb99784f136510913c00"/>
+      <topic label="FINSH_FUNCTION_EXPORT" href="group__finsh.html#ga944b96ca55cb370cfe92211c68a55664"/>
+      <topic label="FINSH_FUNCTION_EXPORT_ALIAS" href="group__finsh.html#ga3b995a06148f4155bd274b3b4f893d76"/>
+      <topic label="MSH_CMD_EXPORT" href="group__finsh.html#ga8d756c1e1b9bd44c94a3f97ef62fb02b"/>
+      <topic label="finsh_type" href="group__finsh.html#gaed99f2320eea22a0d941d4095e47fdb9">
+        <topic label="finsh_type_unknown" href="group__finsh.html#ggaed99f2320eea22a0d941d4095e47fdb9ade53b28d63e2eb8bf9db1c8c208064bb"/>
+        <topic label="finsh_type_void" href="group__finsh.html#ggaed99f2320eea22a0d941d4095e47fdb9a8cd81668f94571c0b51d610e1b50938e"/>
+        <topic label="finsh_type_voidp" href="group__finsh.html#ggaed99f2320eea22a0d941d4095e47fdb9a6c6173f41a66c885762085a7565b5782"/>
+        <topic label="finsh_type_char" href="group__finsh.html#ggaed99f2320eea22a0d941d4095e47fdb9af9321e231cdf1308dc93f8fcc74cbb47"/>
+        <topic label="finsh_type_uchar" href="group__finsh.html#ggaed99f2320eea22a0d941d4095e47fdb9acc8233eadd3a86c9445b6f9ef1eb2409"/>
+        <topic label="finsh_type_charp" href="group__finsh.html#ggaed99f2320eea22a0d941d4095e47fdb9ad1c003eaf6ae93c7b6822e9645ea64be"/>
+        <topic label="finsh_type_short" href="group__finsh.html#ggaed99f2320eea22a0d941d4095e47fdb9a2e6dab856b6a2c434b0067505e89ffc8"/>
+        <topic label="finsh_type_ushort" href="group__finsh.html#ggaed99f2320eea22a0d941d4095e47fdb9ad1d657ad220b7809bc1d3f84b49ba308"/>
+        <topic label="finsh_type_shortp" href="group__finsh.html#ggaed99f2320eea22a0d941d4095e47fdb9a2d6a3286098af4a96d29fded58d9c810"/>
+        <topic label="finsh_type_int" href="group__finsh.html#ggaed99f2320eea22a0d941d4095e47fdb9aee5c9a462a5a9affc69d8e7bca870251"/>
+        <topic label="finsh_type_uint" href="group__finsh.html#ggaed99f2320eea22a0d941d4095e47fdb9abf1c00b19b36e41e1c4d1d7a374e59ae"/>
+        <topic label="finsh_type_intp" href="group__finsh.html#ggaed99f2320eea22a0d941d4095e47fdb9a95683e05fd61b3865f160bf59fdd1119"/>
+        <topic label="finsh_type_long" href="group__finsh.html#ggaed99f2320eea22a0d941d4095e47fdb9a6920dac1e59612b6d0b4d47268459396"/>
+        <topic label="finsh_type_ulong" href="group__finsh.html#ggaed99f2320eea22a0d941d4095e47fdb9a06b40671f2e419fc42f5811f5d60d484"/>
+        <topic label="finsh_type_longp" href="group__finsh.html#ggaed99f2320eea22a0d941d4095e47fdb9a3d1432a03da2b3976cd7cdb38a8f35bf"/>
+      </topic>
+      <topic label="finsh_syscall_append" href="group__finsh.html#gaa7c21ba556e9a84a8cc3a9c18ebeae07"/>
+      <topic label="finsh_sysvar_append" href="group__finsh.html#ga9e4df71d6d3d4b267063ce941a59ed1b"/>
+      <topic label="finsh_set_device" href="group__finsh.html#ga4ca70de04431b9f767dff9f2ba7dcc8b"/>
+      <topic label="finsh_get_device" href="group__finsh.html#ga2e05476dce5ac5afab26e0769292cf83"/>
+      <topic label="finsh_set_echo" href="group__finsh.html#gae80e3d53913894f5fbfcf9335205c649"/>
+      <topic label="finsh_get_echo" href="group__finsh.html#ga77d4ddaeaf41942986da9810c6f5b5ee"/>
+    </topic>
+    <topic label="Hardware Related Package" href="group__bsp.html">
+      <topic label="rt_hw_interrupt_disable" href="group__bsp.html#gaa56c3da0faca777694f042aa6557ca53"/>
+      <topic label="rt_hw_interrupt_enable" href="group__bsp.html#ga566def229b448a1d209a14834501dc3a"/>
+      <topic label="rt_hw_interrupt_init" href="group__bsp.html#gab40031c8c6d5fe45893912dc50b04639"/>
+      <topic label="rt_hw_interrupt_mask" href="group__bsp.html#ga9528763a2ebf52c2be6e9349704672fc"/>
+      <topic label="rt_hw_interrupt_umask" href="group__bsp.html#gaf08efe992a1717a83757e99295a1b33c"/>
+      <topic label="rt_hw_interrupt_install" href="group__bsp.html#gae967a258c431792b35e4e72d1691d233"/>
+      <topic label="rt_hw_cpu_reset" href="group__bsp.html#gabe7a3d803d027af563d6aa604e94d821"/>
+      <topic label="rt_hw_cpu_shutdown" href="group__bsp.html#ga5575183b7ec3e1a5255ff373831a8ea6"/>
+    </topic>
+    <topic label="RT-Thread Kernel API" href="group___kernel.html">
+      <topic label="Thread Management" href="group___thread.html">
+        <topic label="rt_thread" href="structrt__thread.html">
+          <topic label="name" href="structrt__thread.html#a89b5c7fb22abb868056586e365b3fbd3"/>
+          <topic label="type" href="structrt__thread.html#a9e66117dc5b76db6d0d78aa3077b57da"/>
+          <topic label="flags" href="structrt__thread.html#a0a62e2cba8609469b351472d615fd326"/>
+          <topic label="module_id" href="structrt__thread.html#a6cca8c4a6cbf727dfaac6a48bb19351a"/>
+          <topic label="list" href="structrt__thread.html#a30dd781aa72ce771beef5ed7a4cdbbd7"/>
+          <topic label="tlist" href="structrt__thread.html#a8484a36933357e7c6f871364d9f2d3a9"/>
+          <topic label="sp" href="structrt__thread.html#abc9d01c30e0fc9872df2fd5c044e31e0"/>
+          <topic label="entry" href="structrt__thread.html#adcdaf75f05998c6485544c337526da52"/>
+          <topic label="parameter" href="structrt__thread.html#a153b0810eaeb3c0508f3fdc9027a301e"/>
+          <topic label="stack_addr" href="structrt__thread.html#a2bb90555aaff4a54699c88c2789e0407"/>
+          <topic label="stack_size" href="structrt__thread.html#a08915cf4c568a17fb73b938c82f9cf25"/>
+          <topic label="error" href="structrt__thread.html#a32eec53f34cb610335b085a642e6e995"/>
+          <topic label="stat" href="structrt__thread.html#a16a3dd776f8cfed732deda73535dbb00"/>
+          <topic label="current_priority" href="structrt__thread.html#a90875799a0ea47e5558f104702a20548"/>
+          <topic label="init_priority" href="structrt__thread.html#a281785b80ad0dc2e7d0c5404d32c67f9"/>
+          <topic label="init_tick" href="structrt__thread.html#a3da450b626778b5cf1125174783c1989"/>
+          <topic label="remaining_tick" href="structrt__thread.html#a763db3299b6a4c69ad7aa5b7815f3daf"/>
+          <topic label="thread_timer" href="structrt__thread.html#ac787f3fbcdc5f8d012f2d6d9923f5560"/>
+          <topic label="cleanup" href="structrt__thread.html#ac7c6d56c56677160b3c651571bcb127a"/>
+          <topic label="user_data" href="structrt__thread.html#ad237699b29310d61d8d709253782372b"/>
+        </topic>
+        <topic label="RT_THREAD_INIT" href="group___thread.html#gae743a0f57a34ce46c0687ff787972ded"/>
+        <topic label="RT_THREAD_READY" href="group___thread.html#ga3d2482a36a666c7e796f0fee67c0d3f3"/>
+        <topic label="RT_THREAD_SUSPEND" href="group___thread.html#gad67bab390563b8b80a2ee7a847660f85"/>
+        <topic label="RT_THREAD_RUNNING" href="group___thread.html#ga76fc51507d2201f644b94b916560778b"/>
+        <topic label="RT_THREAD_BLOCK" href="group___thread.html#ga85729ec69f5f51133e5d1e218f1bd504"/>
+        <topic label="RT_THREAD_CLOSE" href="group___thread.html#ga1c39773ce3aefe35d15e68f34ddedc9a"/>
+        <topic label="RT_THREAD_CTRL_STARTUP" href="group___thread.html#gae94f55354bd0e145bd855bd38db5c442"/>
+        <topic label="RT_THREAD_CTRL_CLOSE" href="group___thread.html#gad875eaaa2400aef8f6078f5d1f8297b3"/>
+        <topic label="RT_THREAD_CTRL_CHANGE_PRIORITY" href="group___thread.html#gad59e5c8ec96f8b3231947b0c665e5fba"/>
+        <topic label="RT_THREAD_CTRL_INFO" href="group___thread.html#ga45ba1445796c920c2ae943b419e19d4b"/>
+        <topic label="rt_thread_idle_excute" href="group___thread.html#ga9c10243ac4c20396787df151ea13f4eb"/>
+        <topic label="rt_schedule" href="group___thread.html#gae9f99bb5e2e2032b10ddda7a03eefe24"/>
+        <topic label="rt_enter_critical" href="group___thread.html#gac4c796a7c2031213d9d2416c6e4a5b6a"/>
+        <topic label="rt_exit_critical" href="group___thread.html#ga35c56c2d56e2bb0f2df95abc752143df"/>
+        <topic label="rt_critical_level" href="group___thread.html#gaf3f894e8efadefda238a5e5ab45c7e21"/>
+        <topic label="rt_thread_init" href="group___thread.html#gacd985aa60939b95e510f144610f001b9"/>
+        <topic label="rt_thread_self" href="group___thread.html#ga6133c1b6b27d972447156db15e7c1ce7"/>
+        <topic label="rt_thread_startup" href="group___thread.html#ga04b743537fd099e204fc292e57b4aa5a"/>
+        <topic label="rt_thread_detach" href="group___thread.html#ga514825b80304477ecf377d721da409b0"/>
+        <topic label="rt_thread_create" href="group___thread.html#gacb215b161f17c26b5e19c28cd0119e7b"/>
+        <topic label="rt_thread_delete" href="group___thread.html#ga6d64eb4d0a485461049616808f4ce177"/>
+        <topic label="rt_thread_yield" href="group___thread.html#ga5703a0d7351b37a1c00874a362626ea3"/>
+        <topic label="rt_thread_sleep" href="group___thread.html#ga540da4c76db4f081b668766042e7490e"/>
+        <topic label="rt_thread_delay" href="group___thread.html#ga6b18459cac67e3695447e69b997fc74e"/>
+        <topic label="rt_thread_control" href="group___thread.html#gaec4d1d7bababdead1e82fa880ac1c6ea"/>
+        <topic label="rt_thread_suspend" href="group___thread.html#gab75228a43588dc35570bce6a2c18f3f0"/>
+        <topic label="rt_thread_resume" href="group___thread.html#gab4f29aff4fec96d92f6321fa7b00c379"/>
+        <topic label="rt_thread_timeout" href="group___thread.html#ga8a0288d712bd2d99d11231d4b073c5f3"/>
+        <topic label="rt_thread_find" href="group___thread.html#ga789a0782597b4d7f7c6c16eacc6084a8"/>
+        <topic label="rt_thread_idle_init" href="group___thread.html#gae0dcacf89c3d97272b185f7162a3e0c3"/>
+        <topic label="rt_thread_idle_sethook" href="group___thread.html#ga47689b07705c1e7892f6ec397152e9ac"/>
+        <topic label="rt_system_scheduler_init" href="group___thread.html#ga5aa2c0c67999e20ce8693ad3c8e624f0"/>
+        <topic label="rt_system_scheduler_start" href="group___thread.html#ga9aa8a561e0caf5e13126834c4f4bb681"/>
+      </topic>
+      <topic label="Clock and Timer Management" href="group___clock.html">
+        <topic label="rt_timer" href="structrt__timer.html">
+          <topic label="parent" href="structrt__timer.html#a1a3b0ccd5039808ff180c0507812d629"/>
+          <topic label="timeout_func" href="structrt__timer.html#a99212839ec394738c375a4d55d835e16"/>
+          <topic label="parameter" href="structrt__timer.html#a7865afa39d2596876ce1e7c3275c9042"/>
+          <topic label="init_tick" href="structrt__timer.html#af958eb6ee48462b264972242f9b6d9c3"/>
+          <topic label="timeout_tick" href="structrt__timer.html#afc375a971b021a1c75a6fba94742b136"/>
+        </topic>
+        <topic label="RT_TIMER_FLAG_DEACTIVATED" href="group___clock.html#gaf00c192dcbc7a949beebaec8e8bf9232"/>
+        <topic label="RT_TIMER_FLAG_ACTIVATED" href="group___clock.html#ga174b5f60b760b5e421616ff17cb15c4b"/>
+        <topic label="RT_TIMER_FLAG_ONE_SHOT" href="group___clock.html#gae9ef5d12543ac6b2113741ed503fc9c3"/>
+        <topic label="RT_TIMER_FLAG_PERIODIC" href="group___clock.html#ga52a9fd903938762a98408771bd139097"/>
+        <topic label="RT_TIMER_FLAG_HARD_TIMER" href="group___clock.html#gad750e1e3947c267e57be487dad3b4300"/>
+        <topic label="RT_TIMER_FLAG_SOFT_TIMER" href="group___clock.html#ga0df6e547917d460610fd734ae84daca3"/>
+        <topic label="RT_TIMER_CTRL_SET_TIME" href="group___clock.html#ga9b1d12b8471acff4c8f9eebb4216c7df"/>
+        <topic label="RT_TIMER_CTRL_GET_TIME" href="group___clock.html#ga2bbc0b4b2a4914c8eea4d1263e52ab85"/>
+        <topic label="RT_TIMER_CTRL_SET_ONESHOT" href="group___clock.html#ga460a57e7d4fe4ea24772affaca3d62bc"/>
+        <topic label="RT_TIMER_CTRL_SET_PERIODIC" href="group___clock.html#ga2e125a6714e6a5ff5756129cadbe3a7d"/>
+        <topic label="rt_tick_get" href="group___clock.html#ga6e2aa36f263bddcddae01a91986fcdae"/>
+        <topic label="rt_tick_set" href="group___clock.html#ga77af135da16a0b9e1c4a351f4bee6dbd"/>
+        <topic label="rt_tick_increase" href="group___clock.html#ga29337f93377626f651dd393e1bb608fb"/>
+        <topic label="rt_tick_from_millisecond" href="group___clock.html#gaf9f1453af745c5feeb9a7f7f065f025b"/>
+        <topic label="rt_timer_init" href="group___clock.html#ga678d29f53307113da6b1578c9d3423cb"/>
+        <topic label="rt_timer_detach" href="group___clock.html#ga0d1aca4fc86f1dbd88945be8820793bb"/>
+        <topic label="rt_timer_create" href="group___clock.html#ga9e6911989135de1b989dd7fe1b3543ce"/>
+        <topic label="rt_timer_delete" href="group___clock.html#gaf6c147a1f25bd5ac9e72a142ab36a4ac"/>
+        <topic label="rt_timer_start" href="group___clock.html#ga3aeb8f8350b3a7403d8629231396c016"/>
+        <topic label="rt_timer_stop" href="group___clock.html#gaaef9923c8b90ede02e12826c58c6f8a2"/>
+        <topic label="rt_timer_control" href="group___clock.html#ga4f59e029dbca9de4db8821a45a0aaf53"/>
+        <topic label="rt_timer_check" href="group___clock.html#ga3a29a70b401aa9d5c5dbb7269fd0ac57"/>
+        <topic label="rt_timer_next_timeout_tick" href="group___clock.html#ga51af0ff7d55ff298adfb87d276d0d678"/>
+        <topic label="rt_system_tick_init" href="group___clock.html#gae62f4fc2660b4b42ec0504ea971315bf"/>
+        <topic label="rt_system_timer_init" href="group___clock.html#ga9f109e873cdcf963059e968cedb76c36"/>
+        <topic label="rt_system_timer_thread_init" href="group___clock.html#gac5298e02b109e4885723f6116fb11814"/>
+        <topic label="rt_timer_timeout_sethook" href="group___clock.html#gaf048118e9baee3eb9933a19a0ab80f69"/>
+      </topic>
+      <topic label="Kernel Object Management" href="group___kernel_object.html">
+        <topic label="rt_object" href="structrt__object.html">
+          <topic label="name" href="structrt__object.html#a2546fe32b051c21668f5946e05de77cc"/>
+          <topic label="type" href="structrt__object.html#a87fff935df5a56027657597120071149"/>
+          <topic label="flag" href="structrt__object.html#aa2b7be2eb353a54b8319ae285fff23f4"/>
+          <topic label="module_id" href="structrt__object.html#a77ec1d0595edbc3e609d982fe71ba58e"/>
+          <topic label="list" href="structrt__object.html#a69dc994d5641cee2afddb6cf1b737405"/>
+        </topic>
+        <topic label="rt_object_information" href="structrt__object__information.html">
+          <topic label="type" href="structrt__object__information.html#ade4fad90f69638200ccb2cbcc9f8e298"/>
+          <topic label="object_list" href="structrt__object__information.html#ad201bcecb2a95d3516b06e020ec24e73"/>
+          <topic label="object_size" href="structrt__object__information.html#ada7e29b16c914f1692557fdc98f471fc"/>
+        </topic>
+        <topic label="RT_OBJECT_FLAG_MODULE" href="group___kernel_object.html#gadc83c17483bce09fad91cc8b2a3d0ed5"/>
+        <topic label="RT_OBJECT_HOOK_CALL" href="group___kernel_object.html#ga40f88eaca0029aea304a7757c85431b8"/>
+        <topic label="rt_object_t" href="group___kernel_object.html#ga91d74b4f1699da278153af455dadcd70"/>
+        <topic label="rt_object_class_type" href="group___kernel_object.html#ga38a532bcb1bd3f12685db4219b761b56">
+          <topic label="RT_Object_Class_Thread" href="group___kernel_object.html#gga38a532bcb1bd3f12685db4219b761b56a548d26bb698e083d38bd8f0649441a52"/>
+          <topic label="RT_Object_Class_Semaphore" href="group___kernel_object.html#gga38a532bcb1bd3f12685db4219b761b56a850c61dd598ead7fcf06baec83094c70"/>
+          <topic label="RT_Object_Class_Mutex" href="group___kernel_object.html#gga38a532bcb1bd3f12685db4219b761b56afd5b06c025abc6ebc90d0c3ce1e4f6fd"/>
+          <topic label="RT_Object_Class_Event" href="group___kernel_object.html#gga38a532bcb1bd3f12685db4219b761b56ac379eb33745638b59cd9098f46fda7a6"/>
+          <topic label="RT_Object_Class_MailBox" href="group___kernel_object.html#gga38a532bcb1bd3f12685db4219b761b56a72c12fbfbf3ff1080debc6ee3d4a900b"/>
+          <topic label="RT_Object_Class_MessageQueue" href="group___kernel_object.html#gga38a532bcb1bd3f12685db4219b761b56a47535f15636cfef3f4d40cd2258e26fd"/>
+          <topic label="RT_Object_Class_MemPool" href="group___kernel_object.html#gga38a532bcb1bd3f12685db4219b761b56a54439386d6e606a5596023616e28c096"/>
+          <topic label="RT_Object_Class_Device" href="group___kernel_object.html#gga38a532bcb1bd3f12685db4219b761b56af875e996a48417b20a531df21c615f26"/>
+          <topic label="RT_Object_Class_Timer" href="group___kernel_object.html#gga38a532bcb1bd3f12685db4219b761b56a29bccdc3303ac04a7e25d40fea97ab12"/>
+          <topic label="RT_Object_Class_Module" href="group___kernel_object.html#gga38a532bcb1bd3f12685db4219b761b56a1e5b83d7de96e8d29324a710094f099b"/>
+          <topic label="RT_Object_Class_Unknown" href="group___kernel_object.html#gga38a532bcb1bd3f12685db4219b761b56a7fd1d3fe31dd8000703a6198bd919c74"/>
+          <topic label="RT_Object_Class_Static" href="group___kernel_object.html#gga38a532bcb1bd3f12685db4219b761b56ac3a51281d7f8fee902e6324673d39cec"/>
+        </topic>
+        <topic label="rt_object_get_information" href="group___kernel_object.html#ga8cb85e5812b8e7c3705fb3c7702c992b"/>
+        <topic label="rt_object_init" href="group___kernel_object.html#ga0a86356c83e8264841fcb83255f72014"/>
+        <topic label="rt_object_detach" href="group___kernel_object.html#gad3a5cf0c036738c6f0ee560a62bc93be"/>
+        <topic label="rt_object_allocate" href="group___kernel_object.html#ga661bb999394a29404c20c7f3e58e5f64"/>
+        <topic label="rt_object_delete" href="group___kernel_object.html#ga0479fb23b766d96e9611ed32becc2797"/>
+        <topic label="rt_object_is_systemobject" href="group___kernel_object.html#ga0b4471fdda93017477bc81ca357481ac"/>
+        <topic label="rt_object_find" href="group___kernel_object.html#ga6c82dbb4ae114918c5c96d0dca3957eb"/>
+        <topic label="rt_system_object_init" href="group___kernel_object.html#ga0126bb4a5edd998ff952e1129e9e0cb9"/>
+        <topic label="rt_object_attach_sethook" href="group___kernel_object.html#ga8bac83f313b9fb0215c424bec05174bd"/>
+        <topic label="rt_object_detach_sethook" href="group___kernel_object.html#ga28dd3af85707fc6c9bf548fe53460aca"/>
+        <topic label="rt_object_trytake_sethook" href="group___kernel_object.html#gabfce5c06de6e1cd6b661b05cb9dd6242"/>
+        <topic label="rt_object_take_sethook" href="group___kernel_object.html#ga69054a027dcc8483b65fd48740eb3717"/>
+        <topic label="rt_object_put_sethook" href="group___kernel_object.html#gad107a57fce56ef991d673fa21c6d065a"/>
+      </topic>
+      <topic label="Inter-Thread Communication" href="group___i_p_c.html">
+        <topic label="rt_ipc_object" href="structrt__ipc__object.html">
+          <topic label="parent" href="structrt__ipc__object.html#a1113d054268319ad7840b3362eba7ad2"/>
+          <topic label="suspend_thread" href="structrt__ipc__object.html#a6b016bc028f03601f1a8efd0fb0e91e2"/>
+        </topic>
+        <topic label="rt_semaphore" href="structrt__semaphore.html">
+          <topic label="parent" href="structrt__semaphore.html#ae30f5ce3f4e89636b0f5b19755f39df7"/>
+          <topic label="value" href="structrt__semaphore.html#a320fc41815308456699a4d3efee49418"/>
+        </topic>
+        <topic label="rt_mutex" href="structrt__mutex.html">
+          <topic label="parent" href="structrt__mutex.html#a8d34059b8d2907555498f824ff8b850c"/>
+          <topic label="value" href="structrt__mutex.html#aa7ea827976098e306efd7c5c6c6e15f6"/>
+          <topic label="original_priority" href="structrt__mutex.html#a6479136cda18a790607d353b36176266"/>
+          <topic label="hold" href="structrt__mutex.html#af92bda0f20eac114ac96d5bb2ab05f37"/>
+          <topic label="owner" href="structrt__mutex.html#ab0275a5a653896be4f43f1104e8cdd8b"/>
+        </topic>
+        <topic label="rt_mailbox" href="structrt__mailbox.html">
+          <topic label="parent" href="structrt__mailbox.html#a2d44d61cebf881cc505fbbc1946b3b2e"/>
+          <topic label="msg_pool" href="structrt__mailbox.html#aa4c122c0d9e429f2a37ab3fa87c3df4d"/>
+          <topic label="size" href="structrt__mailbox.html#af3016cff0753dac4b6684c2da246e446"/>
+          <topic label="entry" href="structrt__mailbox.html#ad850b26d9717d9467259f79ec56849f3"/>
+          <topic label="in_offset" href="structrt__mailbox.html#a81a6208c7eb0056b992541e07d2f8eb7"/>
+          <topic label="out_offset" href="structrt__mailbox.html#ab81f4324444c3440de54101fd9f6f028"/>
+          <topic label="suspend_sender_thread" href="structrt__mailbox.html#a11aef5d6e06f6459b7c1d56c835c7f9e"/>
+        </topic>
+        <topic label="rt_messagequeue" href="structrt__messagequeue.html">
+          <topic label="parent" href="structrt__messagequeue.html#a24763c7e54bb3f4783daf3fb9c103dfe"/>
+          <topic label="msg_pool" href="structrt__messagequeue.html#add66b801d59516f96b5657f820db545c"/>
+          <topic label="msg_size" href="structrt__messagequeue.html#a63b5552f40bacdf02983bf9cf4cad24d"/>
+          <topic label="max_msgs" href="structrt__messagequeue.html#ac14765aec551079b253e817ff8e5373b"/>
+          <topic label="entry" href="structrt__messagequeue.html#ad92b222d4d0dce750c9055f0499988c1"/>
+          <topic label="msg_queue_head" href="structrt__messagequeue.html#aaf1a21b9e2f00b53544ed695e4d2aacc"/>
+          <topic label="msg_queue_tail" href="structrt__messagequeue.html#a3c28b474eea1aaacfc75e870dbd50162"/>
+          <topic label="msg_queue_free" href="structrt__messagequeue.html#af45a62f5084904df25be7d63b2252c85"/>
+        </topic>
+        <topic label="RT_IPC_FLAG_FIFO" href="group___i_p_c.html#ga1b618f6714ea8f49a45ea4d105aaf5d5"/>
+        <topic label="RT_IPC_FLAG_PRIO" href="group___i_p_c.html#ga296aeeb69fe2c8c5012e1059df4364a6"/>
+        <topic label="RT_IPC_CMD_UNKNOWN" href="group___i_p_c.html#gae7ea862e2d1edce01e015bdffe49d586"/>
+        <topic label="RT_IPC_CMD_RESET" href="group___i_p_c.html#ga947606ce2a31a2d70e287c38a09dab3b"/>
+        <topic label="RT_WAITING_FOREVER" href="group___i_p_c.html#ga923d8e409f9daa8843978d6805ebcdeb"/>
+        <topic label="RT_WAITING_NO" href="group___i_p_c.html#ga78a487898fe750a9f7e9c37911fbe7cb"/>
+        <topic label="RT_EVENT_FLAG_AND" href="group___i_p_c.html#ga449614d0024ade7e81e53462bce12a60"/>
+        <topic label="RT_EVENT_FLAG_OR" href="group___i_p_c.html#ga1685d2d8ef3af705fdc297405eda02ba"/>
+        <topic label="RT_EVENT_FLAG_CLEAR" href="group___i_p_c.html#gaf1c42d6c619445f9151e76c3242ef052"/>
+        <topic label="rt_ipc_object_init" href="group___i_p_c.html#gacb55d0444383689161388fe89f415e92"/>
+        <topic label="rt_ipc_list_suspend" href="group___i_p_c.html#ga76ac02d6065733bd88ad9c225d17d7cc"/>
+        <topic label="rt_ipc_list_resume" href="group___i_p_c.html#ga3305383c1afa8b8d6077d9a43fc05697"/>
+        <topic label="rt_ipc_list_resume_all" href="group___i_p_c.html#ga9aff869d3f5db5c1788b45bb6feb9b4f"/>
+        <topic label="rt_sem_init" href="group___i_p_c.html#ga023e00dd1ae86ddbeb2dbf92771e17ea"/>
+        <topic label="rt_sem_detach" href="group___i_p_c.html#ga7dd3560a50be21e132c71f622870c500"/>
+        <topic label="rt_sem_create" href="group___i_p_c.html#ga61a4960ff4a173f1d1c35ede42e1227f"/>
+        <topic label="rt_sem_delete" href="group___i_p_c.html#ga0e45d2b96aab649832b6756d68629bbe"/>
+        <topic label="rt_sem_take" href="group___i_p_c.html#gaad0807b1eb15fe12a67de122e28f20eb"/>
+        <topic label="rt_sem_trytake" href="group___i_p_c.html#gaf24da991e29df68a49062d89b95c7de5"/>
+        <topic label="rt_sem_release" href="group___i_p_c.html#gad9a5760bc4c7faeb08a7d9c112506f76"/>
+        <topic label="rt_sem_control" href="group___i_p_c.html#ga4f05b6881e0d7c456b7bc1412fa73392"/>
+        <topic label="rt_mutex_init" href="group___i_p_c.html#ga90c29e470fff8981a976ec7f9bb0546e"/>
+        <topic label="rt_mutex_detach" href="group___i_p_c.html#ga7a8b48c0e6884e2c22d08e9e7e98a613"/>
+        <topic label="rt_mutex_create" href="group___i_p_c.html#ga5ce96ed48d83086aab6ecadebac6d0c6"/>
+        <topic label="rt_mutex_delete" href="group___i_p_c.html#ga8a74f51362fc566500bec135599dd5a9"/>
+        <topic label="rt_mutex_take" href="group___i_p_c.html#ga77845c9c0da68d07225c4c4699f114f0"/>
+        <topic label="rt_mutex_release" href="group___i_p_c.html#gad49c2ee6dc578e6687919f01a4ac5137"/>
+        <topic label="rt_mutex_control" href="group___i_p_c.html#gadf759ed1d28b25c78893aa4236e2e7b5"/>
+        <topic label="rt_event_init" href="group___i_p_c.html#gab0fad38227b1ebd616a807a09f2eb772"/>
+        <topic label="rt_event_detach" href="group___i_p_c.html#ga43f0b137c7e6d5c2152f6b1d39b57616"/>
+        <topic label="rt_event_create" href="group___i_p_c.html#ga3d752d98e73c0adcdd2b0df24e67efdb"/>
+        <topic label="rt_event_delete" href="group___i_p_c.html#ga840d6210713f186fe248a032a68d5e6d"/>
+        <topic label="rt_event_send" href="group___i_p_c.html#ga92efdf32aaf073d733f3bafd02d730e5"/>
+        <topic label="rt_event_recv" href="group___i_p_c.html#ga77e0517918bc7dabd458c2a751a59263"/>
+        <topic label="rt_event_control" href="group___i_p_c.html#gafb0ca02b1983270b2cc911d6c5682ed0"/>
+        <topic label="rt_mb_init" href="group___i_p_c.html#gac05bd0c179f754c32f83a7b013e8953b"/>
+        <topic label="rt_mb_detach" href="group___i_p_c.html#ga3312c6094d9c21af33a74f444a8c5993"/>
+        <topic label="rt_mb_create" href="group___i_p_c.html#ga7719d644b6f58399894dec1c6353ac37"/>
+        <topic label="rt_mb_delete" href="group___i_p_c.html#ga71e9e49401cbbed83515ace6fa13c27b"/>
+        <topic label="rt_mb_send_wait" href="group___i_p_c.html#gab212d0f70fbf7ac83a2ba6b1f5e4e938"/>
+        <topic label="rt_mb_send" href="group___i_p_c.html#ga9d800aa0faa0ab5ccd3b0e75837db047"/>
+        <topic label="rt_mb_recv" href="group___i_p_c.html#ga363ad0b0f09a2b1f62dad79199c4d717"/>
+        <topic label="rt_mb_control" href="group___i_p_c.html#gaebd2849f8d9fcc6645191eb22508e798"/>
+        <topic label="rt_mq_init" href="group___i_p_c.html#gaac5b76df894964c908271ab0951f7e86"/>
+        <topic label="rt_mq_detach" href="group___i_p_c.html#ga1ed6238494fac3ab081a90d9c563a8f3"/>
+        <topic label="rt_mq_create" href="group___i_p_c.html#ga35acff654ecee2a76d5555e9683d8470"/>
+        <topic label="rt_mq_delete" href="group___i_p_c.html#gacbf0bfedc6677ca8357d8b345c9026c9"/>
+        <topic label="rt_mq_send" href="group___i_p_c.html#ga83ca81f98ff7d1c4212a5ebdcab638fb"/>
+        <topic label="rt_mq_urgent" href="group___i_p_c.html#ga29ff4d36285c0d81eb19a9fd03708e18"/>
+        <topic label="rt_mq_recv" href="group___i_p_c.html#ga1a676c587c7b403b2585a7152905e39a"/>
+        <topic label="rt_mq_control" href="group___i_p_c.html#ga6956acd1324f5e8ebc7946c13152707f"/>
+      </topic>
+      <topic label="Memory Management" href="group___m_m.html">
+        <topic label="rt_mempool" href="structrt__mempool.html">
+          <topic label="parent" href="structrt__mempool.html#ac60b315b45b2a3f15c8f5763c0a88886"/>
+          <topic label="start_address" href="structrt__mempool.html#a8c4783f5987099205e935f9124760d3c"/>
+          <topic label="size" href="structrt__mempool.html#a358b4d35e2ef602461506baa5fc9de85"/>
+          <topic label="block_size" href="structrt__mempool.html#a3a5bbd0c25f8e166cf0cee6568d5f22b"/>
+          <topic label="block_list" href="structrt__mempool.html#ad3fcb1189ca2dff9be268e285992c625"/>
+          <topic label="block_total_count" href="structrt__mempool.html#a25efbd1cdd87127c5221ee8688e04277"/>
+          <topic label="block_free_count" href="structrt__mempool.html#ae9af793d845659781f7c14ed4d23c235"/>
+          <topic label="suspend_thread" href="structrt__mempool.html#aa494ddf482327e878499499a874e8ef3"/>
+          <topic label="suspend_thread_count" href="structrt__mempool.html#a026c1a71fee95a5c0506e520d6dc4f55"/>
+        </topic>
+        <topic label="rt_malloc" href="group___m_m.html#ga6f19fbf07d6cf7ac5c91af52352644f6"/>
+        <topic label="rt_realloc" href="group___m_m.html#ga1986c303c58c9b98f0326954d73ede21"/>
+        <topic label="rt_calloc" href="group___m_m.html#ga89c02c2964ca603cf87912871bafa1b4"/>
+        <topic label="rt_free" href="group___m_m.html#gae5d286642b49be193200d11d6729ca66"/>
+        <topic label="rt_mp_init" href="group___m_m.html#ga1a6bc99e5cb8663be2f1882410448f94"/>
+        <topic label="rt_mp_detach" href="group___m_m.html#ga65fc7bef71be142744e517eebe13fc04"/>
+        <topic label="rt_mp_create" href="group___m_m.html#gabe8c74161a1d6f456e67efb2c16195b7"/>
+        <topic label="rt_mp_delete" href="group___m_m.html#gace1b1218858d5ec8a95be226ae897f26"/>
+        <topic label="rt_mp_alloc" href="group___m_m.html#ga531984d42851ffa0fd7a14bf67f15c22"/>
+        <topic label="rt_mp_free" href="group___m_m.html#ga65371665abde3bed7379c72d5ea225e2"/>
+        <topic label="rt_mp_alloc_sethook" href="group___m_m.html#ga358d3559267d1c8c66c836ed2e08433b"/>
+        <topic label="rt_mp_free_sethook" href="group___m_m.html#gafd43b13db5623925756b7a3968aa3b01"/>
+        <topic label="rt_system_heap_init" href="group___m_m.html#gafa6feb60f6204d1783bc3bc324b886e7"/>
+        <topic label="rt_malloc_align" href="group___m_m.html#gaf2654f08787ce7935c635c0343970f6a"/>
+        <topic label="rt_free_align" href="group___m_m.html#gabf1ea8f43781620e7b08fb1868e32b92"/>
+        <topic label="rt_malloc_sethook" href="group___m_m.html#ga518e835654e9ee72ced505e949564e4b"/>
+        <topic label="rt_free_sethook" href="group___m_m.html#gaf556549fc541bfc634f37f2dca004547"/>
+      </topic>
+      <topic label="Device System" href="group___device.html">
+        <topic label="rt_device" href="structrt__device.html">
+          <topic label="parent" href="structrt__device.html#a52df486399b65f49455698b55b656d8d"/>
+          <topic label="type" href="structrt__device.html#a0b8dba8f32d49291b85e54d13520b871"/>
+          <topic label="flag" href="structrt__device.html#a43f1618323314be10c88bbac14ab1561"/>
+          <topic label="open_flag" href="structrt__device.html#a0585a1c5e745441dd6d56663ed9e6cd4"/>
+          <topic label="ref_count" href="structrt__device.html#a432bca55aa2144bc5761015f57f017c3"/>
+          <topic label="device_id" href="structrt__device.html#a31db6fb6da677fd9904a8ca436bff640"/>
+          <topic label="user_data" href="structrt__device.html#a7abe4976f1632005eb09e0ed59ba99ef"/>
+        </topic>
+        <topic label="rt_device_blk_geometry" href="structrt__device__blk__geometry.html">
+          <topic label="sector_count" href="structrt__device__blk__geometry.html#a0954c634b56f590a91ea7c6d87b20531"/>
+          <topic label="bytes_per_sector" href="structrt__device__blk__geometry.html#aeb4ef7bd1c3f03f07f6fab722aa1fad5"/>
+          <topic label="block_size" href="structrt__device__blk__geometry.html#a02cdb472708dfa348c9e59a65574e936"/>
+        </topic>
+        <topic label="rt_device_blk_sectors" href="structrt__device__blk__sectors.html">
+          <topic label="sector_begin" href="structrt__device__blk__sectors.html#abdb868af6de958a4996556791f47ea4e"/>
+          <topic label="sector_end" href="structrt__device__blk__sectors.html#acba703a0aa4d37dacb8afc92a0f7bb31"/>
+        </topic>
+        <topic label="rt_device_graphic_info" href="structrt__device__graphic__info.html">
+          <topic label="pixel_format" href="structrt__device__graphic__info.html#a2bb36d6effd52eeeddd0c9557615aef6"/>
+          <topic label="bits_per_pixel" href="structrt__device__graphic__info.html#a421bd32816ea1dad3add44d1c78f9273"/>
+          <topic label="reserved" href="structrt__device__graphic__info.html#a2db41625bdfdbad7a21c274cc1fb98be"/>
+          <topic label="width" href="structrt__device__graphic__info.html#a005a28be4512dc1bcd657331868597e0"/>
+          <topic label="height" href="structrt__device__graphic__info.html#ad8c8c9fda6f3109169267dc81aed5deb"/>
+          <topic label="framebuffer" href="structrt__device__graphic__info.html#ae54ef435f8e5bc5317bc3c6cd1d2b65b"/>
+        </topic>
+        <topic label="rt_device_rect_info" href="structrt__device__rect__info.html">
+          <topic label="x" href="structrt__device__rect__info.html#aa76f3dd7ea14057db862c7ffad524799"/>
+          <topic label="y" href="structrt__device__rect__info.html#a11bcb47ee4fddef2852f99a539f045ee"/>
+          <topic label="width" href="structrt__device__rect__info.html#a1f6ad5365962a838cea665a3db53f2cb"/>
+          <topic label="height" href="structrt__device__rect__info.html#a0cad394b7fcd23e9f48950c211dc6ebd"/>
+        </topic>
+        <topic label="rt_device_graphic_ops" href="structrt__device__graphic__ops.html">
+        </topic>
+        <topic label="RT_DEVICE_FLAG_DEACTIVATE" href="group___device.html#ga2944a0dadfee3da236244108ee64ef23"/>
+        <topic label="RT_DEVICE_FLAG_RDONLY" href="group___device.html#gae55023ca390d9c9db1e36f47d70b7bef"/>
+        <topic label="RT_DEVICE_FLAG_WRONLY" href="group___device.html#ga23a6a0bf94d7ac84e205b25090ccecac"/>
+        <topic label="RT_DEVICE_FLAG_RDWR" href="group___device.html#ga9e347dc85aee3d0316e9544e65150b6a"/>
+        <topic label="RT_DEVICE_FLAG_REMOVABLE" href="group___device.html#gafab1082cb2c2c23d3098889e52880eb2"/>
+        <topic label="RT_DEVICE_FLAG_STANDALONE" href="group___device.html#ga614c2568c11b488d0c6ab6f77e178933"/>
+        <topic label="RT_DEVICE_FLAG_ACTIVATED" href="group___device.html#gafce8c8e2f97455644d244f841292406a"/>
+        <topic label="RT_DEVICE_FLAG_SUSPENDED" href="group___device.html#ga77f4d95ded0bdd0012942bad5b676d07"/>
+        <topic label="RT_DEVICE_FLAG_STREAM" href="group___device.html#ga35474a8eeb00f8a72b2f09cbfae9236d"/>
+        <topic label="RT_DEVICE_FLAG_INT_RX" href="group___device.html#ga3475a6ac901802ed9fe50f5c13f6274b"/>
+        <topic label="RT_DEVICE_FLAG_DMA_RX" href="group___device.html#ga3bee223726cc7b3c82b93c873bc6c0ea"/>
+        <topic label="RT_DEVICE_FLAG_INT_TX" href="group___device.html#gac6963e9aaa345ef576d8c3a378a670e5"/>
+        <topic label="RT_DEVICE_FLAG_DMA_TX" href="group___device.html#gac4474c2de32e07786ce187e582c45932"/>
+        <topic label="RT_DEVICE_OFLAG_CLOSE" href="group___device.html#gaded7e734d35ad96413265a830f2ae0c3"/>
+        <topic label="RT_DEVICE_OFLAG_RDONLY" href="group___device.html#ga35bc30b5382c33312b5c4162936cc62f"/>
+        <topic label="RT_DEVICE_OFLAG_WRONLY" href="group___device.html#ga09cb4d4a3ba8481e39294eed833e9361"/>
+        <topic label="RT_DEVICE_OFLAG_RDWR" href="group___device.html#gafb08422ef35082a8599c30c663799507"/>
+        <topic label="RT_DEVICE_OFLAG_OPEN" href="group___device.html#ga7f778feb8fe961d85e30638b72f22b05"/>
+        <topic label="RT_DEVICE_CTRL_RESUME" href="group___device.html#ga5f4c6955afabe83249d5808b4146dfc5"/>
+        <topic label="RT_DEVICE_CTRL_SUSPEND" href="group___device.html#ga85db48a4ae2c896e7293d9e3d10d766a"/>
+        <topic label="RT_DEVICE_CTRL_CHAR_STREAM" href="group___device.html#gaa4f5ab88e23994edc48e6e33d8c763d8"/>
+        <topic label="RT_DEVICE_CTRL_BLK_GETGEOME" href="group___device.html#ga4cd94b03d0c06f7bfc5f41d231819775"/>
+        <topic label="RT_DEVICE_CTRL_BLK_SYNC" href="group___device.html#ga6d24e14500d918c32389e1ed59745cb2"/>
+        <topic label="RT_DEVICE_CTRL_BLK_ERASE" href="group___device.html#ga6dd2bcb09b580d4b066b21fe075da08a"/>
+        <topic label="RT_DEVICE_CTRL_NETIF_GETMAC" href="group___device.html#gac34cb62d4a941224ca03c2362ec78d8f"/>
+        <topic label="RT_DEVICE_CTRL_MTD_FORMAT" href="group___device.html#gaf39ce3167e521f3e8bea8cd32eb97ce2"/>
+        <topic label="RT_DEVICE_CTRL_RTC_GET_TIME" href="group___device.html#ga0c92797f20574b9153f8cf9d413297f8"/>
+        <topic label="RT_DEVICE_CTRL_RTC_SET_TIME" href="group___device.html#gae4e1a97713d31ac905f661848bce6835"/>
+        <topic label="RT_DEVICE_CTRL_RTC_GET_ALARM" href="group___device.html#gad4c661d33a1b182b4b39e58ff1d14d39"/>
+        <topic label="RT_DEVICE_CTRL_RTC_SET_ALARM" href="group___device.html#ga33b648fb7b76a061106c46308073db33"/>
+        <topic label="RT_DEVICE_CTRL_CURSOR_SET_POSITION" href="group___device.html#ga1778cc1071e28653d95e2027f1f47141"/>
+        <topic label="RTGRAPHIC_CTRL_RECT_UPDATE" href="group___device.html#ga19d8e9e0bbc3fe1264173764f7e881b2"/>
+        <topic label="RTGRAPHIC_PIXEL_POSITION" href="group___device.html#ga129ac0e844b97c6f324ab5995f9cff6b"/>
+        <topic label="rt_device_class_type" href="group___device.html#ga429003537c58f674b39eb3f9defbd052">
+          <topic label="RT_Device_Class_Char" href="group___device.html#gga429003537c58f674b39eb3f9defbd052aca8110723cd932d3bb56c656f0ed5b62"/>
+          <topic label="RT_Device_Class_Block" href="group___device.html#gga429003537c58f674b39eb3f9defbd052a677c6cfb5e8c1a16569048ac404dcd47"/>
+          <topic label="RT_Device_Class_NetIf" href="group___device.html#gga429003537c58f674b39eb3f9defbd052a82a578cbd8e6866dd4a004ebda3dd38a"/>
+          <topic label="RT_Device_Class_MTD" href="group___device.html#gga429003537c58f674b39eb3f9defbd052a46f0f09d72719157d938555f775fc926"/>
+          <topic label="RT_Device_Class_CAN" href="group___device.html#gga429003537c58f674b39eb3f9defbd052a4a52a6417e964c11476cb7a60b741934"/>
+          <topic label="RT_Device_Class_RTC" href="group___device.html#gga429003537c58f674b39eb3f9defbd052a835ac897d5129b2096a3234483a87ea6"/>
+          <topic label="RT_Device_Class_Sound" href="group___device.html#gga429003537c58f674b39eb3f9defbd052a71d71b9aa4d514c045b98e54638d4113"/>
+          <topic label="RT_Device_Class_Graphic" href="group___device.html#gga429003537c58f674b39eb3f9defbd052a273e840320150127b6b53fc25f89ed3a"/>
+          <topic label="RT_Device_Class_I2CBUS" href="group___device.html#gga429003537c58f674b39eb3f9defbd052aeb20b6c37b5de0719482540cd4183e9f"/>
+          <topic label="RT_Device_Class_USBDevice" href="group___device.html#gga429003537c58f674b39eb3f9defbd052aac19a7d8fedfb847854f2eedc2dceb5a"/>
+          <topic label="RT_Device_Class_USBHost" href="group___device.html#gga429003537c58f674b39eb3f9defbd052ad02f0b8a005ff66e96e755eacacb2e29"/>
+          <topic label="RT_Device_Class_SPIBUS" href="group___device.html#gga429003537c58f674b39eb3f9defbd052af726afeffa76ee6ac21f54460b540a35"/>
+          <topic label="RT_Device_Class_SPIDevice" href="group___device.html#gga429003537c58f674b39eb3f9defbd052a0acfc2c192da1f374a89d0b04dbbcbe6"/>
+          <topic label="RT_Device_Class_SDIO" href="group___device.html#gga429003537c58f674b39eb3f9defbd052aa6bdf0c801df14e94498759a4e77a58c"/>
+          <topic label="RT_Device_Class_PM" href="group___device.html#gga429003537c58f674b39eb3f9defbd052a45c180e88e77f13dcb2350243fe3bb3e"/>
+          <topic label="RT_Device_Class_Pipe" href="group___device.html#gga429003537c58f674b39eb3f9defbd052a6dfab8ae755d80bd084cb3cbe352691a"/>
+          <topic label="RT_Device_Class_Portal" href="group___device.html#gga429003537c58f674b39eb3f9defbd052a4fe182c4c087083203282b7a68126d25"/>
+          <topic label="RT_Device_Class_Miscellaneous" href="group___device.html#gga429003537c58f674b39eb3f9defbd052a23679c5fd4c9641e47d5f422bdcc25bb"/>
+          <topic label="RT_Device_Class_Unknown" href="group___device.html#gga429003537c58f674b39eb3f9defbd052ae580460bedb868d5242e8115a41bf00a"/>
+        </topic>
+        <topic label="rt_device_find" href="group___device.html#ga7fb604dd486fbf5e48004b4d94d8eb3e"/>
+        <topic label="rt_device_register" href="group___device.html#gaaa44b227c43321faffb198ef9c0bb17e"/>
+        <topic label="rt_device_unregister" href="group___device.html#ga76cf284581e36b7e2244398efbf850b5"/>
+        <topic label="rt_device_init_all" href="group___device.html#gaaee2de8aa1d98e9b1f5870f136c7a1c1"/>
+        <topic label="rt_device_set_rx_indicate" href="group___device.html#ga07dfc7fd340b9449d2bd732159ed237f"/>
+        <topic label="rt_device_set_tx_complete" href="group___device.html#gae6340392a3848e3f5e324aa984375b07"/>
+        <topic label="rt_device_init" href="group___device.html#ga04892007706fe586a1db33284571be7e"/>
+        <topic label="rt_device_open" href="group___device.html#gac0cd9f7a81722d69e8720ea4750c17a2"/>
+        <topic label="rt_device_close" href="group___device.html#ga914535247ea0e5477002553ad38b1482"/>
+        <topic label="rt_device_read" href="group___device.html#ga33660fb6c9217dce99b6b625443453ba"/>
+        <topic label="rt_device_write" href="group___device.html#gab8d041e5ae9c776332adfee71691e698"/>
+        <topic label="rt_device_control" href="group___device.html#gab0c55790df4b96be5cc50a9c4a7931cf"/>
+      </topic>
+      <topic label="Runtime Trace and Record" href="group___hook.html">
+        <topic label="rt_thread_idle_sethook" href="group___hook.html#ga47689b07705c1e7892f6ec397152e9ac"/>
+        <topic label="rt_malloc_sethook" href="group___hook.html#ga909761c80493569b64558225d7f89e77"/>
+        <topic label="rt_free_sethook" href="group___hook.html#gaf556549fc541bfc634f37f2dca004547"/>
+        <topic label="rt_mp_alloc_sethook" href="group___hook.html#ga358d3559267d1c8c66c836ed2e08433b"/>
+        <topic label="rt_mp_free_sethook" href="group___hook.html#gafd43b13db5623925756b7a3968aa3b01"/>
+        <topic label="rt_module_load_sethook" href="group___hook.html#gae6da0f4b7b9afc54b8666a0581ec4ed0"/>
+        <topic label="rt_module_unload_sethook" href="group___hook.html#ga967257af8155a771eca4807da56d264e"/>
+        <topic label="rt_object_attach_sethook" href="group___hook.html#ga8bac83f313b9fb0215c424bec05174bd"/>
+        <topic label="rt_object_detach_sethook" href="group___hook.html#ga28dd3af85707fc6c9bf548fe53460aca"/>
+        <topic label="rt_object_trytake_sethook" href="group___hook.html#gabfce5c06de6e1cd6b661b05cb9dd6242"/>
+        <topic label="rt_object_take_sethook" href="group___hook.html#ga69054a027dcc8483b65fd48740eb3717"/>
+        <topic label="rt_object_put_sethook" href="group___hook.html#gad107a57fce56ef991d673fa21c6d065a"/>
+        <topic label="rt_scheduler_sethook" href="group___hook.html#gaab5cba09f1bfbfc0e8b0838ee2682c62"/>
+        <topic label="rt_timer_timeout_sethook" href="group___hook.html#gaf048118e9baee3eb9933a19a0ab80f69"/>
+      </topic>
+      <topic label="Other useful kernel service" href="group___kernel_service.html">
+        <topic label="RT_LIST_OBJECT_INIT" href="group___kernel_service.html#ga4cc6d94199b8cd5c2b90dc398a44f654"/>
+        <topic label="rt_list_entry" href="group___kernel_service.html#ga52568d5666fbf7f7f5d0b96149d5ebd1"/>
+        <topic label="_rt_errno" href="group___kernel_service.html#ga02ccef35d98a60385ce86d14c0bad9d0"/>
+        <topic label="rt_memset" href="group___kernel_service.html#ga3a32f9ba466a610a23e127c74f37d7c2"/>
+        <topic label="rt_memcpy" href="group___kernel_service.html#gacbe2d70e90f1ce1ea00dd61621b97981"/>
+        <topic label="rt_memmove" href="group___kernel_service.html#gae87b3a1321fb564b12e97960ef41b500"/>
+        <topic label="rt_memcmp" href="group___kernel_service.html#ga4fe9ceae2937c508dd668aaec1019ae8"/>
+        <topic label="rt_strstr" href="group___kernel_service.html#gad986e7ef38f22c0c612e8467a25a19ef"/>
+        <topic label="rt_strcasecmp" href="group___kernel_service.html#ga5ccf01d436b44080746f989058d6058b"/>
+        <topic label="rt_strncpy" href="group___kernel_service.html#gabede2807983559147cec27e438a0dbeb"/>
+        <topic label="rt_strncmp" href="group___kernel_service.html#gad45fdd0ca4553763ed24a9dd4c42793f"/>
+        <topic label="rt_strcmp" href="group___kernel_service.html#ga322e6a53d471e6582b4f82e0d86d10ea"/>
+        <topic label="rt_strlen" href="group___kernel_service.html#ga1c4a4101a636340284e05b0ae801e60a"/>
+        <topic label="rt_strdup" href="group___kernel_service.html#ga3424d273c715bc14e81e2e608287216a"/>
+        <topic label="rt_show_version" href="group___kernel_service.html#ga11ecdcdb5b09e6e18b52625c1e904dca"/>
+        <topic label="rt_snprintf" href="group___kernel_service.html#ga62a425223db6edffa3d9ab8f766eb992"/>
+        <topic label="rt_vsprintf" href="group___kernel_service.html#ga54ff1f90de6258f0e24a89914a94d98e"/>
+        <topic label="rt_sprintf" href="group___kernel_service.html#ga36c861ec1a7eac18e2bd5b9bdce2f176"/>
+        <topic label="rt_malloc_align" href="group___kernel_service.html#gaf2654f08787ce7935c635c0343970f6a"/>
+        <topic label="rt_free_align" href="group___kernel_service.html#gabf1ea8f43781620e7b08fb1868e32b92"/>
+        <topic label="__rt_ffs" href="group___kernel_service.html#gaf225812decad1a6d9036626273ba9e65"/>
+        <topic label="rt_list_init" href="group___kernel_service.html#ga7103f52aa8c7402c9e87f03942d8bc9f"/>
+        <topic label="rt_list_insert_after" href="group___kernel_service.html#ga7d57c901bb0ee4e1b9ed92a5a196cc39"/>
+        <topic label="rt_list_insert_before" href="group___kernel_service.html#ga31047c521c265353f8372043fb6ff5ef"/>
+        <topic label="rt_list_remove" href="group___kernel_service.html#ga0525e5898dd57464613551b887256c28"/>
+        <topic label="rt_list_isempty" href="group___kernel_service.html#ga2b25b69a89568b7f2bf6ed5e9e70da74"/>
+      </topic>
+      <topic label="Error Code" href="group___error.html">
+        <topic label="RT_EOK" href="group___error.html#gaaaddfb31f867cc924e0220470aaaec5f"/>
+        <topic label="RT_ERROR" href="group___error.html#ga00349f5e8b688f0d04b88326ebbf7148"/>
+        <topic label="RT_ETIMEOUT" href="group___error.html#ga4bf14759709bbad38b3af44d0ac5b550"/>
+        <topic label="RT_EFULL" href="group___error.html#ga6510144340be8d6b0ec72c4b60ab4219"/>
+        <topic label="RT_EEMPTY" href="group___error.html#gaaac90957b823ffc303a4d3a00f39ce6a"/>
+        <topic label="RT_ENOMEM" href="group___error.html#ga39afdfff046d9cf8c62d92beca8b572f"/>
+        <topic label="RT_ENOSYS" href="group___error.html#gaa7a65ad3f8153cfac2ba087a3f58f6fa"/>
+        <topic label="RT_EBUSY" href="group___error.html#ga94b79af35e40c9cc97e39292aa59d841"/>
+        <topic label="RT_EIO" href="group___error.html#ga4e6d153e65d54083ee2e7f7108554859"/>
+      </topic>
+      <topic label="rt_interrupt_enter" href="group___kernel.html#gab001288797398481f7edf004f0201b3e"/>
+      <topic label="rt_interrupt_leave" href="group___kernel.html#ga0ee87623a549bc3ab2c267f0ab9467dc"/>
+      <topic label="rt_interrupt_get_nest" href="group___kernel.html#ga0d9cc4b32c1d60bca19a512200507650"/>
+    </topic>
+    <topic label="Application Module" href="group___module.html">
+      <topic label="rt_module" href="structrt__module.html">
+        <topic label="parent" href="structrt__module.html#ab405225fb942d32c1716a129c2b57b40"/>
+        <topic label="module_space" href="structrt__module.html#aa90c25d9ceeae1acd6c65c211b11dba6"/>
+        <topic label="module_entry" href="structrt__module.html#a1029570d5234851f1be558c25f7270ff"/>
+        <topic label="module_thread" href="structrt__module.html#a447d4c89faa77dda6069f7a0148b33bd"/>
+        <topic label="stack_size" href="structrt__module.html#ac209d42269694e81d10d7fc7f3ac86e3"/>
+        <topic label="nsym" href="structrt__module.html#a320225670694fede07c32a9ec2549509"/>
+        <topic label="symtab" href="structrt__module.html#a507c55fba392fa32f086b19075e4e53d"/>
+        <topic label="nref" href="structrt__module.html#a4648bf937270dfc4115056eae81dc168"/>
+      </topic>
+      <topic label="RT_MODULE_FLAG_WITHENTRY" href="group___module.html#gac9cf009cdd711aada15c637c09348976"/>
+      <topic label="RT_MODULE_FLAG_WITHOUTENTRY" href="group___module.html#ga9b618fe8b0480194183246ef0403fa30"/>
+      <topic label="rt_module_load" href="group___module.html#ga19ae3a3f106e5511624cab485a39c93b"/>
+      <topic label="rt_module_unload" href="group___module.html#gaa9132b4920b970e0a730e27df7dac60b"/>
+      <topic label="rt_module_open" href="group___module.html#ga14ca8aed2d7db27b8f1372e45ac6edc1"/>
+      <topic label="rt_module_self" href="group___module.html#ga5b68b8f419b06f9e382f1cd35b0de324"/>
+      <topic label="rt_module_find" href="group___module.html#gaf9753b1c59c3d363de611e3be761c17d"/>
+      <topic label="rt_module_load_sethook" href="group___module.html#gae6da0f4b7b9afc54b8666a0581ec4ed0"/>
+      <topic label="rt_module_unload_sethook" href="group___module.html#ga967257af8155a771eca4807da56d264e"/>
+    </topic>
+    <topic label="System Initialization" href="group___system_init.html">
+      <topic label="rt_system_tick_init" href="group___system_init.html#gae62f4fc2660b4b42ec0504ea971315bf"/>
+      <topic label="rt_system_heap_init" href="group___system_init.html#gafa6feb60f6204d1783bc3bc324b886e7"/>
+      <topic label="rt_system_module_init" href="group___system_init.html#gad8314910b9169d06594838780bff0bc0"/>
+      <topic label="rt_system_object_init" href="group___system_init.html#ga0126bb4a5edd998ff952e1129e9e0cb9"/>
+      <topic label="rt_system_scheduler_init" href="group___system_init.html#ga5aa2c0c67999e20ce8693ad3c8e624f0"/>
+      <topic label="rt_system_scheduler_start" href="group___system_init.html#ga9aa8a561e0caf5e13126834c4f4bb681"/>
+      <topic label="rt_system_timer_init" href="group___system_init.html#ga9f109e873cdcf963059e968cedb76c36"/>
+      <topic label="rt_system_timer_thread_init" href="group___system_init.html#gac5298e02b109e4885723f6116fb11814"/>
+      <topic label="rt_application_init" href="group___system_init.html#ga0bc341878c3dbb76bdb773fc9176f4f3"/>
+    </topic>
+  </topic>
+  <topic label="Data Structures">
+    <topic label="Data Structures" href="annotated.html">
+      <topic label="rt_device" href="structrt__device.html">
+        <topic label="parent" href="structrt__device.html#a52df486399b65f49455698b55b656d8d"/>
+        <topic label="type" href="structrt__device.html#a0b8dba8f32d49291b85e54d13520b871"/>
+        <topic label="flag" href="structrt__device.html#a43f1618323314be10c88bbac14ab1561"/>
+        <topic label="open_flag" href="structrt__device.html#a0585a1c5e745441dd6d56663ed9e6cd4"/>
+        <topic label="ref_count" href="structrt__device.html#a432bca55aa2144bc5761015f57f017c3"/>
+        <topic label="device_id" href="structrt__device.html#a31db6fb6da677fd9904a8ca436bff640"/>
+        <topic label="user_data" href="structrt__device.html#a7abe4976f1632005eb09e0ed59ba99ef"/>
+      </topic>
+      <topic label="rt_device_blk_geometry" href="structrt__device__blk__geometry.html">
+        <topic label="sector_count" href="structrt__device__blk__geometry.html#a0954c634b56f590a91ea7c6d87b20531"/>
+        <topic label="bytes_per_sector" href="structrt__device__blk__geometry.html#aeb4ef7bd1c3f03f07f6fab722aa1fad5"/>
+        <topic label="block_size" href="structrt__device__blk__geometry.html#a02cdb472708dfa348c9e59a65574e936"/>
+      </topic>
+      <topic label="rt_device_blk_sectors" href="structrt__device__blk__sectors.html">
+        <topic label="sector_begin" href="structrt__device__blk__sectors.html#abdb868af6de958a4996556791f47ea4e"/>
+        <topic label="sector_end" href="structrt__device__blk__sectors.html#acba703a0aa4d37dacb8afc92a0f7bb31"/>
+      </topic>
+      <topic label="rt_device_graphic_info" href="structrt__device__graphic__info.html">
+        <topic label="pixel_format" href="structrt__device__graphic__info.html#a2bb36d6effd52eeeddd0c9557615aef6"/>
+        <topic label="bits_per_pixel" href="structrt__device__graphic__info.html#a421bd32816ea1dad3add44d1c78f9273"/>
+        <topic label="reserved" href="structrt__device__graphic__info.html#a2db41625bdfdbad7a21c274cc1fb98be"/>
+        <topic label="width" href="structrt__device__graphic__info.html#a005a28be4512dc1bcd657331868597e0"/>
+        <topic label="height" href="structrt__device__graphic__info.html#ad8c8c9fda6f3109169267dc81aed5deb"/>
+        <topic label="framebuffer" href="structrt__device__graphic__info.html#ae54ef435f8e5bc5317bc3c6cd1d2b65b"/>
+      </topic>
+      <topic label="rt_device_graphic_ops" href="structrt__device__graphic__ops.html">
+      </topic>
+      <topic label="rt_device_rect_info" href="structrt__device__rect__info.html">
+        <topic label="x" href="structrt__device__rect__info.html#aa76f3dd7ea14057db862c7ffad524799"/>
+        <topic label="y" href="structrt__device__rect__info.html#a11bcb47ee4fddef2852f99a539f045ee"/>
+        <topic label="width" href="structrt__device__rect__info.html#a1f6ad5365962a838cea665a3db53f2cb"/>
+        <topic label="height" href="structrt__device__rect__info.html#a0cad394b7fcd23e9f48950c211dc6ebd"/>
+      </topic>
+      <topic label="rt_ipc_object" href="structrt__ipc__object.html">
+        <topic label="parent" href="structrt__ipc__object.html#a1113d054268319ad7840b3362eba7ad2"/>
+        <topic label="suspend_thread" href="structrt__ipc__object.html#a6b016bc028f03601f1a8efd0fb0e91e2"/>
+      </topic>
+      <topic label="rt_mailbox" href="structrt__mailbox.html">
+        <topic label="parent" href="structrt__mailbox.html#a2d44d61cebf881cc505fbbc1946b3b2e"/>
+        <topic label="msg_pool" href="structrt__mailbox.html#aa4c122c0d9e429f2a37ab3fa87c3df4d"/>
+        <topic label="size" href="structrt__mailbox.html#af3016cff0753dac4b6684c2da246e446"/>
+        <topic label="entry" href="structrt__mailbox.html#ad850b26d9717d9467259f79ec56849f3"/>
+        <topic label="in_offset" href="structrt__mailbox.html#a81a6208c7eb0056b992541e07d2f8eb7"/>
+        <topic label="out_offset" href="structrt__mailbox.html#ab81f4324444c3440de54101fd9f6f028"/>
+        <topic label="suspend_sender_thread" href="structrt__mailbox.html#a11aef5d6e06f6459b7c1d56c835c7f9e"/>
+      </topic>
+      <topic label="rt_mempool" href="structrt__mempool.html">
+        <topic label="parent" href="structrt__mempool.html#ac60b315b45b2a3f15c8f5763c0a88886"/>
+        <topic label="start_address" href="structrt__mempool.html#a8c4783f5987099205e935f9124760d3c"/>
+        <topic label="size" href="structrt__mempool.html#a358b4d35e2ef602461506baa5fc9de85"/>
+        <topic label="block_size" href="structrt__mempool.html#a3a5bbd0c25f8e166cf0cee6568d5f22b"/>
+        <topic label="block_list" href="structrt__mempool.html#ad3fcb1189ca2dff9be268e285992c625"/>
+        <topic label="block_total_count" href="structrt__mempool.html#a25efbd1cdd87127c5221ee8688e04277"/>
+        <topic label="block_free_count" href="structrt__mempool.html#ae9af793d845659781f7c14ed4d23c235"/>
+        <topic label="suspend_thread" href="structrt__mempool.html#aa494ddf482327e878499499a874e8ef3"/>
+        <topic label="suspend_thread_count" href="structrt__mempool.html#a026c1a71fee95a5c0506e520d6dc4f55"/>
+      </topic>
+      <topic label="rt_messagequeue" href="structrt__messagequeue.html">
+        <topic label="parent" href="structrt__messagequeue.html#a24763c7e54bb3f4783daf3fb9c103dfe"/>
+        <topic label="msg_pool" href="structrt__messagequeue.html#add66b801d59516f96b5657f820db545c"/>
+        <topic label="msg_size" href="structrt__messagequeue.html#a63b5552f40bacdf02983bf9cf4cad24d"/>
+        <topic label="max_msgs" href="structrt__messagequeue.html#ac14765aec551079b253e817ff8e5373b"/>
+        <topic label="entry" href="structrt__messagequeue.html#ad92b222d4d0dce750c9055f0499988c1"/>
+        <topic label="msg_queue_head" href="structrt__messagequeue.html#aaf1a21b9e2f00b53544ed695e4d2aacc"/>
+        <topic label="msg_queue_tail" href="structrt__messagequeue.html#a3c28b474eea1aaacfc75e870dbd50162"/>
+        <topic label="msg_queue_free" href="structrt__messagequeue.html#af45a62f5084904df25be7d63b2252c85"/>
+      </topic>
+      <topic label="rt_module" href="structrt__module.html">
+        <topic label="parent" href="structrt__module.html#ab405225fb942d32c1716a129c2b57b40"/>
+        <topic label="module_space" href="structrt__module.html#aa90c25d9ceeae1acd6c65c211b11dba6"/>
+        <topic label="module_entry" href="structrt__module.html#a1029570d5234851f1be558c25f7270ff"/>
+        <topic label="module_thread" href="structrt__module.html#a447d4c89faa77dda6069f7a0148b33bd"/>
+        <topic label="stack_size" href="structrt__module.html#ac209d42269694e81d10d7fc7f3ac86e3"/>
+        <topic label="nsym" href="structrt__module.html#a320225670694fede07c32a9ec2549509"/>
+        <topic label="symtab" href="structrt__module.html#a507c55fba392fa32f086b19075e4e53d"/>
+        <topic label="nref" href="structrt__module.html#a4648bf937270dfc4115056eae81dc168"/>
+      </topic>
+      <topic label="rt_mutex" href="structrt__mutex.html">
+        <topic label="parent" href="structrt__mutex.html#a8d34059b8d2907555498f824ff8b850c"/>
+        <topic label="value" href="structrt__mutex.html#aa7ea827976098e306efd7c5c6c6e15f6"/>
+        <topic label="original_priority" href="structrt__mutex.html#a6479136cda18a790607d353b36176266"/>
+        <topic label="hold" href="structrt__mutex.html#af92bda0f20eac114ac96d5bb2ab05f37"/>
+        <topic label="owner" href="structrt__mutex.html#ab0275a5a653896be4f43f1104e8cdd8b"/>
+      </topic>
+      <topic label="rt_object" href="structrt__object.html">
+        <topic label="name" href="structrt__object.html#a2546fe32b051c21668f5946e05de77cc"/>
+        <topic label="type" href="structrt__object.html#a87fff935df5a56027657597120071149"/>
+        <topic label="flag" href="structrt__object.html#aa2b7be2eb353a54b8319ae285fff23f4"/>
+        <topic label="module_id" href="structrt__object.html#a77ec1d0595edbc3e609d982fe71ba58e"/>
+        <topic label="list" href="structrt__object.html#a69dc994d5641cee2afddb6cf1b737405"/>
+      </topic>
+      <topic label="rt_object_information" href="structrt__object__information.html">
+        <topic label="type" href="structrt__object__information.html#ade4fad90f69638200ccb2cbcc9f8e298"/>
+        <topic label="object_list" href="structrt__object__information.html#ad201bcecb2a95d3516b06e020ec24e73"/>
+        <topic label="object_size" href="structrt__object__information.html#ada7e29b16c914f1692557fdc98f471fc"/>
+      </topic>
+      <topic label="rt_semaphore" href="structrt__semaphore.html">
+        <topic label="parent" href="structrt__semaphore.html#ae30f5ce3f4e89636b0f5b19755f39df7"/>
+        <topic label="value" href="structrt__semaphore.html#a320fc41815308456699a4d3efee49418"/>
+      </topic>
+      <topic label="rt_thread" href="structrt__thread.html">
+        <topic label="name" href="structrt__thread.html#a89b5c7fb22abb868056586e365b3fbd3"/>
+        <topic label="type" href="structrt__thread.html#a9e66117dc5b76db6d0d78aa3077b57da"/>
+        <topic label="flags" href="structrt__thread.html#a0a62e2cba8609469b351472d615fd326"/>
+        <topic label="module_id" href="structrt__thread.html#a6cca8c4a6cbf727dfaac6a48bb19351a"/>
+        <topic label="list" href="structrt__thread.html#a30dd781aa72ce771beef5ed7a4cdbbd7"/>
+        <topic label="tlist" href="structrt__thread.html#a8484a36933357e7c6f871364d9f2d3a9"/>
+        <topic label="sp" href="structrt__thread.html#abc9d01c30e0fc9872df2fd5c044e31e0"/>
+        <topic label="entry" href="structrt__thread.html#adcdaf75f05998c6485544c337526da52"/>
+        <topic label="parameter" href="structrt__thread.html#a153b0810eaeb3c0508f3fdc9027a301e"/>
+        <topic label="stack_addr" href="structrt__thread.html#a2bb90555aaff4a54699c88c2789e0407"/>
+        <topic label="stack_size" href="structrt__thread.html#a08915cf4c568a17fb73b938c82f9cf25"/>
+        <topic label="error" href="structrt__thread.html#a32eec53f34cb610335b085a642e6e995"/>
+        <topic label="stat" href="structrt__thread.html#a16a3dd776f8cfed732deda73535dbb00"/>
+        <topic label="current_priority" href="structrt__thread.html#a90875799a0ea47e5558f104702a20548"/>
+        <topic label="init_priority" href="structrt__thread.html#a281785b80ad0dc2e7d0c5404d32c67f9"/>
+        <topic label="init_tick" href="structrt__thread.html#a3da450b626778b5cf1125174783c1989"/>
+        <topic label="remaining_tick" href="structrt__thread.html#a763db3299b6a4c69ad7aa5b7815f3daf"/>
+        <topic label="thread_timer" href="structrt__thread.html#ac787f3fbcdc5f8d012f2d6d9923f5560"/>
+        <topic label="cleanup" href="structrt__thread.html#ac7c6d56c56677160b3c651571bcb127a"/>
+        <topic label="user_data" href="structrt__thread.html#ad237699b29310d61d8d709253782372b"/>
+      </topic>
+      <topic label="rt_timer" href="structrt__timer.html">
+        <topic label="parent" href="structrt__timer.html#a1a3b0ccd5039808ff180c0507812d629"/>
+        <topic label="timeout_func" href="structrt__timer.html#a99212839ec394738c375a4d55d835e16"/>
+        <topic label="parameter" href="structrt__timer.html#a7865afa39d2596876ce1e7c3275c9042"/>
+        <topic label="init_tick" href="structrt__timer.html#af958eb6ee48462b264972242f9b6d9c3"/>
+        <topic label="timeout_tick" href="structrt__timer.html#afc375a971b021a1c75a6fba94742b136"/>
+      </topic>
+    </topic>
+    <topic label="Data Fields" href="functions.html">
+      <topic label="All" href="functions.html"/>
+      <topic label="Variables" href="functions_vars.html"/>
+    </topic>
+  </topic>
+</toc>

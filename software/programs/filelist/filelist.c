@@ -15,7 +15,7 @@ void main(void)
 	struct rtgui_app* application;
 	struct rtgui_win* win;	
 
-	application = rtgui_app_create(rt_thread_self(), "filelist");
+	application = rtgui_app_create("filelist");
 	if (application != RT_NULL)
 	{			
 		struct rtgui_rect rect;

@@ -1,33 +1,23 @@
 /*
- * File      : application.c
- * This file is part of RT-Thread RTOS
- * COPYRIGHT (C) 2006, RT-Thread Development Team
- *
- * The license and distribution terms for this file may be
- * found in the file LICENSE in this distribution or at
- * http://www.rt-thread.org/license/LICENSE
- *
- * Change Logs:
- * Date           Author       Notes
- * 2009-01-05     Bernard      the first version
+   此demo用于演示tftp(简单文件按传输协议)客户端
  */
-
-/**
- * @addtogroup STM32
- */
-/*@{*/
-
-#include <stdio.h>
 #include <board.h>
 #include <rtthread.h>
-
-#ifdef RT_USING_LWIP
-#include <lwip/sys.h>
-#include <lwip/api.h>
-#include <netif/ethernetif.h>
+#ifdef RT_USING_FINSH
+#include <finsh.h>
+#include <shell.h>
 #endif
 
-#define RT_NFS_HOST_EXPORT	"10.0.0.104:/" 
+
+#include "components.h"
+
+#ifdef RT_USING_LWIP
+extern rt_hw_stm32_eth_init(void);
+#endif
+
+#ifdef RT_USING_COMPONENTS_INIT
+extern void rt_components_init(void);
+#endif
 
 void rt_init_thread_entry(void* parameter)
 {
@@ -47,6 +37,12 @@ void rt_init_thread_entry(void* parameter)
     if (dfs_mount("flash0", "/", "elm", 0, 0) == 0)
     {
         rt_kprintf("flash0 mount to /.\n");
+		#if (RT_DFS_ELM_USE_LFN != 0) && (defined RT_DFS_ELM_CODE_PAGE_FILE)
+        {
+                extern void ff_convert_init(void);
+                ff_convert_init();
+        }
+		#endif
     }
     else
     {
@@ -59,22 +55,15 @@ void rt_init_thread_entry(void* parameter)
 
 int rt_application_init()
 {
-    rt_thread_t init_thread;
+    rt_thread_t tid;
 
-#if (RT_THREAD_PRIORITY_MAX == 32)
-    init_thread = rt_thread_create("init",
-                                   rt_init_thread_entry, RT_NULL,
-                                   2048, 8, 20);
-#else
-    init_thread = rt_thread_create("init",
-                                   rt_init_thread_entry, RT_NULL,
-                                   2048, 80, 20);
-#endif
-
-    if (init_thread != RT_NULL)
-        rt_thread_startup(init_thread);
-
+    tid = rt_thread_create("init",
+        rt_init_thread_entry, RT_NULL,
+        2048, RT_THREAD_PRIORITY_MAX/3, 20);//
+	
+    if (tid != RT_NULL)
+        rt_thread_startup(tid);
+	
     return 0;
 }
 
-/*@}*/

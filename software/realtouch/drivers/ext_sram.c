@@ -1,6 +1,8 @@
 #include "rtthread.h"
 #include "board.h"
 
+static void ext_sram_test(void);
+
 void ext_sram_init(void)
 {
     FSMC_NORSRAMInitTypeDef  FSMC_NORSRAMInitStructure;
@@ -10,11 +12,12 @@ void ext_sram_init(void)
     FSMC_NORSRAMInitStructure.FSMC_WriteTimingStruct = &Timing_write;
 
     FSMC_NORSRAMStructInit(&FSMC_NORSRAMInitStructure);
+	
 
     /*--------------------- read timings configuration ---------------------*/
     Timing_read.FSMC_AddressSetupTime = 4;  /* [3:0] F2/F4 1~15 HCLK */
     Timing_read.FSMC_AddressHoldTime = 0;   /* [7:4] keep 0x00 in SRAM mode */
-    Timing_read.FSMC_DataSetupTime = 5;     /* [15:8] F2/F4 0~255 HCLK */
+    Timing_read.FSMC_DataSetupTime =5;     /* [15:8] F2/F4 0~255 HCLK */
     /* [19:16] Time between NEx high to NEx low (BUSTURN HCLK) */
     Timing_read.FSMC_BusTurnAroundDuration = 1;
     Timing_read.FSMC_CLKDivision = 0; /* [24:20] keep 0x00 in SRAM mode  */
@@ -25,6 +28,7 @@ void ext_sram_init(void)
     Timing_write.FSMC_AddressSetupTime = 4;  /* [3:0] F2/F4 1~15 HCLK */
     Timing_write.FSMC_AddressHoldTime = 0;   /* [7:4] keep 0x00 in SRAM mode */
     Timing_write.FSMC_DataSetupTime = 5;     /* [15:8] F2/F4 0~255 HCLK */
+	
     /* [19:16] Time between NEx high to NEx low (BUSTURN HCLK) */
     Timing_write.FSMC_BusTurnAroundDuration = 1;
     Timing_write.FSMC_CLKDivision = 0; /* [24:20] keep 0x00 in SRAM mode  */
@@ -64,4 +68,33 @@ void ext_sram_init(void)
     FSMC_NORSRAMInitStructure.FSMC_Bank = FSMC_Bank1_NORSRAM1;
     FSMC_NORSRAMInit(&FSMC_NORSRAMInitStructure);
     FSMC_NORSRAMCmd(FSMC_NORSRAMInitStructure.FSMC_Bank, ENABLE);
+	
+	ext_sram_test();
+}
+
+void ext_sram_test(void)
+{
+    /* memtest */
+    {
+        unsigned char * p_extram = (unsigned char *)STM32_EXT_SRAM_BEGIN;
+        unsigned int temp;
+
+        rt_kprintf("\r\nmem testing....");
+        for(temp=0; temp<(STM32_EXT_SRAM_END-STM32_EXT_SRAM_BEGIN); temp++)
+        {
+            *p_extram++ = (unsigned char)temp;
+        }
+
+        p_extram = (unsigned char *)STM32_EXT_SRAM_BEGIN;
+        for(temp=0; temp<(STM32_EXT_SRAM_END-STM32_EXT_SRAM_BEGIN); temp++)
+        {
+            if( *p_extram++ != (unsigned char)temp )
+            {
+                rt_kprintf("\rmemtest fail @ %08X\r\nsystem halt!!!!!",(unsigned int)p_extram);
+                while(1);
+            }
+        }
+        rt_kprintf("\rmem test pass!!\r\n");
+    }/* memtest */
+
 }

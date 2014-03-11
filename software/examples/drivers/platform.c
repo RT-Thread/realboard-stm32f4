@@ -18,6 +18,7 @@ CS0: PG10  SPI FLASH
 CS1: PB12  TOUCH
 CS2: PG7   WIFI
 */
+
 static void rt_hw_spi2_init(void)
 {
     /* register spi bus */
@@ -118,6 +119,8 @@ static void rt_hw_spi2_init(void)
 }
 #endif /* RT_USING_SPI */
 
+extern void rt_hw_sdcard_init(void);
+
 void rt_platform_init(void)
 {
 #ifdef RT_USING_SPI
@@ -151,9 +154,25 @@ void rt_platform_init(void)
 #endif /* RT_USING_DFS */
 
 #ifdef RT_USING_RTGUI
-    /* initilize ra8875 lcd controller */
-    ra8875_init();
+    /* initilize  lcd controller */
+#if LCD_VERSION==1
+    {
+        ra8875_init();
+    }
+#elif LCD_VERSION==2
+    {
+        ssd1963_init();
+    }
+#elif LCD_VERSION==3
+    {
+        ssd1289_init();
+    }
+#elif LCD_VERSION==4
+    {
+        md050sd_init();
+    }
 
+#endif
     /* initilize key module */
     rt_hw_key_init();
 #endif /* RT_USING_RTGUI */

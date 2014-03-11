@@ -12,45 +12,22 @@
  * 2009-01-05     Bernard      the first version
  */
 
-/**
- * @addtogroup STM32
- */
-/*@{*/
-
-#include <stdio.h>
-
-#include "stm32f4xx.h"
-#include <board.h>
 #include <rtthread.h>
 
 void rt_init_thread_entry(void* parameter)
 {
-#ifdef RT_USING_COMPONENTS_INIT
-    /* initialization RT-Thread Components */
-    rt_components_init();
-#endif
-
-    /* do some thing here. */
+    rt_kprintf("\r\n Hello RT-Thread!\r\n");
 }
 
 int rt_application_init()
 {
-    rt_thread_t init_thread;
+    rt_thread_t tid;
 
-#if (RT_THREAD_PRIORITY_MAX == 32)
-    init_thread = rt_thread_create("init",
-                                   rt_init_thread_entry, RT_NULL,
-                                   2048, 8, 20);
-#else
-    init_thread = rt_thread_create("init",
-                                   rt_init_thread_entry, RT_NULL,
-                                   2048, 80, 20);
-#endif
-
-    if (init_thread != RT_NULL)
-        rt_thread_startup(init_thread);
+    tid = rt_thread_create("init",
+        rt_init_thread_entry, RT_NULL,
+        2048, RT_THREAD_PRIORITY_MAX/3, 20);
+    if (tid != RT_NULL)
+        rt_thread_startup(tid);
 
     return 0;
 }
-
-/*@}*/

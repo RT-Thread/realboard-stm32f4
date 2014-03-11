@@ -42,6 +42,7 @@ static rt_uint32_t read_line(int fd, char* line, rt_uint32_t line_size)
 
 static void setup_load_default(void)
 {
+	/*
     struct setup_items setup;
 
     rt_kprintf("setup_load_default!\r\n");
@@ -52,6 +53,7 @@ static void setup_load_default(void)
     setup.touch_max_y = 0x79b;
 
     setup_save(&setup);
+	*/
 }
 
 rt_err_t setup_load(struct setup_items* setup)

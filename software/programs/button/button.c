@@ -10,7 +10,7 @@ void main(void)
 	struct rtgui_win* win;	
 	struct rtgui_button* button;
 
-	application = rtgui_app_create(rt_thread_self(), "button");
+	application = rtgui_app_create("button");
 	if (application != RT_NULL)
 	{			
 		rtgui_rect_t rect = {220, 250, 400, 450};

@@ -17,6 +17,10 @@
 
 #include "board.h"
 
+#ifdef RT_USING_COMPONENTS_INIT
+#include <components.h>
+#endif
+
 /**
  * @addtogroup STM32
  */
@@ -234,12 +238,20 @@ void rt_hw_board_init()
     /* Configure the SysTick */
     SysTick_Config(SystemCoreClock / RT_TICK_PER_SECOND);
 
+    fsmc_gpio_init();
+
+#ifdef RT_USING_COMPONENTS_INIT
+    /* initialization board with RT-Thread Components */
+    rt_components_board_init();
+#endif
     rt_hw_usart_init();
 #ifdef RT_USING_CONSOLE
     rt_console_set_device(RT_CONSOLE_DEVICE_NAME);
 #endif
 
-    fsmc_gpio_init();
+#if STM32_EXT_SRAM
+    ext_sram_init();
+#endif
 
     mco_config();
 }

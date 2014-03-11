@@ -1,0 +1,37 @@
+第一次使用realtouch主程序时，可能会没有资源文件。
+请插上网线，然后程序会自动从网络下载资源文件。
+如果没有条件接上网线，可以从SD卡复制文件。
+
+1. 请将 ./realtouch/applications/application.c 中的
+// resource_download();
+注释掉，并重新编译烧写固件。
+
+2. 准备资源文件：
+把sdcard目录下所有目录复制到SD卡根目录，
+然后把SD卡插到realtouch上面备用。
+
+2. finsh执行：
+2.1  格式化flash，然后重新启动。
+finsh>>mkfs("elm", "flash0")
+finsh>>reset()
+
+2.2  创建目录用于挂载SD卡及资源文件目录，因需要挂载SD卡，所以最后需要重新启动。
+finsh>>mkdir("/SD")
+finsh>>mkdir("/resource")
+finsh>>mkdir("/firmware")
+finsh>>reset()
+
+2.3 准备就绪后，启动会显示根目录和SD卡都挂载成功，然后就可以开始复制资源文件了。
+finsh>>copy("/SD/resource/gbk2uni.tbl", "/resource/gbk2uni.tbl")
+finsh>>copy("/SD/resource/uni2gbk.tbl", "/resource/uni2gbk.tbl")
+finsh>>copy("/SD/resource/hzk12.fnt", "/resource/hzk12.fnt")
+finsh>>copy("/SD/resource/hzk16.fnt", "/resource/hzk16.fnt")
+
+finsh>>copy("/SD/firmware/fw.bin", "/firmware/fw.bin")
+finsh>>copy("/SD/firmware/helper.bin", "/firmware/helper.bin")
+finsh>>copy("/SD/firmware/wpa.mo", "/firmware/wpa.mo")
+
+2.4 所有资源文件复制完成后，重启动即可
+finsh>>reset()
+
+

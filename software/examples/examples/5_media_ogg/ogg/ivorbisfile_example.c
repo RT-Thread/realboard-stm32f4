@@ -25,7 +25,7 @@
 
 #include <inttypes.h>
 #include <rtthread.h>
-#include "codec.h"
+#include "codec_wm8978_i2c.h"
 #include <dfs_posix.h>
 
 char pcmout1[4096]; /* take 4k out of the data segment, not the stack */
