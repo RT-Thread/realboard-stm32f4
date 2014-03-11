@@ -21,17 +21,17 @@ s  A2-A0 MODE SER/DFR PD1-PD0
 */
 /* bit[1:0] power-down */
 #define POWER_MODE0     (0) /* Power-Down Between Conversions. When */
-/* each conversion is finished, the converter */
-/* enters a low-power mode. At the start of the */
-/* next conversion, the device instantly powers up */
-/* to full power. There is no need for additional */
-/* delays to ensure full operation, and the very first */
-/* conversion is valid. The Y? switch is on when in */
-/* power-down.*/
+                            /* each conversion is finished, the converter */
+                            /* enters a low-power mode. At the start of the */
+                            /* next conversion, the device instantly powers up */
+                            /* to full power. There is no need for additional */
+                            /* delays to ensure full operation, and the very first */
+                            /* conversion is valid. The Y? switch is on when in */
+                            /* power-down.*/
 #define POWER_MODE1     (1) /* Reference is off and ADC is on. */
 #define POWER_MODE2     (2) /* Reference is on and ADC is off. */
 #define POWER_MODE3     (3) /* Device is always powered. Reference is on and */
-/* ADC is on. */
+                            /* ADC is on. */
 /* bit[2] SER/DFR */
 #define DIFFERENTIAL    (0<<2)
 #define SINGLE_ENDED    (1<<2)
@@ -50,7 +50,7 @@ s  A2-A0 MODE SER/DFR PD1-PD0
 #define TOUCH_MSR_X     (START | MEASURE_X | MODE_12BIT | DIFFERENTIAL | POWER_MODE0)
 #define TOUCH_MSR_Y     (START | MEASURE_Y | MODE_12BIT | DIFFERENTIAL | POWER_MODE0)
 
-#if LCD_VERSION == 1
+#if LCD_VERSION == 1 
 #define MIN_X_DEFAULT   0x7bd
 #define MAX_X_DEFAULT   0x20
 #define MIN_Y_DEFAULT   0x53
@@ -91,7 +91,7 @@ static struct rtgui_touch_device *touch = RT_NULL;
 
 rt_inline void touch_int_cmd(FunctionalState NewState);
 
-#if LCD_VERSION == 3
+#if LCD_VERSION == 3 
 #define X_WIDTH 240
 #define Y_WIDTH 320
 #else
@@ -106,7 +106,7 @@ static void rtgui_touch_calculate(void)
         /* read touch */
         {
             uint8_t i, j, k, min;
-            uint16_t temp;
+	        uint16_t temp;
             rt_uint16_t tmpxy[2][SAMP_CNT];
             uint8_t send_buffer[1];
             uint8_t recv_buffer[2];
@@ -118,8 +118,8 @@ static void rtgui_touch_calculate(void)
                                       1,
                                       recv_buffer,
                                       2);
-                tmpxy[0][i]  = (recv_buffer[0] & 0x7F) << 4;
-                tmpxy[0][i] |= (recv_buffer[1] >> 3) & 0x0F;
+                tmpxy[0][i]  = (recv_buffer[0]<<8)|recv_buffer[1] ;
+                tmpxy[0][i] >>=4;
 
                 send_buffer[0] = TOUCH_MSR_Y;
                 rt_spi_send_then_recv(touch->spi_device,
@@ -127,44 +127,44 @@ static void rtgui_touch_calculate(void)
                                       1,
                                       recv_buffer,
                                       2);
-                tmpxy[1][i]  = (recv_buffer[0] & 0x7F) << 4;
-                tmpxy[1][i] |= (recv_buffer[1] >> 3) & 0x0F;
+                tmpxy[1][i]  = (recv_buffer[0]<<8)|recv_buffer[1] ;
+                tmpxy[1][i] >>=4;
             }
             send_buffer[0] = 1 << 7;
             rt_spi_send(touch->spi_device, send_buffer, 1);
 
             /* calculate average */
-            {
-                rt_uint32_t total_x = 0;
-                rt_uint32_t total_y = 0;
-                for(k=0; k<2; k++)
-                {
-                    // sorting the ADC value
-                    for(i=0; i<SAMP_CNT-1; i++)
-                    {
-                        min=i;
-                        for (j=i+1; j<SAMP_CNT; j++)
-                        {
-                            if (tmpxy[k][min] > tmpxy[k][j])
-                                min=j;
-                        }
-                        temp = tmpxy[k][i];
-                        tmpxy[k][i] = tmpxy[k][min];
-                        tmpxy[k][min] = temp;
-                    }
-                    //check value for Valve value
-                    if((tmpxy[k][SAMP_CNT_DIV2+1]-tmpxy[k][SAMP_CNT_DIV2-2]) > SH)
-                    {
-                        return;
-                    }
-                }
-                total_x=tmpxy[0][SAMP_CNT_DIV2-2]+tmpxy[0][SAMP_CNT_DIV2-1]+tmpxy[0][SAMP_CNT_DIV2]+tmpxy[0][SAMP_CNT_DIV2+1];
-                total_y=tmpxy[1][SAMP_CNT_DIV2-2]+tmpxy[1][SAMP_CNT_DIV2-1]+tmpxy[1][SAMP_CNT_DIV2]+tmpxy[1][SAMP_CNT_DIV2+1];
-                //calculate average value
-                touch->x=total_x>>2;
-                touch->y=total_y>>2;
+			{
+				rt_uint32_t total_x = 0;
+				rt_uint32_t total_y = 0;
+				for(k=0; k<2; k++)
+				{ 
+					// sorting the ADC value
+					for(i=0; i<SAMP_CNT-1; i++)
+					{
+						min=i;
+						for (j=i+1; j<SAMP_CNT; j++)
+						{
+							if (tmpxy[k][min] > tmpxy[k][j]) 
+								min=j;
+						}
+						temp = tmpxy[k][i];
+						tmpxy[k][i] = tmpxy[k][min];
+						tmpxy[k][min] = temp;
+				    }
+				    //check value for Valve value
+					if((tmpxy[k][SAMP_CNT_DIV2+1]-tmpxy[k][SAMP_CNT_DIV2-2]) > SH)
+					{
+						return;
+					}
+				}
+				total_x=tmpxy[0][SAMP_CNT_DIV2-2]+tmpxy[0][SAMP_CNT_DIV2-1]+tmpxy[0][SAMP_CNT_DIV2]+tmpxy[0][SAMP_CNT_DIV2+1];
+				total_y=tmpxy[1][SAMP_CNT_DIV2-2]+tmpxy[1][SAMP_CNT_DIV2-1]+tmpxy[1][SAMP_CNT_DIV2]+tmpxy[1][SAMP_CNT_DIV2+1];
+				//calculate average value
+				touch->x=total_x>>2;
+				touch->y=total_y>>2;
                 rt_kprintf("touch->x:%d touch->y:%d\r\n", touch->x, touch->y);
-            } /* calculate average */
+           } /* calculate average */
         } /* read touch */
 
         /* if it's not in calibration status  */
@@ -305,8 +305,7 @@ static void touch_thread_entry(void *parameter)
                          1,
                          RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                          RT_WAITING_FOREVER,
-                         &event_value)
-                == RT_EOK)
+                         &event_value)== RT_EOK)
         {
             while(1)
             {
@@ -319,17 +318,17 @@ static void touch_thread_entry(void *parameter)
                     emouse.x = touch->x;
                     emouse.y = touch->y;
 
-                    if(touch_down != RT_TRUE)
-                    {
+                    if(touch_down != RT_TRUE) 
+                    {                    
                         touch_int_cmd(ENABLE);
                         break;
-                    }
+                    }    
 
                     if ((touch->calibrating == RT_TRUE) && (touch->calibration_func != RT_NULL))
                     {
                         /* callback function */
                         touch->calibration_func(emouse.x, emouse.y);
-
+											
                     }
                     else
                     {
@@ -359,7 +358,7 @@ static void touch_thread_entry(void *parameter)
 
                     /* calculation */
                     rtgui_touch_calculate();
-
+                    
                     /* send mouse event */
                     emouse.parent.type = RTGUI_EVENT_MOUSE_BUTTON;
                     emouse.parent.sender = RT_NULL;
@@ -376,9 +375,9 @@ static void touch_thread_entry(void *parameter)
 #define previous_keep      8
                         /* filter. */
                         if((touch_previous.x > touch->x + previous_keep)
-                                || (touch_previous.x < touch->x - previous_keep)
-                                || (touch_previous.y > touch->y + previous_keep)
-                                || (touch_previous.y < touch->y - previous_keep))
+                            || (touch_previous.x < touch->x - previous_keep)
+                            || (touch_previous.y > touch->y + previous_keep)
+                            || (touch_previous.y < touch->y - previous_keep))
                         {
                             touch_previous.x = touch->x;
                             touch_previous.y = touch->y;
