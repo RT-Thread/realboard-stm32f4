@@ -119,6 +119,7 @@ static void dc_draw(struct rtgui_widget *widget)
 		
 }
 
+
 void main(void)
 {   
 	/*局部变量*/
