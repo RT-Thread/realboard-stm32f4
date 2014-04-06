@@ -9,6 +9,9 @@ CPPPATH = [cwd, str(Dir('#'))]
 # remove no need file.
 if (GetDepend('RT_USING_LWIP') == False) or (GetDepend('RT_USING_WIFI') == False):
 	SrcRemove(src, 'libwifi.c')
+	SrcRemove(src, 'douban_radio.c')
+	SrcRemove(src, 'resource_download.c')
+	SrcRemove(src, 'http.c')
 
 group = DefineGroup('Applications', src, depend = [''], CPPPATH = CPPPATH)
 

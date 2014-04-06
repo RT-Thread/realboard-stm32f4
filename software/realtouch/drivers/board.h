@@ -56,6 +56,10 @@ rt_uint32_t rt_hw_tick_get_microsecond(void);
 void rt_hw_usart_init(void);
 void rt_hw_susb_init(void);
 
+#ifndef ARRAY_SIZE
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
+#endif
+
 #endif
 
 // <<< Use Configuration Wizard in Context Menu >>>

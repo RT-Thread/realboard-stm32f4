@@ -37,10 +37,15 @@ static rt_err_t stm32_configure(struct rt_serial_device *serial, struct serial_c
 
 	uart = (struct stm32_uart *)serial->parent.user_data;
 
+#if 0
 	if (cfg->baud_rate == BAUD_RATE_9600)
 		USART_InitStructure.USART_BaudRate = 9600;
 	else if (cfg->baud_rate == BAUD_RATE_115200)
 		USART_InitStructure.USART_BaudRate = 115200;
+	else if (cfg->baud_rate == BAUD_RATE_38400)
+		USART_InitStructure.USART_BaudRate = 38400; else
+#endif
+	USART_InitStructure.USART_BaudRate = cfg->baud_rate;
 
 	if (cfg->data_bits == DATA_BITS_8)
 		USART_InitStructure.USART_WordLength = USART_WordLength_8b;
@@ -159,7 +164,7 @@ void USART1_IRQHandler(void)
 #endif
 
 #if defined(RT_USING_UART2)
-/* UART1 device driver structure */
+/* UART2 device driver structure */
 struct serial_ringbuffer uart2_int_rx;
 struct stm32_uart uart2 =
 {
@@ -194,7 +199,7 @@ void USART2_IRQHandler(void)
 #endif
 
 #if defined(RT_USING_UART3)
-/* UART1 device driver structure */
+/* UART3 device driver structure */
 struct serial_ringbuffer uart3_int_rx;
 struct stm32_uart uart3 =
 {
@@ -340,23 +345,24 @@ static void NVIC_Configuration(struct stm32_uart* uart)
 void rt_hw_usart_init(void)
 {
 	struct stm32_uart* uart;
-	struct serial_configure config;
+	struct serial_configure* config;
 
 	RCC_Configuration();
 	GPIO_Configuration();
 
 #ifdef RT_USING_UART1
 	uart = &uart1;
-	config.baud_rate = BAUD_RATE_115200;
-	config.bit_order = BIT_ORDER_LSB;
-	config.data_bits = DATA_BITS_8;
-	config.parity    = PARITY_NONE;
-	config.stop_bits = STOP_BITS_1;
-	config.invert    = NRZ_NORMAL;
+
+	config = &serial1.config;
+	config->baud_rate = BAUD_RATE_115200;
+	config->bit_order = BIT_ORDER_LSB;
+	config->data_bits = DATA_BITS_8;
+	config->parity    = PARITY_NONE;
+	config->stop_bits = STOP_BITS_1;
+	config->invert    = NRZ_NORMAL;
 
 	serial1.ops    = &stm32_uart_ops;
 	serial1.int_rx = &uart1_int_rx;
-	serial1.config = config;
 
 	NVIC_Configuration(&uart1);
 
@@ -369,20 +375,20 @@ void rt_hw_usart_init(void)
 #ifdef RT_USING_UART2
 	uart = &uart2;
 
-	config.baud_rate = BAUD_RATE_115200;
-	config.bit_order = BIT_ORDER_LSB;
-	config.data_bits = DATA_BITS_8;
-	config.parity    = PARITY_NONE;
-	config.stop_bits = STOP_BITS_1;
-	config.invert    = NRZ_NORMAL;
+	config = &serial2.config;
+	config->baud_rate = BAUD_RATE_115200;
+	config->bit_order = BIT_ORDER_LSB;
+	config->data_bits = DATA_BITS_8;
+	config->parity    = PARITY_NONE;
+	config->stop_bits = STOP_BITS_1;
+	config->invert    = NRZ_NORMAL;
 
 	serial2.ops    = &stm32_uart_ops;
 	serial2.int_rx = &uart2_int_rx;
-	serial2.config = config;
 
 	NVIC_Configuration(&uart2);
 
-	/* register UART1 device */
+	/* register UART2 device */
 	rt_hw_serial_register(&serial2, "uart2",
 		RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX | RT_DEVICE_FLAG_STREAM,
 		uart);
@@ -391,20 +397,20 @@ void rt_hw_usart_init(void)
 #ifdef RT_USING_UART3
 	uart = &uart3;
 
-	config.baud_rate = BAUD_RATE_115200;
-	config.bit_order = BIT_ORDER_LSB;
-	config.data_bits = DATA_BITS_8;
-	config.parity    = PARITY_NONE;
-	config.stop_bits = STOP_BITS_1;
-	config.invert    = NRZ_NORMAL;
+	config = &serial3.config;
+	config->baud_rate = BAUD_RATE_115200;
+	config->bit_order = BIT_ORDER_LSB;
+	config->data_bits = DATA_BITS_8;
+	config->parity    = PARITY_NONE;
+	config->stop_bits = STOP_BITS_1;
+	config->invert    = NRZ_NORMAL;
 
 	serial3.ops    = &stm32_uart_ops;
 	serial3.int_rx = &uart3_int_rx;
-	serial3.config = config;
 
 	NVIC_Configuration(&uart3);
 
-	/* register UART1 device */
+	/* register UART3 device */
 	rt_hw_serial_register(&serial3, "uart3",
 		RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX | RT_DEVICE_FLAG_STREAM,
 		uart);

@@ -210,7 +210,11 @@ static rt_size_t stm32_i2c_recv_bytes(I2C_TypeDef* I2Cx, struct rt_i2c_msg *msg)
     while (len--)
     {
         while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_RECEIVED));
-
+	if (len == 1) {
+	    I2C_AcknowledgeConfig(I2C1, DISABLE);
+	    //I2C_CalculatePEC(I2C1, ENABLE);
+	    I2C_GenerateSTOP(I2C1, ENABLE);
+	}
         msg->buf[bytes++] = (rt_uint8_t)I2Cx->DR;
     }
 
@@ -226,8 +230,10 @@ static rt_size_t stm32_i2c_send_bytes(I2C_TypeDef* I2Cx, struct rt_i2c_msg *msg)
     while (len--)
     {
         I2Cx->DR = msg->buf[bytes++];
-        while(! I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+        while(! I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTING));
     }
+
+    //I2C_CalculatePEC(I2C1, ENABLE);
 
     return bytes;
 }
@@ -254,9 +260,9 @@ static void I2C_SendAddress(I2C_TypeDef* I2Cx, struct rt_i2c_msg *msg)
 static rt_size_t stm32_i2c_xfer(struct rt_i2c_bus_device *bus,
                                 struct rt_i2c_msg msgs[], rt_uint32_t num)
 {
-    struct rt_i2c_msg *msg;
     rt_int32_t i, ret;
-    rt_uint16_t ignore_nack;
+
+    I2C_AcknowledgeConfig(I2C1, ENABLE);
 
     I2C_GenerateSTART(I2C1, ENABLE);
     /* Test on EV5 and clear it */
@@ -264,27 +270,27 @@ static rt_size_t stm32_i2c_xfer(struct rt_i2c_bus_device *bus,
 
     for (i = 0; i < num; i++)
     {
+	struct rt_i2c_msg *msg;
         msg = &msgs[i];
-        ignore_nack = msg->flags & RT_I2C_IGNORE_NACK;
         if (!(msg->flags & RT_I2C_NO_START))
         {
             if (i)
             {
                 I2C_GenerateSTART(I2C1, ENABLE);
+		while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT));
             }
             I2C_SendAddress(I2C1, msg);
-            if (msg->flags & RT_I2C_RD)
+            if (msg->flags & RT_I2C_RD) {
+		if (msg->len < 2) I2C_AcknowledgeConfig(I2C1, DISABLE);
                 while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED));
+		if (msg->len < 2) I2C_GenerateSTOP(I2C1, ENABLE);
+	    }
             else
                 while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED));
 
         }
         if (msg->flags & RT_I2C_RD)
         {
-            if (!(msg->flags & RT_I2C_NO_READ_ACK))
-                I2C_AcknowledgeConfig(I2C1,ENABLE);
-            else
-                I2C_AcknowledgeConfig(I2C1,DISABLE);
             ret = stm32_i2c_recv_bytes(I2C1, msg);
             if (ret >= 1)
                 i2c_dbg("read %d byte%s\n",

@@ -5,3 +5,7 @@ build/
 project.uvproj
 project.uvopt
 project.uvgui.*
+
+rtthread-stm32f4xx.*
+tmpcmd.txt
+
