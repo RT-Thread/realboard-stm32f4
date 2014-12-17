@@ -3901,7 +3901,7 @@ static void phy_monitor_thread_entry(void *parameter)
 
         phy_speed_new = 0;
 
-        if(status & (PHY_AutoNego_Complete | PHY_Linked_Status))
+        if((status & PHY_AutoNego_Complete) && (status & PHY_Linked_Status))
         {
             uint16_t SR;
 
